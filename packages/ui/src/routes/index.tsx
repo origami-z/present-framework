@@ -1,15 +1,25 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useCallback, useRef } from 'react'
+import {
+  Button,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanel,
+  TextField,
+  Label,
+  TextArea,
+} from 'react-aria-components'
 import { fetchPlan, patchPlan, generateArtifacts, runIterate } from '../lib/api'
 import { PillarList } from '../components/PillarList'
 import { DiagramPreview } from '../components/DiagramPreview'
 import { ReportPreview } from '../components/ReportPreview'
 import { DeckPreview } from '../components/DeckPreview'
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute('/')(({
   loader: () => fetchPlan(),
   component: PlannerPage,
-})
+}))
 
 type Tab = 'diagram' | 'report' | 'deck'
 
@@ -84,51 +94,63 @@ function PlannerPage() {
       <header style={headerStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0, flex: 1 }}>
           <span style={{ fontSize: '1.1em', fontWeight: 700 }}>📋 Present</span>
-          <span style={{ color: '#64748b', fontSize: '0.85em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {plan?.meta?.title}
           </span>
-          <span style={versionBadge}>v{plan?.meta?.version}</span>
+          <span className="version-badge">v{plan?.meta?.version}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
           {savedAt && (
-            <span style={{ fontSize: '0.75em', color: '#94a3b8' }}>
+            <span style={{ fontSize: '0.75em', color: 'var(--color-text-faint)' }}>
               {saving ? '💾 Saving…' : `Saved ${savedAt}`}
             </span>
           )}
-          <button style={secondaryBtn} onClick={handleIterate} disabled={iterating}>
+          <Button className="btn btn-secondary" onPress={handleIterate} isDisabled={iterating}>
             {iterating ? '⏳' : '📸'} Iterate
-          </button>
-          <button style={primaryBtnStyle} onClick={handleGenerateAll} disabled={generating}>
+          </Button>
+          <Button className="btn btn-primary" onPress={handleGenerateAll} isDisabled={generating}>
             {generating ? '⏳' : '⚡'} Generate All
-          </button>
+          </Button>
         </div>
       </header>
 
-      {toast && <div style={toastStyle}>{toast}</div>}
+      {toast && <div className="toast">{toast}</div>}
 
       <div style={bodyStyle}>
         {/* Left panel */}
         <div style={leftPanel}>
           <div style={sectionCard}>
-            <h3 style={sectionTitle}>Plan Overview</h3>
-            <label style={fieldLabel}>Current State</label>
-            <textarea
-              style={textareaStyle}
+            <h3 className="section-title">Plan Overview</h3>
+
+            <TextField
+              className="field"
               value={plan?.current_state || ''}
-              onChange={(e) => handlePlanChange({ current_state: e.target.value })}
-              placeholder="Where things are today…"
-            />
-            <label style={fieldLabel}>Target State</label>
-            <textarea
-              style={textareaStyle}
+              onChange={(v) => handlePlanChange({ current_state: v })}
+            >
+              <Label className="field-label">Current State</Label>
+              <TextArea
+                className="field-textarea"
+                placeholder="Where things are today…"
+                style={{ minHeight: 70 }}
+              />
+            </TextField>
+
+            <TextField
+              className="field"
               value={plan?.target_state || ''}
-              onChange={(e) => handlePlanChange({ target_state: e.target.value })}
-              placeholder="What does success look like?"
-            />
+              onChange={(v) => handlePlanChange({ target_state: v })}
+            >
+              <Label className="field-label">Target State</Label>
+              <TextArea
+                className="field-textarea"
+                placeholder="What does success look like?"
+                style={{ minHeight: 70 }}
+              />
+            </TextField>
           </div>
 
           <div style={sectionCard}>
-            <h3 style={sectionTitle}>Pillars & Tasks</h3>
+            <h3 className="section-title">Pillars &amp; Tasks</h3>
             <PillarList
               pillars={plan?.pillars || []}
               onUpdate={(pillars) => handlePlanChange({ pillars })}
@@ -136,30 +158,33 @@ function PlannerPage() {
           </div>
         </div>
 
-        {/* Right panel */}
-        <div style={rightPanel}>
-          <div style={tabBar}>
-            {(['diagram', 'report', 'deck'] as Tab[]).map((tab) => (
-              <button
-                key={tab}
-                style={{ ...tabBtn, ...(activeTab === tab ? tabBtnActive : {}) }}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab === 'diagram' ? '🔷 Diagram' : tab === 'report' ? '📄 Report' : '🎨 Deck'}
-              </button>
-            ))}
-            <div style={{ flex: 1 }} />
-            <span style={{ padding: '0 0.75rem', fontSize: '0.75em', color: '#94a3b8', alignSelf: 'center' }}>
+        {/* Right panel — Tabs */}
+        <Tabs
+          selectedKey={activeTab}
+          onSelectionChange={(key) => setActiveTab(key as Tab)}
+          style={rightPanel}
+        >
+          <div style={tabBarRow}>
+            <TabList className="tablist" style={{ borderBottom: 'none', flex: 1 }}>
+              <Tab id="diagram" className="tab">🔷 Diagram</Tab>
+              <Tab id="report" className="tab">📄 Report</Tab>
+              <Tab id="deck" className="tab">🎨 Deck</Tab>
+            </TabList>
+            <span style={{ padding: '0 0.75rem', fontSize: '0.75em', color: 'var(--color-text-faint)', alignSelf: 'center' }}>
               Click ⚡ Generate All to update previews
             </span>
           </div>
 
-          <div style={previewBody}>
-            {activeTab === 'diagram' && <DiagramPreview content={artifacts.diagram || ''} />}
-            {activeTab === 'report' && <ReportPreview content={artifacts.report || ''} />}
-            {activeTab === 'deck' && <DeckPreview content={artifacts.deck || ''} />}
-          </div>
-        </div>
+          <TabPanel id="diagram" className="tabpanel">
+            <DiagramPreview content={artifacts.diagram || ''} />
+          </TabPanel>
+          <TabPanel id="report" className="tabpanel">
+            <ReportPreview content={artifacts.report || ''} />
+          </TabPanel>
+          <TabPanel id="deck" className="tabpanel">
+            <DeckPreview content={artifacts.deck || ''} />
+          </TabPanel>
+        </Tabs>
       </div>
     </div>
   )
@@ -169,7 +194,7 @@ const appStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column'
 
 const headerStyle: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-  padding: '0.6rem 1.25rem', background: '#fff', borderBottom: '1px solid #e2e8f0',
+  padding: '0.6rem 1.25rem', background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)',
   flexShrink: 0, gap: '1rem',
 }
 
@@ -177,64 +202,18 @@ const bodyStyle: React.CSSProperties = { display: 'flex', flex: 1, overflow: 'hi
 
 const leftPanel: React.CSSProperties = {
   width: '42%', minWidth: 320, overflow: 'auto', padding: '1rem',
-  borderRight: '1px solid #e2e8f0', background: '#f8fafc',
+  borderRight: '1px solid var(--color-border)', background: 'var(--color-bg)',
   display: 'flex', flexDirection: 'column', gap: '0.75rem',
 }
 
 const rightPanel: React.CSSProperties = { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }
 
-const tabBar: React.CSSProperties = {
-  display: 'flex', borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0,
+const tabBarRow: React.CSSProperties = {
+  display: 'flex', alignItems: 'stretch',
+  borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface)', flexShrink: 0,
 }
-
-const tabBtn: React.CSSProperties = {
-  padding: '0.6rem 1rem', background: 'none', border: 'none',
-  borderBottom: '2px solid transparent', cursor: 'pointer',
-  fontSize: '0.85em', fontWeight: 500, color: '#64748b',
-}
-
-const tabBtnActive: React.CSSProperties = { color: '#1a56db', borderBottomColor: '#1a56db' }
-
-const previewBody: React.CSSProperties = { flex: 1, overflow: 'auto', background: '#fff' }
 
 const sectionCard: React.CSSProperties = {
-  background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '0.875rem',
-}
-
-const sectionTitle: React.CSSProperties = {
-  fontSize: '0.82em', fontWeight: 700, textTransform: 'uppercase',
-  letterSpacing: '0.06em', color: '#475569', marginBottom: '0.75rem',
-}
-
-const fieldLabel: React.CSSProperties = {
-  display: 'block', fontSize: '0.75em', fontWeight: 600, color: '#64748b',
-  marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.04em',
-}
-
-const textareaStyle: React.CSSProperties = {
-  width: '100%', padding: '6px 8px', border: '1px solid #e2e8f0', borderRadius: 6,
-  fontSize: '0.85em', fontFamily: 'inherit', resize: 'vertical', minHeight: 70,
-  marginBottom: '0.75rem', lineHeight: 1.5,
-}
-
-const primaryBtnStyle: React.CSSProperties = {
-  padding: '7px 14px', background: '#1a56db', color: '#fff',
-  border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.85em', fontWeight: 600,
-}
-
-const secondaryBtn: React.CSSProperties = {
-  padding: '7px 14px', background: 'none', border: '1px solid #e2e8f0',
-  borderRadius: 6, cursor: 'pointer', fontSize: '0.85em', fontWeight: 500, color: '#475569',
-}
-
-const versionBadge: React.CSSProperties = {
-  padding: '1px 6px', background: '#e0e7ff', color: '#3730a3',
-  borderRadius: 4, fontSize: '0.75em', fontWeight: 600,
-}
-
-const toastStyle: React.CSSProperties = {
-  position: 'fixed', bottom: '1.5rem', right: '1.5rem',
-  padding: '0.75rem 1.25rem', background: '#1e293b', color: '#fff',
-  borderRadius: 8, fontSize: '0.85em', zIndex: 1000,
-  boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+  background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+  borderRadius: 'var(--radius-lg)', padding: '0.875rem',
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Button, TextField, Input } from 'react-aria-components'
 import { TaskEditor } from './TaskEditor'
 
 interface Task {
@@ -73,8 +74,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
       created: date,
       updated: date,
     }
-    const updated = { ...pillar, tasks: [...pillar.tasks, newTask] }
-    updatePillar(pillarIdx, updated)
+    updatePillar(pillarIdx, { ...pillar, tasks: [...pillar.tasks, newTask] })
   }
 
   const addPillar = () => {
@@ -108,36 +108,49 @@ export function PillarList({ pillars, onUpdate }: Props) {
 
         return (
           <div key={pillar.id} style={pillarCard}>
-            <div style={pillarHeader} onClick={() => toggle(pillar.id)}>
-              <div style={{ flex: 1 }}>
-                <span style={{ fontWeight: 700, fontSize: '0.95em' }}>{pillar.name}</span>
-                <span style={{ ...badge, background: '#e0e7ff', color: '#3730a3', marginLeft: '0.5rem', fontSize: '0.7em', fontFamily: 'monospace' }}>
-                  {pillar.id}
-                </span>
-                <div style={{ fontSize: '0.75em', color: '#64748b', marginTop: '0.2rem' }}>
-                  ✅ {stats.done} &nbsp; 🔵 {stats.wip} &nbsp; 📋 {stats.todo}
-                  {pillar.description && <span style={{ marginLeft: '0.75rem', fontStyle: 'italic' }}>{pillar.description}</span>}
+            <div style={pillarHeaderRow}>
+              <Button
+                onPress={() => toggle(pillar.id)}
+                style={{
+                  flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+                  background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.95em' }}>{pillar.name}</span>
+                  <span className="pillar-id-badge">{pillar.id}</span>
+                  <span style={{ color: 'var(--color-text-faint)', fontSize: '0.8em', marginLeft: '0.5rem' }}>
+                    {isCollapsed ? '▶' : '▼'}
+                  </span>
                 </div>
-              </div>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <button
-                  style={iconBtn}
-                  onClick={(e) => { e.stopPropagation(); removePillar(idx) }}
-                  title="Remove pillar"
-                >🗑</button>
-                <span style={{ color: '#94a3b8', fontSize: '0.8em' }}>{isCollapsed ? '▶' : '▼'}</span>
-              </div>
+                <div style={{ fontSize: '0.75em', color: 'var(--color-text-muted)', marginTop: '0.2rem' }}>
+                  ✅ {stats.done} &nbsp; 🔵 {stats.wip} &nbsp; 📋 {stats.todo}
+                  {pillar.description && (
+                    <span style={{ marginLeft: '0.75rem', fontStyle: 'italic' }}>{pillar.description}</span>
+                  )}
+                </div>
+              </Button>
+              <Button
+                className="btn btn-icon"
+                onPress={() => removePillar(idx)}
+                aria-label={`Remove pillar ${pillar.name}`}
+              >
+                🗑
+              </Button>
             </div>
 
             {!isCollapsed && (
               <div style={{ padding: '0.5rem 0.75rem' }}>
-                <input
-                  style={{ ...inlineInput, marginBottom: '0.5rem' }}
-                  placeholder="Pillar description (optional)"
+                <TextField
                   value={pillar.description || ''}
-                  onChange={(e) => updatePillar(idx, { ...pillar, description: e.target.value })}
-                  onClick={(e) => e.stopPropagation()}
-                />
+                  onChange={(v) => updatePillar(idx, { ...pillar, description: v })}
+                >
+                  <Input
+                    className="field-input-inline"
+                    placeholder="Pillar description (optional)"
+                    style={{ marginBottom: '0.5rem' }}
+                  />
+                </TextField>
 
                 {pillar.tasks.map((task, tIdx) => (
                   <TaskEditor
@@ -156,9 +169,9 @@ export function PillarList({ pillars, onUpdate }: Props) {
                   />
                 ))}
 
-                <button style={addTaskBtn} onClick={() => addTask(idx)}>
+                <Button className="btn btn-add-task" onPress={() => addTask(idx)}>
                   + Add Task
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -167,99 +180,47 @@ export function PillarList({ pillars, onUpdate }: Props) {
 
       {addingPillar ? (
         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
-          <input
-            style={{ ...inlineInput, flex: 1 }}
-            placeholder="Pillar name (e.g. Security)"
-            value={newPillarName}
-            onChange={(e) => setNewPillarName(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') addPillar(); if (e.key === 'Escape') setAddingPillar(false) }}
-            autoFocus
-          />
-          <button style={primaryBtn} onClick={addPillar}>Add</button>
-          <button style={ghostBtn} onClick={() => setAddingPillar(false)}>Cancel</button>
+          <TextField value={newPillarName} onChange={setNewPillarName} style={{ flex: 1 }}>
+            <Input
+              className="field-input"
+              placeholder="Pillar name (e.g. Security)"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') addPillar()
+                if (e.key === 'Escape') setAddingPillar(false)
+              }}
+              autoFocus
+            />
+          </TextField>
+          <Button className="btn btn-primary" onPress={addPillar}>Add</Button>
+          <Button className="btn btn-secondary" onPress={() => setAddingPillar(false)}>Cancel</Button>
         </div>
       ) : (
-        <button style={{ ...ghostBtn, marginTop: '0.75rem', width: '100%' }} onClick={() => setAddingPillar(true)}>
+        <Button
+          className="btn btn-secondary"
+          style={{ marginTop: '0.75rem', width: '100%' }}
+          onPress={() => setAddingPillar(true)}
+        >
           + Add Pillar
-        </button>
+        </Button>
       )}
     </div>
   )
 }
 
 const pillarCard: React.CSSProperties = {
-  border: '1px solid #e2e8f0',
-  borderRadius: 8,
+  border: '1px solid var(--color-border)',
+  borderRadius: 'var(--radius-lg)',
   marginBottom: '0.75rem',
   overflow: 'hidden',
-  background: '#fff',
+  background: 'var(--color-surface)',
 }
 
-const pillarHeader: React.CSSProperties = {
+const pillarHeaderRow: React.CSSProperties = {
   display: 'flex',
   alignItems: 'flex-start',
   justifyContent: 'space-between',
   padding: '0.75rem',
-  cursor: 'pointer',
-  background: '#f8fafc',
-  borderBottom: '1px solid #e2e8f0',
-  userSelect: 'none',
-}
-
-const badge: React.CSSProperties = {
-  padding: '1px 6px',
-  borderRadius: 4,
-  fontWeight: 500,
-}
-
-const iconBtn: React.CSSProperties = {
-  background: 'none',
-  border: 'none',
-  cursor: 'pointer',
-  fontSize: '0.85em',
-  padding: '2px 4px',
-  opacity: 0.6,
-}
-
-const inlineInput: React.CSSProperties = {
-  width: '100%',
-  padding: '5px 8px',
-  border: '1px solid #e2e8f0',
-  borderRadius: 4,
-  fontSize: '0.82em',
-  fontFamily: 'inherit',
-  color: '#475569',
-}
-
-const addTaskBtn: React.CSSProperties = {
-  width: '100%',
-  padding: '6px',
-  background: 'none',
-  border: '1px dashed #cbd5e1',
-  borderRadius: 6,
-  color: '#64748b',
-  cursor: 'pointer',
-  fontSize: '0.82em',
-  marginTop: '0.25rem',
-}
-
-const primaryBtn: React.CSSProperties = {
-  padding: '6px 14px',
-  background: '#1a56db',
-  color: '#fff',
-  border: 'none',
-  borderRadius: 6,
-  cursor: 'pointer',
-  fontSize: '0.85em',
-  fontWeight: 600,
-}
-
-const ghostBtn: React.CSSProperties = {
-  padding: '6px 14px',
-  background: 'none',
-  border: '1px solid #e2e8f0',
-  borderRadius: 6,
-  cursor: 'pointer',
-  fontSize: '0.85em',
-  color: '#475569',
+  background: 'var(--color-bg)',
+  borderBottom: '1px solid var(--color-border)',
+  gap: '0.5rem',
 }

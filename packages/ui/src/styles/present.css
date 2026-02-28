@@ -1,0 +1,314 @@
+/* Present Framework — Global Styles
+   React Aria components are styled via data-* attribute selectors.
+   Design tokens use CSS custom properties. */
+
+:root {
+  --color-primary: #1a56db;
+  --color-primary-dark: #1e429f;
+  --color-primary-light: #e0e7ff;
+  --color-danger: #ef4444;
+  --color-danger-light: #fee2e2;
+  --color-surface: #ffffff;
+  --color-bg: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-border-focus: #1a56db;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-text-faint: #94a3b8;
+  --color-todo: #6b7280;
+  --color-wip: #1a56db;
+  --color-done: #16a34a;
+  --color-archive: #9ca3af;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --font-mono: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  --transition: 120ms ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(--color-bg); color: var(--color-text); line-height: 1.5; }
+
+/* ─── Buttons ──────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 7px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.85em;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: background var(--transition), opacity var(--transition), transform var(--transition);
+  white-space: nowrap;
+  text-decoration: none;
+}
+.btn[data-hovered]      { opacity: 0.88; }
+.btn[data-pressed]      { transform: scale(0.97); }
+.btn[data-disabled]     { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+.btn[data-focus-visible] { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+.btn-primary { background: var(--color-primary); color: #fff; font-weight: 600; }
+.btn-primary[data-hovered] { background: var(--color-primary-dark); opacity: 1; }
+
+.btn-secondary { background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted); }
+.btn-secondary[data-hovered] { background: var(--color-bg); opacity: 1; }
+
+.btn-ghost { background: transparent; border: none; color: var(--color-text-muted); padding: 5px 10px; }
+.btn-ghost[data-hovered] { background: var(--color-bg); opacity: 1; }
+
+.btn-danger { background: transparent; border: none; color: var(--color-danger); padding: 4px 8px; font-size: 0.8em; }
+.btn-danger[data-hovered] { background: var(--color-danger-light); opacity: 1; }
+
+.btn-icon { background: transparent; border: none; color: var(--color-text-muted); padding: 3px 5px; opacity: 0.65; font-size: 0.9em; }
+.btn-icon[data-hovered] { opacity: 1; background: var(--color-bg); }
+
+.btn-add-task {
+  width: 100%;
+  padding: 6px;
+  background: none;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: 0.82em;
+  margin-top: 0.25rem;
+  font-family: inherit;
+}
+.btn-add-task[data-hovered] { background: var(--color-bg); border-color: var(--color-text-faint); opacity: 1; }
+
+/* ─── TextField / Input / TextArea ─────────────────────────────────────── */
+.field { display: flex; flex-direction: column; margin-bottom: 0.5rem; }
+.field:last-child { margin-bottom: 0; }
+
+.field-label {
+  display: block;
+  font-size: 0.73em;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  margin-bottom: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.field-input,
+.field-textarea {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85em;
+  font-family: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.field-textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+.field-input[data-hovered],
+.field-textarea[data-hovered]  { border-color: var(--color-text-faint); }
+.field-input[data-focused],
+.field-textarea[data-focused]  { border-color: var(--color-border-focus); box-shadow: 0 0 0 3px rgba(26,86,219,.15); }
+.field-input[data-invalid],
+.field-textarea[data-invalid]  { border-color: var(--color-danger); }
+
+.field-input-inline {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.82em;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  background: transparent;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.field-input-inline[data-focused] { border-color: var(--color-border-focus); background: var(--color-surface); }
+
+/* ─── Select ────────────────────────────────────────────────────────────── */
+.select-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35em;
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85em;
+  font-family: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.select-btn[data-hovered]       { border-color: var(--color-text-faint); }
+.select-btn[data-focus-visible] { border-color: var(--color-border-focus); box-shadow: 0 0 0 3px rgba(26,86,219,.15); }
+.select-btn[data-open]          { border-color: var(--color-border-focus); }
+
+.select-arrow { font-size: 0.65em; color: var(--color-text-muted); }
+
+.select-popover {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  min-width: var(--trigger-width);
+  outline: none;
+  overflow: hidden;
+  padding: 3px;
+}
+.select-popover[data-entering] { animation: popoverIn 120ms ease; }
+.select-popover[data-exiting]  { animation: popoverIn 80ms ease reverse; }
+
+@keyframes popoverIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.select-listbox { outline: none; }
+
+.select-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85em;
+  cursor: pointer;
+  outline: none;
+}
+.select-item[data-focused]  { background: #f1f5f9; }
+.select-item[data-selected] { background: var(--color-primary-light); color: var(--color-primary); font-weight: 600; }
+.select-item[data-selected][data-focused] { background: #c7d2fe; }
+
+/* ─── CheckboxGroup / Checkbox ──────────────────────────────────────────── */
+.checkbox-group { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  cursor: pointer;
+  font-size: 0.8em;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: background var(--transition);
+}
+.checkbox[data-hovered]       { background: var(--color-bg); }
+.checkbox[data-focus-visible] { outline: 2px solid var(--color-primary); outline-offset: 1px; }
+.checkbox[data-selected]      { color: var(--color-primary); }
+
+.checkbox-box {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color var(--transition), background var(--transition);
+  background: #fff;
+}
+.checkbox[data-selected] .checkbox-box { border-color: var(--color-primary); background: var(--color-primary); }
+.checkbox[data-indeterminate] .checkbox-box { border-color: var(--color-primary); background: var(--color-primary); }
+
+.checkbox-check { color: #fff; font-size: 9px; line-height: 1; }
+
+/* ─── Tabs ──────────────────────────────────────────────────────────────── */
+.tabs { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.tablist {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  flex-shrink: 0;
+  outline: none;
+}
+
+.tab {
+  padding: 0.6rem 1rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 0.85em;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  outline: none;
+  transition: color var(--transition), border-color var(--transition);
+  white-space: nowrap;
+}
+.tab[data-hovered]        { color: var(--color-text); }
+.tab[data-selected]       { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+.tab[data-focus-visible]  { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+
+.tabpanel { flex: 1; overflow: auto; background: var(--color-surface); outline: none; }
+
+/* ─── Toast notification ────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  padding: 0.75rem 1.25rem;
+  background: #1e293b;
+  color: #fff;
+  border-radius: var(--radius-lg);
+  font-size: 0.85em;
+  z-index: 1000;
+  box-shadow: 0 4px 16px rgba(0,0,0,.25);
+  animation: toastIn 200ms ease;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Misc layout helpers ───────────────────────────────────────────────── */
+.section-title {
+  font-size: 0.78em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.version-badge {
+  padding: 1px 6px;
+  background: var(--color-primary-light);
+  color: #3730a3;
+  border-radius: var(--radius-sm);
+  font-size: 0.73em;
+  font-weight: 700;
+}
+
+.id-chip {
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+  background: #f1f5f9;
+  color: var(--color-text-muted);
+}
+
+.pillar-id-badge {
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.68em;
+  background: #e0e7ff;
+  color: #3730a3;
+  font-weight: 500;
+  margin-left: 0.4rem;
+}
