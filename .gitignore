@@ -1,0 +1,19 @@
+node_modules/
+.DS_Store
+*.log
+npm-debug.log*
+.env
+.env.local
+
+# TanStack Start build artifacts
+packages/ui/.vinxi/
+packages/ui/.output/
+packages/ui/dist/
+
+# Generated output (optional — remove this line to track artifacts in git)
+# output/
+
+# Editor
+.vscode/settings.json
+.idea/
+*.swp

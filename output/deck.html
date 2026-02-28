@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2025 Engineering Technical Roadmap</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" />
+  <style>
+    :root { --r-heading-font: 'Segoe UI', system-ui, sans-serif; --r-main-font: 'Segoe UI', system-ui, sans-serif; }
+    .reveal h1 { font-size: 1.8em; }
+    .reveal h2 { font-size: 1.3em; color: #1a56db; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.3em; }
+    .reveal h3 { font-size: 1em; color: #374151; }
+    .reveal table { font-size: 0.7em; width: 100%; }
+    .reveal table th { background: #f3f4f6; color: #111; }
+    .reveal table td, .reveal table th { padding: 6px 10px; border: 1px solid #e5e7eb; }
+    .reveal table tr:nth-child(even) { background: #f9fafb; }
+    .meta { color: #6b7280; font-size: 0.7em; margin-top: 0.5em; }
+    .pill { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.65em; font-weight: 700; margin: 2px; }
+    .stat-grid { display: flex; gap: 1em; justify-content: center; flex-wrap: wrap; margin: 0.5em 0; }
+    .stat-box { background: #f3f4f6; border-radius: 8px; padding: 0.5em 1.2em; text-align: center; }
+    .stat-box .num { font-size: 1.8em; font-weight: 700; color: #1a56db; }
+    .stat-box .lbl { font-size: 0.65em; color: #6b7280; }
+    .pillar-tag { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 3px 12px; border-radius: 4px; margin: 4px; font-size: 0.75em; font-weight: 600; }
+    .current-target { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; text-align: left; font-size: 0.75em; }
+    .box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1em; }
+    .box h4 { margin: 0 0 0.5em; color: #374151; }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- Slide 1: Title -->
+      <section>
+        <h1>2025 Engineering Technical Roadmap</h1>
+        <p class="meta">Platform Engineering Team &nbsp;·&nbsp; 2026-02-28 &nbsp;·&nbsp; v1</p>
+        <div class="stat-grid" style="margin-top:1.5em">
+          <div class="stat-box"><div class="num">3</div><div class="lbl">Done</div></div>
+          <div class="stat-box"><div class="num">4</div><div class="lbl">In Progress</div></div>
+          <div class="stat-box"><div class="num">10</div><div class="lbl">Todo</div></div>
+          <div class="stat-box"><div class="num">18%</div><div class="lbl">Complete</div></div>
+        </div>
+      </section>
+
+      <!-- Slide 2: Agenda -->
+      <section>
+        <h2>Agenda</h2>
+        <div style="margin-top: 1em">
+          <div class="pillar-tag">Infrastructure</div>
+          <div class="pillar-tag">Observability</div>
+          <div class="pillar-tag">Security</div>
+          <div class="pillar-tag">Developer Experience</div>
+        </div>
+      </section>
+
+      <!-- Slide 3: Current vs Target State -->
+      <section>
+        <h2>Where We Are &amp; Where We're Going</h2>
+        <div class="current-target">
+          <div class="box">
+            <h4>📍 Current State</h4>
+            <p>Our platform runs as a monolithic Rails application deployed on bare metal servers.
+Infrastructure is managed manually with ad-hoc scripts. Test coverage is around 30%.
+Security posture has not been formally audited. On-call burden is high due to fragile
+deployments and lack of observability.
+</p>
+          </div>
+          <div class="box">
+            <h4>🎯 Target State</h4>
+            <p>Fully containerized microservices deployed on Kubernetes with GitOps workflows.
+Infrastructure managed entirely through Terraform IaC. Test coverage above 80%.
+SOC2 Type II compliant. On-call burden reduced by 60% through better observability
+and automated remediation. Developer productivity improved with standardized tooling.
+</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Infrastructure</h2>
+        <p style="font-size:0.75em;color:#6b7280;margin-bottom:0.5em">Cloud infrastructure, containerization, and DevOps automation</p>
+        <div class="stat-grid" style="margin-bottom:0.5em">
+          <div class="stat-box"><div class="num">1</div><div class="lbl">Done</div></div>
+          <div class="stat-box"><div class="num">1</div><div class="lbl">WIP</div></div>
+          <div class="stat-box"><div class="num">3</div><div class="lbl">Todo</div></div>
+        </div>
+        <table>
+          <thead><tr><th>Task</th><th>Status</th><th>Eval</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Containerize all services with Docker</td>
+              <td><span style="background:#388e3c;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">DONE</span></td>
+              <td>⭐</td>
+              <td>high</td>
+            </tr>
+            <tr>
+              <td>Migrate to Kubernetes (staging)</td>
+              <td><span style="background:#1976d2;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">WIP</span></td>
+              <td>🟢</td>
+              <td>high</td>
+            </tr>
+            <tr>
+              <td>Migrate to Kubernetes (production)</td>
+              <td><span style="background:#e0e0e0;color:#333;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">TODO</span></td>
+              <td>⬜</td>
+              <td>high</td>
+            </tr>
+            <tr>
+              <td>Implement Terraform IaC</td>
+              <td><span style="background:#e0e0e0;color:#333;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">TODO</span></td>
+              <td>⬜</td>
+              <td>high</td>
+            </tr>
+            <tr>
+              <td>Set up GitOps with ArgoCD</td>
+              <td><span style="background:#e0e0e0;color:#333;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">TODO</span></td>
+              <td>⬜</td>
+              <td>medium</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Observability</h2>
+        <p style="font-size:0.75em;color:#6b7280;margin-bottom:0.5em">Logging, metrics, tracing, and alerting</p>
+        <div class="stat-grid" style="margin-bottom:0.5em">
+          <div class="stat-box"><div class="num">0</div><div class="lbl">Done</div></div>
+          <div class="stat-box"><div class="num">1</div><div class="lbl">WIP</div></div>
+          <div class="stat-box"><div class="num">3</div><div class="lbl">Todo</div></div>
+        </div>
+        <table>
+          <thead><tr><th>Task</th><th>Status</th><th>Eval</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Centralize logs with ELK/Loki stack</td>
+              <td><span style="background:#1976d2;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">WIP</span></td>
+              <td>🟡</td>
+              <td>high</td>
+            </tr>
+            <tr>
+              <td>Add Prometheus metrics + Grafana dashboards</td>
+              <td><span style="background:#e0e0e0;color:#333;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">TODO</span></td>
+              <td>⬜</td>
+              <td>high</td>
+            </tr>
+            <tr>
+              <td>Distributed tracing with OpenTelemetry</td>
+              <td><span style="background:#e0e0e0;color:#333;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">TODO</span></td>
+              <td>⬜</td>
+              <td>medium</td>
+            </tr>
+            <tr>
+              <td>On-call runbooks and alert tuning</td>
+              <td><span style="background:#e0e0e0;color:#333;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">TODO</span></td>
+              <td>⬜</td>
+              <td>medium</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Security</h2>
+        <p style="font-size:0.75em;color:#6b7280;margin-bottom:0.5em">Security posture, compliance, and vulnerability management</p>
+        <div class="stat-grid" style="margin-bottom:0.5em">
+          <div class="stat-box"><div class="num">1</div><div class="lbl">Done</div></div>
+          <div class="stat-box"><div class="num">1</div><div class="lbl">WIP</div></div>
+          <div class="stat-box"><div class="num">2</div><div class="lbl">Todo</div></div>
+        </div>
+        <table>
+          <thead><tr><th>Task</th><th>Status</th><th>Eval</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>External security audit</td>
+              <td><span style="background:#388e3c;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">DONE</span></td>
+              <td>🟢</td>
+              <td>high</td>
+            </tr>
+            <tr>
+              <td>Remediate critical audit findings</td>
+              <td><span style="background:#1976d2;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">WIP</span></td>
+              <td>🔴</td>
+              <td>high</td>
+            </tr>
+            <tr>
+              <td>Implement secrets management (Vault)</td>
+              <td><span style="background:#e0e0e0;color:#333;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">TODO</span></td>
+              <td>⬜</td>
+              <td>high</td>
+            </tr>
+            <tr>
+              <td>Achieve SOC2 Type II compliance</td>
+              <td><span style="background:#e0e0e0;color:#333;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">TODO</span></td>
+              <td>⬜</td>
+              <td>high</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Developer Experience</h2>
+        <p style="font-size:0.75em;color:#6b7280;margin-bottom:0.5em">Tooling, workflows, and productivity improvements for engineers</p>
+        <div class="stat-grid" style="margin-bottom:0.5em">
+          <div class="stat-box"><div class="num">1</div><div class="lbl">Done</div></div>
+          <div class="stat-box"><div class="num">1</div><div class="lbl">WIP</div></div>
+          <div class="stat-box"><div class="num">2</div><div class="lbl">Todo</div></div>
+        </div>
+        <table>
+          <thead><tr><th>Task</th><th>Status</th><th>Eval</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Standardize local dev environment</td>
+              <td><span style="background:#388e3c;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">DONE</span></td>
+              <td>⭐</td>
+              <td>medium</td>
+            </tr>
+            <tr>
+              <td>CI/CD pipeline standardization</td>
+              <td><span style="background:#1976d2;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">WIP</span></td>
+              <td>🟢</td>
+              <td>high</td>
+            </tr>
+            <tr>
+              <td>Internal developer portal (Backstage)</td>
+              <td><span style="background:#e0e0e0;color:#333;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">TODO</span></td>
+              <td>⬜</td>
+              <td>medium</td>
+            </tr>
+            <tr>
+              <td>Increase test coverage to 80%</td>
+              <td><span style="background:#e0e0e0;color:#333;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:600">TODO</span></td>
+              <td>⬜</td>
+              <td>medium</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Final Slide: Summary -->
+      <section>
+        <h2>Summary &amp; Next Steps</h2>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="num">3/17</div><div class="lbl">Tasks Done</div></div>
+          <div class="stat-box"><div class="num">18%</div><div class="lbl">Complete</div></div>
+        </div>
+        <div style="text-align:left;margin-top:1em">
+          <h3>Pillars</h3>
+          <table>
+            <thead><tr><th>Pillar</th><th>✅ Done</th><th>🔵 WIP</th><th>📋 Todo</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Infrastructure</strong></td><td>1</td><td>1</td><td>3</td></tr>
+              <tr><td><strong>Observability</strong></td><td>0</td><td>1</td><td>3</td></tr>
+              <tr><td><strong>Security</strong></td><td>1</td><td>1</td><td>2</td></tr>
+              <tr><td><strong>Developer Experience</strong></td><td>1</td><td>1</td><td>2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      transition: 'slide',
+      controls: true,
+      progress: true,
+    });
+  </script>
+</body>
+</html>

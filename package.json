@@ -1,0 +1,16 @@
+{
+  "name": "present-framework",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "cli": "node packages/cli/src/index.js",
+    "ui": "npm run dev --workspace=packages/ui"
+  },
+  "overrides": {
+    "@tanstack/router-generator": "1.120.20",
+    "@tanstack/router-plugin": "1.120.20"
+  }
+}

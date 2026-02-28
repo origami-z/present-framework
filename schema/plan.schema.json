@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "plan.schema.json",
+  "title": "Present Framework Plan",
+  "description": "Schema for the present-framework plan.yaml planning file",
+  "type": "object",
+  "required": ["meta", "pillars"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["title", "owner"],
+      "properties": {
+        "title": { "type": "string", "description": "Plan title, e.g. 'Q1 2025 Technical Roadmap'" },
+        "owner": { "type": "string", "description": "Team or person owning this plan" },
+        "created": { "type": "string", "format": "date", "description": "Creation date YYYY-MM-DD" },
+        "updated": { "type": "string", "format": "date", "description": "Last update date YYYY-MM-DD" },
+        "version": { "type": "integer", "minimum": 1, "description": "Iteration version number" }
+      },
+      "additionalProperties": false
+    },
+    "ai": {
+      "type": "object",
+      "description": "AI provider configuration for brainstorming",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": ["anthropic", "openai", "github-copilot", "ollama", "none"],
+          "description": "anthropic=ANTHROPIC_API_KEY | openai=OPENAI_API_KEY | github-copilot=GITHUB_TOKEN | ollama=local | none=disabled"
+        },
+        "model": {
+          "type": "string",
+          "description": "Model name for the chosen provider, e.g. 'claude-sonnet-4-6', 'gpt-4o', 'llama3.2'"
+        }
+      },
+      "additionalProperties": false
+    },
+    "current_state": {
+      "type": "string",
+      "description": "Free-text description of where the team/system is today"
+    },
+    "target_state": {
+      "type": "string",
+      "description": "Free-text description of the desired future state"
+    },
+    "pillars": {
+      "type": "array",
+      "description": "Top-level focus areas (e.g. Infrastructure, Security, Developer Experience)",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "tasks"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "description": "Unique lowercase slug, e.g. 'infrastructure'"
+          },
+          "name": { "type": "string", "description": "Display name, e.g. 'Infrastructure'" },
+          "description": { "type": "string", "description": "Optional short description" },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "title", "status"],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique task ID, e.g. 'infra-001'"
+                },
+                "title": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "description": "Short task title (max 80 chars)"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Detailed description of the task"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["todo", "wip", "done", "archive"],
+                  "description": "todo=not started | wip=in progress | done=complete | archive=dropped/deferred"
+                },
+                "evaluation": {
+                  "type": "string",
+                  "enum": ["not_started", "on_track", "needs_attention", "at_risk", "blocked", "exceeds"],
+                  "description": "⬜ not_started | 🟢 on_track | 🟡 needs_attention | 🔴 at_risk | ⛔ blocked | ⭐ exceeds"
+                },
+                "priority": {
+                  "type": "string",
+                  "enum": ["high", "medium", "low"],
+                  "description": "Task priority"
+                },
+                "created": {
+                  "type": "string",
+                  "format": "date",
+                  "description": "Date created YYYY-MM-DD"
+                },
+                "updated": {
+                  "type": "string",
+                  "format": "date",
+                  "description": "Date last updated YYYY-MM-DD"
+                },
+                "dependencies": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "List of task IDs that must be complete before this one"
+                },
+                "notes": {
+                  "type": "string",
+                  "description": "Free-text notes, blockers, links"
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
