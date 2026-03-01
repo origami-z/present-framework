@@ -34,6 +34,7 @@ export function uiCommand(program) {
           VITE_PORT: opts.uiPort,
           API_PORT: opts.apiPort,
           PLAN_ROOT: getProjectRoot(),
+          PLAN_FOLDER: process.env.PLAN_FOLDER || 'data',
         },
         shell: true,
       });

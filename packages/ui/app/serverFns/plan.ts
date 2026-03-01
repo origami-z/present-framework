@@ -4,9 +4,10 @@ import { join, dirname } from 'path'
 import yaml from 'js-yaml'
 
 const PLAN_ROOT = process.env.PLAN_ROOT || process.cwd()
+const PLAN_FOLDER = process.env.PLAN_FOLDER || 'data'
 
 function getPlanPath() {
-  return join(PLAN_ROOT, 'data', 'plan.yaml')
+  return join(PLAN_ROOT, PLAN_FOLDER, 'plan.yaml')
 }
 
 export const getPlan = createServerFn({ method: 'GET' }).handler(async () => {

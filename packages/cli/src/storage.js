@@ -13,12 +13,14 @@ const SCHEMA_COMMENT =
   '#   "Update <task-id> status to wip and evaluation to on_track"\n' +
   '#   "Summarize my current plan progress"\n\n';
 
-/** Walk up from cwd to find the project root (directory containing data/plan.yaml) */
+const PLAN_FOLDER = process.env.PLAN_FOLDER || 'data';
+
+/** Walk up from cwd to find the project root (directory containing <PLAN_FOLDER>/plan.yaml) */
 function findProjectRoot() {
   let dir = process.cwd();
   const root = dirname(dir); // stop condition
   while (dir !== root) {
-    if (existsSync(join(dir, 'data', 'plan.yaml'))) return dir;
+    if (existsSync(join(dir, PLAN_FOLDER, 'plan.yaml'))) return dir;
     dir = dirname(dir);
   }
   return process.cwd();
@@ -29,7 +31,7 @@ export function getProjectRoot() {
 }
 
 export function getPlanPath() {
-  return join(findProjectRoot(), 'data', 'plan.yaml');
+  return join(findProjectRoot(), PLAN_FOLDER, 'plan.yaml');
 }
 
 export function getOutputDir() {
