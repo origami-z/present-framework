@@ -10,20 +10,22 @@ meta:
 ai:
   provider: anthropic
   model: claude-sonnet-4-6
-current_state: |
-  Our platform runs as a monolithic Rails application deployed on bare metal servers.
-  Infrastructure is managed manually with ad-hoc scripts. Test coverage is around 30%.
-  Security posture has not been formally audited. On-call burden is high due to fragile
-  deployments and lack of observability.
-target_state: |
-  Fully containerized microservices deployed on Kubernetes with GitOps workflows.
-  Infrastructure managed entirely through Terraform IaC. Test coverage above 80%.
-  SOC2 Type II compliant. On-call burden reduced by 60% through better observability
-  and automated remediation. Developer productivity improved with standardized tooling.
 pillars:
   - id: infrastructure
     name: Infrastructure
     description: Cloud infrastructure, containerization, and DevOps automation
+    current_status:
+      - id: infrastructure-cs-001
+        text: Monolithic Rails app deployed on bare metal servers
+      - id: infrastructure-cs-002
+        text: Infrastructure managed manually with ad-hoc scripts
+    target_status:
+      - id: infrastructure-ts-001
+        text: Fully containerized microservices deployed on Kubernetes
+      - id: infrastructure-ts-002
+        text: Infrastructure managed entirely through Terraform IaC
+      - id: infrastructure-ts-003
+        text: GitOps workflows via ArgoCD
     tasks:
       - id: infra-001
         title: Containerize all services with Docker
@@ -34,6 +36,9 @@ pillars:
         created: '2025-01-01'
         updated: '2025-02-15'
         dependencies: []
+        linked_status:
+          - infrastructure-cs-001
+          - infrastructure-ts-001
         notes: Completed ahead of schedule. All 12 services containerized.
       - id: infra-002
         title: Migrate to Kubernetes (staging)
@@ -45,6 +50,8 @@ pillars:
         updated: '2025-03-01'
         dependencies:
           - infra-001
+        linked_status:
+          - infrastructure-ts-001
         notes: Staging migration 70% complete. 8/12 services migrated.
       - id: infra-003
         title: Migrate to Kubernetes (production)
@@ -56,6 +63,8 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - infra-002
+        linked_status:
+          - infrastructure-ts-001
         notes: ''
       - id: infra-004
         title: Implement Terraform IaC
@@ -67,6 +76,9 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - infra-003
+        linked_status:
+          - infrastructure-cs-002
+          - infrastructure-ts-002
         notes: ''
       - id: infra-005
         title: Set up GitOps with ArgoCD
@@ -78,10 +90,18 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - infra-003
+        linked_status:
+          - infrastructure-ts-003
         notes: ''
   - id: observability
     name: Observability
     description: Logging, metrics, tracing, and alerting
+    current_status:
+      - id: observability-cs-001
+        text: On-call burden is high due to fragile deployments and lack of observability
+    target_status:
+      - id: observability-ts-001
+        text: On-call burden reduced by 60% through better observability and automated remediation
     tasks:
       - id: obs-001
         title: Centralize logs with ELK/Loki stack
@@ -92,6 +112,8 @@ pillars:
         created: '2025-01-01'
         updated: '2025-03-10'
         dependencies: []
+        linked_status:
+          - observability-ts-001
         notes: Loki setup done. Still integrating 4 legacy services.
       - id: obs-002
         title: Add Prometheus metrics + Grafana dashboards
@@ -103,6 +125,8 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - infra-002
+        linked_status:
+          - observability-ts-001
         notes: ''
       - id: obs-003
         title: Distributed tracing with OpenTelemetry
@@ -114,6 +138,7 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - obs-002
+        linked_status: []
         notes: ''
       - id: obs-004
         title: On-call runbooks and alert tuning
@@ -125,10 +150,19 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - obs-002
+        linked_status:
+          - observability-cs-001
+          - observability-ts-001
         notes: ''
   - id: security
     name: Security
     description: Security posture, compliance, and vulnerability management
+    current_status:
+      - id: security-cs-001
+        text: Security posture has not been formally audited
+    target_status:
+      - id: security-ts-001
+        text: SOC2 Type II compliant
     tasks:
       - id: sec-001
         title: External security audit
@@ -141,6 +175,8 @@ pillars:
         dependencies:
           - sec-002
           - infra-005
+        linked_status:
+          - security-cs-001
         notes: Audit completed Feb 2025. Report received with 3 critical findings.
       - id: sec-002
         title: Remediate critical audit findings
@@ -152,6 +188,8 @@ pillars:
         updated: '2025-03-05'
         dependencies:
           - sec-001
+        linked_status:
+          - security-cs-001
         notes: 2/3 findings resolved. SQL injection in legacy endpoint still open — blocked on refactor.
       - id: sec-003
         title: Implement secrets management (Vault)
@@ -163,6 +201,7 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - infra-002
+        linked_status: []
         notes: ''
       - id: sec-004
         title: Achieve SOC2 Type II compliance
@@ -175,10 +214,20 @@ pillars:
         dependencies:
           - sec-002
           - sec-003
+        linked_status:
+          - security-ts-001
         notes: ''
   - id: developer-experience
     name: Developer Experience
     description: Tooling, workflows, and productivity improvements for engineers
+    current_status:
+      - id: developer-experience-cs-001
+        text: Test coverage is around 30%
+    target_status:
+      - id: developer-experience-ts-001
+        text: Developer productivity improved with standardized tooling
+      - id: developer-experience-ts-002
+        text: Test coverage above 80%
     tasks:
       - id: devex-001
         title: Standardize local dev environment
@@ -190,6 +239,8 @@ pillars:
         updated: '2025-01-20'
         dependencies:
           - infra-001
+        linked_status:
+          - developer-experience-ts-001
         notes: Shipped devcontainer.json and onboarding script. Setup time reduced from 4h to 20min.
       - id: devex-002
         title: CI/CD pipeline standardization
@@ -201,6 +252,8 @@ pillars:
         updated: '2025-03-01'
         dependencies:
           - infra-001
+        linked_status:
+          - developer-experience-ts-001
         notes: 15/23 repos migrated.
       - id: devex-003
         title: Internal developer portal (Backstage)
@@ -212,6 +265,8 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - devex-002
+        linked_status:
+          - developer-experience-ts-001
         notes: ''
       - id: devex-004
         title: Increase test coverage to 80%
@@ -222,4 +277,7 @@ pillars:
         created: '2025-01-01'
         updated: '2025-01-01'
         dependencies: []
+        linked_status:
+          - developer-experience-cs-001
+          - developer-experience-ts-002
         notes: ''

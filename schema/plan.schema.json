@@ -34,14 +34,6 @@
       },
       "additionalProperties": false
     },
-    "current_state": {
-      "type": "string",
-      "description": "Free-text description of where the team/system is today"
-    },
-    "target_state": {
-      "type": "string",
-      "description": "Free-text description of the desired future state"
-    },
     "pillars": {
       "type": "array",
       "description": "Top-level focus areas (e.g. Infrastructure, Security, Developer Experience)",
@@ -56,6 +48,20 @@
           },
           "name": { "type": "string", "description": "Display name, e.g. 'Infrastructure'" },
           "description": { "type": "string", "description": "Optional short description" },
+          "current_status": {
+            "type": "array",
+            "description": "Bullet points describing where this pillar stands today",
+            "items": {
+              "$ref": "#/definitions/status_item"
+            }
+          },
+          "target_status": {
+            "type": "array",
+            "description": "Bullet points describing the desired future state for this pillar",
+            "items": {
+              "$ref": "#/definitions/status_item"
+            }
+          },
           "tasks": {
             "type": "array",
             "items": {
@@ -108,6 +114,11 @@
                 "notes": {
                   "type": "string",
                   "description": "Free-text notes, blockers, links"
+                },
+                "linked_status": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "List of status item IDs from this pillar's current_status or target_status that this task relates to"
                 }
               },
               "additionalProperties": false
@@ -116,6 +127,23 @@
         },
         "additionalProperties": false
       }
+    }
+  },
+  "definitions": {
+    "status_item": {
+      "type": "object",
+      "required": ["id", "text"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this status bullet point within the pillar"
+        },
+        "text": {
+          "type": "string",
+          "description": "The status bullet point text"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

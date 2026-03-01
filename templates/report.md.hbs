@@ -15,24 +15,28 @@
 
 ---
 
-## Current State
-
-{{current_state}}
-
-## Target State
-
-{{target_state}}
-
----
-
 {{#each pillars}}
 ## {{name}}
 
 {{#if description}}*{{description}}*{{/if}}
 
-| Task | Status | Eval | Priority | Dependencies |
-|------|--------|------|----------|--------------|
-{{#each tasks}}| **{{title}}** | {{statusEmoji status}} {{status}} | {{evalEmoji evaluation}} {{evaluation}} | {{priority}} | {{joinDeps dependencies}} |
+{{#if current_status.length}}
+### 📍 Current Status
+{{#each current_status}}
+- {{text}}
+{{/each}}
+{{/if}}
+
+{{#if target_status.length}}
+### 🎯 Target Status
+{{#each target_status}}
+- {{text}}
+{{/each}}
+{{/if}}
+
+| Task | Status | Eval | Priority | Dependencies | Linked Status |
+|------|--------|------|----------|--------------|---------------|
+{{#each tasks}}| **{{title}}** | {{statusEmoji status}} {{status}} | {{evalEmoji evaluation}} {{evaluation}} | {{priority}} | {{joinDeps dependencies}} | {{joinDeps linked_status}} |
 {{/each}}
 
 {{/each}}

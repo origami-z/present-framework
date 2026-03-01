@@ -68,7 +68,20 @@ export function defaultTask(id) {
     updated: date,
     dependencies: [],
     notes: '',
+    linked_status: [],
   };
+}
+
+export function defaultStatusItem(id, text = '') {
+  return { id, text };
+}
+
+export function generateStatusId(prefix, existingIds = []) {
+  let i = 1;
+  while (existingIds.includes(`${prefix}-${String(i).padStart(3, '0')}`)) {
+    i++;
+  }
+  return `${prefix}-${String(i).padStart(3, '0')}`;
 }
 
 export function defaultPillar(id, name) {
@@ -76,6 +89,8 @@ export function defaultPillar(id, name) {
     id,
     name,
     description: '',
+    current_status: [],
+    target_status: [],
     tasks: [],
   };
 }
@@ -94,10 +109,27 @@ export function defaultPlan(title, owner) {
       provider: 'anthropic',
       model: 'claude-sonnet-4-6',
     },
-    current_state: '',
-    target_state: '',
     pillars: [],
   };
+}
+
+/** Collect all status item IDs across a pillar's current_status and target_status */
+export function allStatusIds(pillar) {
+  return [
+    ...(pillar.current_status || []).map((s) => s.id),
+    ...(pillar.target_status || []).map((s) => s.id),
+  ];
+}
+
+/** Find a status item by ID within a pillar, return { item, list } or null */
+export function findStatusItem(pillar, statusId) {
+  for (const item of pillar.current_status || []) {
+    if (item.id === statusId) return { item, list: 'current_status' };
+  }
+  for (const item of pillar.target_status || []) {
+    if (item.id === statusId) return { item, list: 'target_status' };
+  }
+  return null;
 }
 
 /** Collect all task IDs across all pillars */

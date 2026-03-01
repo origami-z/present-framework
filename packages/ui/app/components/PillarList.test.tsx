@@ -7,6 +7,8 @@ const makePillar = (id: string, name: string, tasks: any[] = []) => ({
   id,
   name,
   description: '',
+  current_status: [],
+  target_status: [],
   tasks,
 })
 
@@ -17,6 +19,7 @@ const makeTask = (id: string, status = 'todo') => ({
   evaluation: 'not_started',
   priority: 'medium',
   dependencies: [],
+  linked_status: [],
 })
 
 describe('PillarList', () => {
@@ -111,7 +114,7 @@ describe('PillarList', () => {
     await user.click(screen.getByRole('button', { name: /^Add$/i }))
 
     expect(onUpdate).toHaveBeenCalledWith([
-      expect.objectContaining({ name: 'New Pillar', id: 'new-pillar' }),
+      expect.objectContaining({ name: 'New Pillar', id: 'new-pillar', current_status: [], target_status: [] }),
     ])
   })
 
@@ -137,5 +140,35 @@ describe('PillarList', () => {
     const [updatedPillars] = onUpdate.mock.calls[0]
     expect(updatedPillars[0].tasks).toHaveLength(1)
     expect(updatedPillars[0].tasks[0].status).toBe('todo')
+    expect(updatedPillars[0].tasks[0].linked_status).toEqual([])
+  })
+
+  it('renders current and target status bullet lists', () => {
+    const pillar = {
+      ...makePillar('infra', 'Infrastructure'),
+      current_status: [{ id: 'infra-cs-001', text: 'Running on bare metal' }],
+      target_status: [{ id: 'infra-ts-001', text: 'Fully on Kubernetes' }],
+    }
+    render(<PillarList pillars={[pillar]} onUpdate={vi.fn()} />)
+    expect(screen.getByText('📍 Current Status')).toBeInTheDocument()
+    expect(screen.getByText('🎯 Target Status')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Running on bare metal')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Fully on Kubernetes')).toBeInTheDocument()
+  })
+
+  it('adds a status item when + Add is clicked', async () => {
+    const user = userEvent.setup()
+    const onUpdate = vi.fn()
+    render(<PillarList pillars={[makePillar('sec', 'Security')]} onUpdate={onUpdate} />)
+
+    // There are two "+ Add" buttons (current and target status)
+    const addButtons = screen.getAllByRole('button', { name: /\+ Add/i })
+    // First one is for current status
+    await user.click(addButtons[0])
+
+    expect(onUpdate).toHaveBeenCalledTimes(1)
+    const [updatedPillars] = onUpdate.mock.calls[0]
+    expect(updatedPillars[0].current_status).toHaveLength(1)
+    expect(updatedPillars[0].current_status[0].id).toBe('sec-cs-001')
   })
 })

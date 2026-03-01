@@ -30,6 +30,7 @@ export function generateDeck(plan) {
     ...pillar,
     stats: pillarStats(pillar),
     keyTasks: pillar.tasks.filter((t) => t.status !== 'archive').slice(0, 8),
+    hasStatus: (pillar.current_status?.length > 0) || (pillar.target_status?.length > 0),
   }));
 
   return template({

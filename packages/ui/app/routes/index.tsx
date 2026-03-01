@@ -6,9 +6,6 @@ import {
   TabList,
   Tab,
   TabPanel,
-  TextField,
-  Label,
-  TextArea,
 } from "react-aria-components";
 import {
   Group as PanelGroup,
@@ -178,36 +175,6 @@ function PlannerPage() {
       <PanelGroup orientation="horizontal" style={bodyStyle}>
         {/* Left panel */}
         <Panel id="left" minSize="20" style={leftPanel}>
-          <div style={sectionCard}>
-            <h3 className="section-title">Plan Overview</h3>
-
-            <TextField
-              className="field"
-              value={plan?.current_state || ""}
-              onChange={(v) => handlePlanChange({ current_state: v })}
-            >
-              <Label className="field-label">Current State</Label>
-              <TextArea
-                className="field-textarea"
-                placeholder="Where things are today..."
-                style={{ minHeight: 70 }}
-              />
-            </TextField>
-
-            <TextField
-              className="field"
-              value={plan?.target_state || ""}
-              onChange={(v) => handlePlanChange({ target_state: v })}
-            >
-              <Label className="field-label">Target State</Label>
-              <TextArea
-                className="field-textarea"
-                placeholder="What does success look like?"
-                style={{ minHeight: 70 }}
-              />
-            </TextField>
-          </div>
-
           <div style={sectionCard}>
             <h3 className="section-title">Pillars &amp; Tasks</h3>
             <PillarList
