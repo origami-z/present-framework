@@ -30,15 +30,22 @@ const baseTask: Task = {
   updated: '2024-01-01',
 }
 
-/** Wrapper that keeps state so controlled inputs work correctly in tests. */
+const noOtherTasks: { id: string; title: string }[] = []
+const otherTasksList = [
+  { id: 'pillar-001', title: 'My Task' },
+  { id: 'pillar-002', title: 'Second Task' },
+  { id: 'pillar-003', title: 'Third Task' },
+]
+
+/** Stateful wrapper so controlled inputs work correctly in tests. */
 function StatefulEditor({
   task: initialTask,
-  allTaskIds,
+  allTasks,
   onUpdate,
   onDelete,
 }: {
   task: Task
-  allTaskIds: string[]
+  allTasks: { id: string; title: string }[]
   onUpdate?: (t: Task) => void
   onDelete?: () => void
 }) {
@@ -46,7 +53,7 @@ function StatefulEditor({
   return (
     <TaskEditor
       task={task}
-      allTaskIds={allTaskIds}
+      allTasks={allTasks}
       onUpdate={(t) => { setTask(t); onUpdate?.(t) }}
       onDelete={onDelete ?? vi.fn()}
     />
@@ -55,23 +62,23 @@ function StatefulEditor({
 
 describe('TaskEditor', () => {
   it('renders the task title in collapsed state', () => {
-    render(<StatefulEditor task={baseTask} allTaskIds={['pillar-001']} />)
+    render(<StatefulEditor task={baseTask} allTasks={noOtherTasks} />)
     expect(screen.getByText('My Task')).toBeInTheDocument()
   })
 
   it('shows task id chip in collapsed state', () => {
-    render(<StatefulEditor task={baseTask} allTaskIds={['pillar-001']} />)
+    render(<StatefulEditor task={baseTask} allTasks={noOtherTasks} />)
     expect(screen.getByText('pillar-001')).toBeInTheDocument()
   })
 
   it('shows "Untitled task" placeholder when title is empty', () => {
-    render(<StatefulEditor task={{ ...baseTask, title: '' }} allTaskIds={['pillar-001']} />)
+    render(<StatefulEditor task={{ ...baseTask, title: '' }} allTasks={noOtherTasks} />)
     expect(screen.getByText('Untitled task')).toBeInTheDocument()
   })
 
   it('expands to show form fields when header is clicked', async () => {
     const user = userEvent.setup()
-    render(<StatefulEditor task={baseTask} allTaskIds={['pillar-001']} />)
+    render(<StatefulEditor task={baseTask} allTasks={noOtherTasks} />)
 
     expect(screen.queryByLabelText('Title')).not.toBeInTheDocument()
 
@@ -85,7 +92,7 @@ describe('TaskEditor', () => {
   it('calls onUpdate with updated title when title field changes', async () => {
     const user = userEvent.setup()
     const onUpdate = vi.fn()
-    render(<StatefulEditor task={baseTask} allTaskIds={['pillar-001']} onUpdate={onUpdate} />)
+    render(<StatefulEditor task={baseTask} allTasks={noOtherTasks} onUpdate={onUpdate} />)
 
     await user.click(screen.getByRole('button', { name: /My Task/i }))
 
@@ -100,7 +107,7 @@ describe('TaskEditor', () => {
   it('calls onDelete when Remove task button is clicked', async () => {
     const user = userEvent.setup()
     const onDelete = vi.fn()
-    render(<StatefulEditor task={baseTask} allTaskIds={['pillar-001']} onDelete={onDelete} />)
+    render(<StatefulEditor task={baseTask} allTasks={noOtherTasks} onDelete={onDelete} />)
 
     await user.click(screen.getByRole('button', { name: /My Task/i }))
     await user.click(screen.getByRole('button', { name: /Remove task/i }))
@@ -108,25 +115,40 @@ describe('TaskEditor', () => {
     expect(onDelete).toHaveBeenCalledTimes(1)
   })
 
-  it('shows "No other tasks" when only this task exists', async () => {
+  it('renders the dependency combobox input when expanded', async () => {
     const user = userEvent.setup()
-    render(<StatefulEditor task={baseTask} allTaskIds={['pillar-001']} />)
+    render(<StatefulEditor task={baseTask} allTasks={otherTasksList} />)
 
     await user.click(screen.getByRole('button', { name: /My Task/i }))
-    expect(screen.getByText(/No other tasks/i)).toBeInTheDocument()
+
+    expect(screen.getByRole('combobox', { name: /Add dependency/i })).toBeInTheDocument()
   })
 
-  it('shows dependency checkboxes for other task ids', async () => {
+  it('renders existing dependency as a removable tag', async () => {
     const user = userEvent.setup()
+    const taskWithDep = { ...baseTask, dependencies: ['pillar-002'] }
+    render(<StatefulEditor task={taskWithDep} allTasks={otherTasksList} />)
+
+    await user.click(screen.getByRole('button', { name: /My Task/i }))
+
+    // The existing dependency appears as a tag chip
+    expect(screen.getByText('pillar-002')).toBeInTheDocument()
+    // And has a remove button
+    expect(screen.getByRole('button', { name: /Remove pillar-002/i })).toBeInTheDocument()
+  })
+
+  it('removes a dependency tag when the remove button is clicked', async () => {
+    const user = userEvent.setup()
+    const onUpdate = vi.fn()
+    const taskWithDep = { ...baseTask, dependencies: ['pillar-002'] }
     render(
-      <StatefulEditor
-        task={baseTask}
-        allTaskIds={['pillar-001', 'pillar-002', 'pillar-003']}
-      />,
+      <StatefulEditor task={taskWithDep} allTasks={otherTasksList} onUpdate={onUpdate} />,
     )
 
     await user.click(screen.getByRole('button', { name: /My Task/i }))
-    expect(screen.getByLabelText('pillar-002')).toBeInTheDocument()
-    expect(screen.getByLabelText('pillar-003')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Remove pillar-002/i }))
+
+    const lastCall = onUpdate.mock.calls[onUpdate.mock.calls.length - 1][0]
+    expect(lastCall.dependencies).toEqual([])
   })
 })
