@@ -49,11 +49,21 @@ function PlannerPage() {
   const [toast, setToast] = useState<string | null>(null);
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const showToast = (msg: string) => {
+  // Clear pending timers on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, []);
+
+  const showToast = useCallback((msg: string) => {
     setToast(msg);
-    setTimeout(() => setToast(null), 3500);
-  };
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 3500);
+  }, []);
 
   const debouncedSave = useCallback((updated: any) => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -69,15 +79,17 @@ function PlannerPage() {
         setSaving(false);
       }
     }, 800);
-  }, []);
+  }, [showToast]);
 
-  const handlePlanChange = (partial: Partial<any>) => {
-    const updated = { ...plan, ...partial };
-    setPlan(updated);
-    debouncedSave(updated);
-  };
+  const handlePlanChange = useCallback((partial: Partial<any>) => {
+    setPlan((prev: any) => {
+      const updated = { ...prev, ...partial };
+      debouncedSave(updated);
+      return updated;
+    });
+  }, [debouncedSave]);
 
-  const handleGenerateAll = async () => {
+  const handleGenerateAll = useCallback(async () => {
     setGenerating(true);
     try {
       const result = await generateArtifacts({ data: { type: "all" } });
@@ -88,9 +100,9 @@ function PlannerPage() {
     } finally {
       setGenerating(false);
     }
-  };
+  }, [showToast]);
 
-  const handleIterate = async () => {
+  const handleIterate = useCallback(async () => {
     setIterating(true);
     try {
       await runIterate();
@@ -100,7 +112,7 @@ function PlannerPage() {
     } finally {
       setIterating(false);
     }
-  };
+  }, [showToast]);
 
   return (
     <div style={appStyle}>

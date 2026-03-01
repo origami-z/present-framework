@@ -6,7 +6,8 @@
     "dev": "vite dev --port 3001",
     "build": "vite build",
     "start": "node .output/server/index.mjs",
-    "typecheck": "tsc --noEmit",
+    "generate-routes": "node -e \"const {getConfig,Generator}=require('@tanstack/router-generator');const c=getConfig({target:'react',routesDirectory:'./app/routes',generatedRouteTree:'./app/routeTree.gen.ts',quoteStyle:'single',semicolons:false},process.cwd());new Generator({config:c,root:process.cwd()}).run()\"",
+    "typecheck": "npm run generate-routes && tsc --noEmit",
     "test": "vitest run --config vitest.config.ts",
     "test:watch": "vitest --config vitest.config.ts",
     "test:coverage": "vitest run --config vitest.config.ts --coverage"

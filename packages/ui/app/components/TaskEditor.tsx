@@ -293,8 +293,8 @@ export function TaskEditor({ task, allTasks, onUpdate, onDelete }: Props) {
         <div
           style={{
             padding: "0.75rem",
-            borderTop: "1px solid #f1f5f9",
-            background: "#fafafa",
+            borderTop: "1px solid var(--color-border)",
+            background: "var(--color-bg)",
           }}
         >
           <TextField
