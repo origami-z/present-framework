@@ -1,4 +1,18 @@
 import { useState } from 'react'
+import {
+  Button,
+  TextField,
+  Label,
+  Input,
+  TextArea,
+  Select,
+  SelectValue,
+  Popover,
+  ListBox,
+  ListBoxItem,
+  CheckboxGroup,
+  Checkbox,
+} from 'react-aria-components'
 
 const STATUSES = ['todo', 'wip', 'done', 'archive'] as const
 const EVALUATIONS = ['not_started', 'on_track', 'needs_attention', 'at_risk', 'blocked', 'exceeds'] as const
@@ -14,10 +28,10 @@ const EVAL_EMOJI: Record<string, string> = {
 }
 
 const STATUS_COLOR: Record<string, string> = {
-  todo: '#6b7280',
-  wip: '#1a56db',
-  done: '#16a34a',
-  archive: '#9ca3af',
+  todo: 'var(--color-todo)',
+  wip: 'var(--color-wip)',
+  done: 'var(--color-done)',
+  archive: 'var(--color-archive)',
 }
 
 interface Task {
@@ -40,6 +54,39 @@ interface Props {
   onDelete: () => void
 }
 
+function EnumSelect<T extends string>({
+  label,
+  value,
+  options,
+  renderOption,
+  onChange,
+}: {
+  label: string
+  value: T
+  options: readonly T[]
+  renderOption: (v: T) => string
+  onChange: (v: T) => void
+}) {
+  return (
+    <Select selectedKey={value} onSelectionChange={(key) => onChange(key as T)}>
+      <Label className="field-label">{label}</Label>
+      <Button className="select-btn">
+        <SelectValue />
+        <span aria-hidden className="select-arrow">▼</span>
+      </Button>
+      <Popover className="select-popover">
+        <ListBox className="select-listbox">
+          {options.map((opt) => (
+            <ListBoxItem key={opt} id={opt} className="select-item">
+              {renderOption(opt)}
+            </ListBoxItem>
+          ))}
+        </ListBox>
+      </Popover>
+    </Select>
+  )
+}
+
 export function TaskEditor({ task, allTaskIds, onUpdate, onDelete }: Props) {
   const [expanded, setExpanded] = useState(false)
 
@@ -50,175 +97,113 @@ export function TaskEditor({ task, allTaskIds, onUpdate, onDelete }: Props) {
   const otherIds = allTaskIds.filter((id) => id !== task.id)
 
   return (
-    <div style={cardStyle}>
-      <div style={headerStyle} onClick={() => setExpanded(!expanded)}>
+    <div style={{
+      border: '1px solid var(--color-border)',
+      borderRadius: 'var(--radius-md)',
+      marginBottom: '0.4rem',
+      overflow: 'hidden',
+      background: 'var(--color-surface)',
+    }}>
+      <Button
+        onPress={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          width: '100%', padding: '0.5rem 0.75rem',
+          background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: '0.5rem',
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: 0 }}>
-          <span style={{ ...statusDot, background: STATUS_COLOR[task.status] || '#999' }} />
+          <span style={{
+            width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+            background: STATUS_COLOR[task.status] || '#999', display: 'inline-block',
+          }} />
           <span style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {task.title || <em style={{ color: '#94a3b8' }}>Untitled task</em>}
+            {task.title || <em style={{ color: 'var(--color-text-faint)' }}>Untitled task</em>}
           </span>
           <span style={{ fontSize: '0.9em' }}>{EVAL_EMOJI[task.evaluation] || '⬜'}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-          <span style={{ ...chip, background: '#f1f5f9', color: '#475569', fontSize: '0.7em' }}>
-            {task.id}
-          </span>
-          <span style={{ color: '#94a3b8', fontSize: '0.8em' }}>{expanded ? '▲' : '▼'}</span>
+          <span className="id-chip">{task.id}</span>
+          <span style={{ color: 'var(--color-text-faint)', fontSize: '0.8em' }}>{expanded ? '▲' : '▼'}</span>
         </div>
-      </div>
+      </Button>
 
       {expanded && (
-        <div style={bodyStyle}>
-          <Field label="Title">
-            <input
-              style={inputStyle}
-              value={task.title}
-              onChange={(e) => update('title', e.target.value)}
-              placeholder="Task title"
+        <div style={{ padding: '0.75rem', borderTop: '1px solid #f1f5f9', background: '#fafafa' }}>
+          <TextField className="field" value={task.title} onChange={(v) => update('title', v)}>
+            <Label className="field-label">Title</Label>
+            <Input className="field-input" placeholder="Task title" />
+          </TextField>
+
+          <TextField className="field" value={task.description || ''} onChange={(v) => update('description', v)}>
+            <Label className="field-label">Description</Label>
+            <TextArea className="field-textarea" placeholder="Optional description" style={{ minHeight: 60 }} />
+          </TextField>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '0.5rem' }}>
+            <EnumSelect
+              label="Status"
+              value={task.status as any}
+              options={STATUSES}
+              renderOption={(s) => s}
+              onChange={(v) => update('status', v)}
             />
-          </Field>
-
-          <Field label="Description">
-            <textarea
-              style={{ ...inputStyle, height: 60, resize: 'vertical' }}
-              value={task.description || ''}
-              onChange={(e) => update('description', e.target.value)}
-              placeholder="Optional description"
+            <EnumSelect
+              label="Evaluation"
+              value={task.evaluation as any}
+              options={EVALUATIONS}
+              renderOption={(e) => `${EVAL_EMOJI[e]} ${e}`}
+              onChange={(v) => update('evaluation', v)}
             />
-          </Field>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
-            <Field label="Status">
-              <select style={selectStyle} value={task.status} onChange={(e) => update('status', e.target.value)}>
-                {STATUSES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </Field>
-
-            <Field label="Evaluation">
-              <select style={selectStyle} value={task.evaluation} onChange={(e) => update('evaluation', e.target.value)}>
-                {EVALUATIONS.map((e) => (
-                  <option key={e} value={e}>{EVAL_EMOJI[e]} {e}</option>
-                ))}
-              </select>
-            </Field>
-
-            <Field label="Priority">
-              <select style={selectStyle} value={task.priority} onChange={(e) => update('priority', e.target.value)}>
-                {PRIORITIES.map((p) => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
-              </select>
-            </Field>
+            <EnumSelect
+              label="Priority"
+              value={task.priority as any}
+              options={PRIORITIES}
+              renderOption={(p) => p}
+              onChange={(v) => update('priority', v)}
+            />
           </div>
 
-          <Field label="Dependencies">
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
-              {otherIds.map((id) => {
-                const checked = task.dependencies.includes(id)
-                return (
-                  <label key={id} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={(e) => {
-                        const deps = e.target.checked
-                          ? [...task.dependencies, id]
-                          : task.dependencies.filter((d) => d !== id)
-                        update('dependencies', deps)
-                      }}
-                    />
-                    <span style={{ fontSize: '0.8em', fontFamily: 'monospace' }}>{id}</span>
-                  </label>
-                )
-              })}
-              {otherIds.length === 0 && <span style={{ color: '#94a3b8', fontSize: '0.8em' }}>No other tasks</span>}
-            </div>
-          </Field>
+          <div className="field">
+            <span className="field-label">Dependencies</span>
+            {otherIds.length > 0 ? (
+              <CheckboxGroup
+                className="checkbox-group"
+                value={task.dependencies}
+                onChange={(deps) => update('dependencies', deps)}
+                aria-label="Task dependencies"
+              >
+                {otherIds.map((id) => (
+                  <Checkbox key={id} value={id} className="checkbox">
+                    {({ isSelected }) => (
+                      <>
+                        <div className="checkbox-box">
+                          {isSelected && <span className="checkbox-check">✓</span>}
+                        </div>
+                        {id}
+                      </>
+                    )}
+                  </Checkbox>
+                ))}
+              </CheckboxGroup>
+            ) : (
+              <span style={{ color: 'var(--color-text-faint)', fontSize: '0.8em' }}>No other tasks</span>
+            )}
+          </div>
 
-          <Field label="Notes">
-            <textarea
-              style={{ ...inputStyle, height: 50, resize: 'vertical' }}
-              value={task.notes || ''}
-              onChange={(e) => update('notes', e.target.value)}
-              placeholder="Notes, links, blockers..."
-            />
-          </Field>
+          <TextField className="field" value={task.notes || ''} onChange={(v) => update('notes', v)}>
+            <Label className="field-label">Notes</Label>
+            <TextArea className="field-textarea" placeholder="Notes, links, blockers..." style={{ minHeight: 50 }} />
+          </TextField>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
-            <button
-              onClick={onDelete}
-              style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.8em', padding: '4px 8px' }}
-            >
+            <Button className="btn btn-danger" onPress={onDelete}>
               🗑 Remove task
-            </button>
+            </Button>
           </div>
         </div>
       )}
     </div>
   )
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: '0.5rem' }}>
-      <label style={{ display: 'block', fontSize: '0.75em', fontWeight: 600, color: '#64748b', marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-        {label}
-      </label>
-      {children}
-    </div>
-  )
-}
-
-const cardStyle: React.CSSProperties = {
-  border: '1px solid #e2e8f0',
-  borderRadius: 6,
-  marginBottom: '0.4rem',
-  overflow: 'hidden',
-  background: '#fff',
-}
-
-const headerStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: '0.5rem 0.75rem',
-  cursor: 'pointer',
-  userSelect: 'none',
-  gap: '0.5rem',
-}
-
-const bodyStyle: React.CSSProperties = {
-  padding: '0.75rem',
-  borderTop: '1px solid #f1f5f9',
-  background: '#fafafa',
-}
-
-const statusDot: React.CSSProperties = {
-  width: 8,
-  height: 8,
-  borderRadius: '50%',
-  flexShrink: 0,
-}
-
-const chip: React.CSSProperties = {
-  padding: '2px 6px',
-  borderRadius: 4,
-  fontFamily: 'monospace',
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '5px 8px',
-  border: '1px solid #e2e8f0',
-  borderRadius: 4,
-  fontSize: '0.85em',
-  fontFamily: 'inherit',
-  background: '#fff',
-}
-
-const selectStyle: React.CSSProperties = {
-  ...inputStyle,
-  cursor: 'pointer',
 }

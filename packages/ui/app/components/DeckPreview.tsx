@@ -11,6 +11,10 @@ export function DeckPreview({ content }: Props) {
     )
   }
 
+  if (typeof window === 'undefined') {
+    return <div style={emptyStyle}>Loading deck preview...</div>
+  }
+
   const blob = new Blob([content], { type: 'text/html' })
   const url = URL.createObjectURL(blob)
 
