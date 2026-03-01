@@ -26,3 +26,6 @@ jobs:
 
       - name: Build UI
         run: npm run build --workspace=packages/ui
+
+      - name: Typecheck UI
+        run: npm run typecheck --workspace=packages/ui

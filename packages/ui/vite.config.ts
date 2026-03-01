@@ -9,9 +9,6 @@ export default defineConfig({
   plugins: [
     tanstackStart({
       srcDirectory: 'app',
-      tsr: {
-        appDirectory: './app',
-      },
     }),
     react(),
   ],

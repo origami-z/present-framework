@@ -19,7 +19,7 @@ export const getPlan = createServerFn({ method: 'GET' }).handler(async () => {
 })
 
 export const savePlan = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => data as any)
+  .inputValidator((data: unknown) => data as any)
   .handler(async ({ data }) => {
     const path = getPlanPath()
     mkdirSync(dirname(path), { recursive: true })
@@ -39,7 +39,7 @@ export const savePlan = createServerFn({ method: 'POST' })
   })
 
 export const generateArtifacts = createServerFn({ method: 'POST' })
-  .validator((data: { type: 'diagram' | 'report' | 'deck' | 'all' }) => data)
+  .inputValidator((data: { type: 'diagram' | 'report' | 'deck' | 'all' }) => data)
   .handler(async ({ data }) => {
     // Import CLI generators (relative path from ui to cli)
     const planPath = getPlanPath()
