@@ -14,7 +14,7 @@ A CLI + web UI for long-term technical planning. Capture current state, define t
   1. `output/diagram.md` — Mermaid dependency graph
   2. `output/report.md` — Markdown status report
   3. `output/deck.html` — reveal.js presentation (opens in browser)
-- **Browser UI** — Vite + React + TanStack Router for visual editing and preview
+- **Browser UI** — TanStack Start full-stack app (Vite + React + SSR) for visual editing and preview
 
 ---
 
@@ -139,10 +139,24 @@ View history with `git log --oneline`.
 
 ## Browser UI
 
+The UI is a TanStack Start full-stack app with server-side rendering, powered by Vite and React 19.
+
+```bash
+# Development
+cd packages/ui
+npm run dev
+# http://localhost:3001
+
+# Production
+npm run build
+npm run start
+```
+
+Or via the CLI:
+
 ```bash
 present ui
-# API server: http://localhost:3001
-# UI:         http://localhost:5173
+# http://localhost:3001
 ```
 
 Features:
@@ -151,6 +165,7 @@ Features:
 - Auto-saves changes with debounce
 - "Generate All" button updates all previews
 - "Iterate" button creates a snapshot
+- Server-side rendering via TanStack Start with server functions for plan data
 
 ---
 
@@ -184,6 +199,12 @@ present-framework/
 ├── iterations/                # Dated snapshots
 ├── packages/
 │   ├── cli/                   # Node.js CLI
-│   └── ui/                    # React + TanStack Router UI
+│   └── ui/                    # TanStack Start full-stack app (Vite + React 19 + SSR)
+│       ├── app/
+│       │   ├── routes/        # File-based routes (TanStack Router)
+│       │   ├── components/    # React Aria UI components
+│       │   ├── serverFns/     # TanStack Start server functions
+│       │   └── styles/        # CSS
+│       └── vite.config.ts     # Vite + TanStack Start plugin config
 └── README.md
 ```
