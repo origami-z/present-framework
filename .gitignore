@@ -9,6 +9,8 @@ npm-debug.log*
 packages/ui/.vinxi/
 packages/ui/.output/
 packages/ui/dist/
+packages/ui/app/routeTree.gen.ts
+packages/ui/app.config.timestamp_*.js
 
 # Generated output (optional — remove this line to track artifacts in git)
 # output/

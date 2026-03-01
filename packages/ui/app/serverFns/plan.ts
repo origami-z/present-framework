@@ -1,4 +1,4 @@
-import { createServerFn } from '@tanstack/start'
+import { createServerFn } from '@tanstack/react-start'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join, dirname } from 'path'
 import yaml from 'js-yaml'
@@ -51,14 +51,15 @@ export const generateArtifacts = createServerFn({ method: 'POST' })
 
     const results: Record<string, string> = {}
 
+    const generatorsDir = join(PLAN_ROOT, 'packages', 'cli', 'src', 'generators')
     const { generateMermaid } = await import(
-      '../../../cli/src/generators/mermaid.js' as string
+      /* @vite-ignore */ join(generatorsDir, 'mermaid.js')
     )
     const { generateReport } = await import(
-      '../../../cli/src/generators/report.js' as string
+      /* @vite-ignore */ join(generatorsDir, 'report.js')
     )
     const { generateDeck } = await import(
-      '../../../cli/src/generators/deck.js' as string
+      /* @vite-ignore */ join(generatorsDir, 'deck.js')
     )
 
     if (data.type === 'diagram' || data.type === 'all') {
