@@ -25,6 +25,8 @@
     .current-target { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; text-align: left; font-size: 0.75em; }
     .box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1em; }
     .box h4 { margin: 0 0 0.5em; color: #374151; }
+    .box ul { margin: 0; padding-left: 1.2em; }
+    .box li { margin-bottom: 0.3em; }
   </style>
 </head>
 <body>
@@ -53,39 +55,43 @@
         </div>
       </section>
 
-      <!-- Slide 3: Current vs Target State -->
-      <section>
-        <h2>Where We Are &amp; Where We're Going</h2>
-        <div class="current-target">
-          <div class="box">
-            <h4>📍 Current State</h4>
-            <p>{{current_state}}</p>
-          </div>
-          <div class="box">
-            <h4>🎯 Target State</h4>
-            <p>{{target_state}}</p>
-          </div>
-        </div>
-      </section>
-
       {{! One slide per pillar }}
       {{#each pillars}}
       <section>
         <h2>{{name}}</h2>
         {{#if description}}<p style="font-size:0.75em;color:#6b7280;margin-bottom:0.5em">{{description}}</p>{{/if}}
+        {{#if hasStatus}}
+        <div class="current-target" style="margin-bottom:0.5em">
+          <div class="box">
+            <h4>📍 Current Status</h4>
+            <ul>
+            {{#each current_status}}
+              <li>{{evalEmoji evaluation}} {{text}}</li>
+            {{/each}}
+            </ul>
+          </div>
+          <div class="box">
+            <h4>🎯 Target Status</h4>
+            <ul>
+            {{#each target_status}}
+              <li>{{evalEmoji evaluation}} {{text}}</li>
+            {{/each}}
+            </ul>
+          </div>
+        </div>
+        {{/if}}
         <div class="stat-grid" style="margin-bottom:0.5em">
           <div class="stat-box"><div class="num">{{stats.done}}</div><div class="lbl">Done</div></div>
           <div class="stat-box"><div class="num">{{stats.wip}}</div><div class="lbl">WIP</div></div>
           <div class="stat-box"><div class="num">{{stats.todo}}</div><div class="lbl">Todo</div></div>
         </div>
         <table>
-          <thead><tr><th>Task</th><th>Status</th><th>Eval</th><th>Priority</th></tr></thead>
+          <thead><tr><th>Task</th><th>Status</th><th>Priority</th></tr></thead>
           <tbody>
           {{#each keyTasks}}
             <tr>
               <td>{{title}}</td>
               <td>{{{statusBadge status}}}</td>
-              <td>{{evalEmoji evaluation}}</td>
               <td>{{priority}}</td>
             </tr>
           {{/each}}

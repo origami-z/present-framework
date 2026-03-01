@@ -14,24 +14,7 @@ import {
 } from "react-aria-components";
 
 const STATUSES = ["todo", "wip", "done", "archive"] as const;
-const EVALUATIONS = [
-  "not_started",
-  "on_track",
-  "needs_attention",
-  "at_risk",
-  "blocked",
-  "exceeds",
-] as const;
 const PRIORITIES = ["high", "medium", "low"] as const;
-
-const EVAL_EMOJI: Record<string, string> = {
-  not_started: "⬜",
-  on_track: "🟢",
-  needs_attention: "🟡",
-  at_risk: "🔴",
-  blocked: "⛔",
-  exceeds: "⭐",
-};
 
 const STATUS_COLOR: Record<string, string> = {
   todo: "var(--color-todo)",
@@ -45,17 +28,25 @@ interface Task {
   title: string;
   description?: string;
   status: string;
-  evaluation: string;
   priority: string;
   dependencies: string[];
+  linked_status: string[];
   notes?: string;
   created?: string;
   updated?: string;
 }
 
+interface StatusOption {
+  id: string;
+  text: string;
+  evaluation: string;
+  list: "current" | "target";
+}
+
 interface Props {
   task: Task;
   allTasks: { id: string; title: string }[];
+  statusItems: StatusOption[];
   onUpdate: (updated: Task) => void;
   onDelete: () => void;
 }
@@ -163,6 +154,111 @@ function DepsComboBox({
   );
 }
 
+function LinkedStatusComboBox({
+  selected,
+  options,
+  onChange,
+}: {
+  selected: string[];
+  options: StatusOption[];
+  onChange: (ids: string[]) => void;
+}) {
+  const [inputValue, setInputValue] = useState("");
+
+  const filteredOptions = options.filter(
+    (o) =>
+      !selected.includes(o.id) &&
+      (o.id.toLowerCase().includes(inputValue.toLowerCase()) ||
+        o.text.toLowerCase().includes(inputValue.toLowerCase())),
+  );
+
+  return (
+    <div className="deps-combobox">
+      <ComboBox
+        inputValue={inputValue}
+        onInputChange={setInputValue}
+        selectedKey={null}
+        onSelectionChange={(key) => {
+          if (key) {
+            onChange([...selected, key as string]);
+            setInputValue("");
+          }
+        }}
+        allowsCustomValue
+        aria-label="Link status"
+      >
+        <div className="deps-input-row">
+          <Input className="field-input" placeholder="Search status items…" />
+          <Button className="select-btn">
+            <span aria-hidden className="select-arrow">
+              ▼
+            </span>
+          </Button>
+        </div>
+        <Popover className="select-popover">
+          <ListBox className="select-listbox">
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map(({ id, text, list }) => (
+                <ListBoxItem key={id} id={id} className="select-item">
+                  <span style={{ fontSize: "0.8em", marginRight: "0.3em" }}>
+                    {list === "current" ? "📍" : "🎯"}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "0.85em",
+                    }}
+                  >
+                    {id}
+                  </span>
+                  {text && (
+                    <span
+                      style={{
+                        color: "var(--color-text-muted)",
+                        marginLeft: "0.4em",
+                      }}
+                    >
+                      — {text}
+                    </span>
+                  )}
+                </ListBoxItem>
+              ))
+            ) : (
+              <ListBoxItem
+                isDisabled
+                id="_none"
+                className="select-item"
+                style={{ color: "var(--color-text-faint)" }}
+              >
+                {inputValue ? "No matches" : "No status items"}
+              </ListBoxItem>
+            )}
+          </ListBox>
+        </Popover>
+      </ComboBox>
+      {selected.length > 0 && (
+        <div className="deps-tags">
+          {selected.map((id) => {
+            const item = options.find((o) => o.id === id);
+            return (
+              <span key={id} className="dep-tag" title={item?.text}>
+                {item?.list === "current" ? "📍" : "🎯"} {id}
+                <button
+                  className="dep-tag-remove"
+                  onClick={() => onChange(selected.filter((s) => s !== id))}
+                  aria-label={`Remove ${id}`}
+                >
+                  ×
+                </button>
+              </span>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function EnumSelect<T extends string>({
   label,
   value,
@@ -198,7 +294,7 @@ function EnumSelect<T extends string>({
   );
 }
 
-export function TaskEditor({ task, allTasks, onUpdate, onDelete }: Props) {
+export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: Props) {
   const [expanded, setExpanded] = useState(false);
 
   const update = (field: keyof Task, value: any) => {
@@ -270,9 +366,20 @@ export function TaskEditor({ task, allTasks, onUpdate, onDelete }: Props) {
               </em>
             )}
           </span>
-          <span style={{ fontSize: "0.9em" }}>
-            {EVAL_EMOJI[task.evaluation] || "⬜"}
-          </span>
+          {(task.linked_status?.length ?? 0) > 0 && (
+            <span
+              style={{
+                fontSize: "0.7em",
+                color: "var(--color-text-muted)",
+                background: "var(--color-bg)",
+                borderRadius: "var(--radius-md)",
+                padding: "0.1em 0.35em",
+              }}
+              title={`Linked to ${task.linked_status.length} status item(s)`}
+            >
+              🔗 {task.linked_status.length}
+            </span>
+          )}
         </div>
         <div
           style={{
@@ -322,7 +429,7 @@ export function TaskEditor({ task, allTasks, onUpdate, onDelete }: Props) {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
+              gridTemplateColumns: "1fr 1fr",
               gap: "0.75rem",
               marginBottom: "0.5rem",
             }}
@@ -333,13 +440,6 @@ export function TaskEditor({ task, allTasks, onUpdate, onDelete }: Props) {
               options={STATUSES}
               renderOption={(s) => s}
               onChange={(v) => update("status", v)}
-            />
-            <EnumSelect
-              label="Evaluation"
-              value={task.evaluation as any}
-              options={EVALUATIONS}
-              renderOption={(e) => `${EVAL_EMOJI[e]} ${e}`}
-              onChange={(v) => update("evaluation", v)}
             />
             <EnumSelect
               label="Priority"
@@ -356,6 +456,15 @@ export function TaskEditor({ task, allTasks, onUpdate, onDelete }: Props) {
               selected={task.dependencies}
               options={otherTasks}
               onChange={(deps) => update("dependencies", deps)}
+            />
+          </div>
+
+          <div className="field">
+            <span className="field-label">Linked Status</span>
+            <LinkedStatusComboBox
+              selected={task.linked_status || []}
+              options={statusItems}
+              onChange={(ids) => update("linked_status", ids)}
             />
           </div>
 

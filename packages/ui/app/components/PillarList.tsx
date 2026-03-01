@@ -1,14 +1,38 @@
 import { useState } from 'react'
-import { Button, TextField, Input } from 'react-aria-components'
+import { Button, TextField, Input, Select, SelectValue, Label, Popover, ListBox, ListBoxItem } from 'react-aria-components'
 import { TaskEditor } from './TaskEditor'
+
+const EVALUATIONS = [
+  'not_started',
+  'on_track',
+  'needs_attention',
+  'at_risk',
+  'blocked',
+  'exceeds',
+] as const
+
+const EVAL_EMOJI: Record<string, string> = {
+  not_started: '⬜',
+  on_track: '🟢',
+  needs_attention: '🟡',
+  at_risk: '🔴',
+  blocked: '⛔',
+  exceeds: '⭐',
+}
+
+interface StatusItem {
+  id: string
+  text: string
+  evaluation: string
+}
 
 interface Task {
   id: string
   title: string
   status: string
-  evaluation: string
   priority: string
   dependencies: string[]
+  linked_status: string[]
   description?: string
   notes?: string
   created?: string
@@ -19,6 +43,8 @@ interface Pillar {
   id: string
   name: string
   description?: string
+  current_status: StatusItem[]
+  target_status: StatusItem[]
   tasks: Task[]
 }
 
@@ -35,6 +61,98 @@ function generateId(prefix: string, existing: string[]) {
 
 function allTasks(pillars: Pillar[]) {
   return pillars.flatMap((p) => p.tasks.map((t) => ({ id: t.id, title: t.title })))
+}
+
+function allStatusIdsForPillar(pillar: Pillar): string[] {
+  return [
+    ...(pillar.current_status || []).map((s) => s.id),
+    ...(pillar.target_status || []).map((s) => s.id),
+  ]
+}
+
+function StatusBulletList({
+  label,
+  items,
+  pillarId,
+  idPrefix,
+  allIds,
+  onUpdate,
+}: {
+  label: string
+  items: StatusItem[]
+  pillarId: string
+  idPrefix: string
+  allIds: string[]
+  onUpdate: (items: StatusItem[]) => void
+}) {
+  const addItem = () => {
+    const id = generateId(`${pillarId}-${idPrefix}`, allIds)
+    onUpdate([...items, { id, text: '', evaluation: 'not_started' }])
+  }
+
+  const updateItem = (idx: number, partial: Partial<StatusItem>) => {
+    const next = [...items]
+    next[idx] = { ...next[idx], ...partial }
+    onUpdate(next)
+  }
+
+  const removeItem = (idx: number) => {
+    onUpdate(items.filter((_, i) => i !== idx))
+  }
+
+  return (
+    <div style={{ marginBottom: '0.5rem' }}>
+      <span className="field-label">{label}</span>
+      {items.map((item, idx) => (
+        <div key={item.id} style={statusItemRow}>
+          <Select
+            selectedKey={item.evaluation || 'not_started'}
+            onSelectionChange={(key) => updateItem(idx, { evaluation: key as string })}
+            aria-label={`Evaluation for ${item.id}`}
+          >
+            <Button className="eval-btn" style={evalBtnStyle}>
+              <SelectValue>{EVAL_EMOJI[item.evaluation] || '⬜'}</SelectValue>
+            </Button>
+            <Popover className="select-popover">
+              <ListBox className="select-listbox">
+                {EVALUATIONS.map((e) => (
+                  <ListBoxItem key={e} id={e} className="select-item">
+                    {EVAL_EMOJI[e]} {e}
+                  </ListBoxItem>
+                ))}
+              </ListBox>
+            </Popover>
+          </Select>
+          <TextField
+            value={item.text}
+            onChange={(v) => updateItem(idx, { text: v })}
+            style={{ flex: 1 }}
+          >
+            <Input
+              className="field-input-inline"
+              placeholder="Status bullet point..."
+            />
+          </TextField>
+          <span style={statusIdLabel}>{item.id}</span>
+          <Button
+            className="btn btn-icon"
+            onPress={() => removeItem(idx)}
+            aria-label={`Remove status ${item.id}`}
+            style={{ fontSize: '0.75em', padding: '0 0.3rem' }}
+          >
+            ×
+          </Button>
+        </div>
+      ))}
+      <Button
+        className="btn btn-secondary"
+        onPress={addItem}
+        style={{ fontSize: '0.75em', padding: '0.2rem 0.5rem', marginTop: '0.25rem' }}
+      >
+        + Add
+      </Button>
+    </div>
+  )
 }
 
 export function PillarList({ pillars, onUpdate }: Props) {
@@ -67,9 +185,9 @@ export function PillarList({ pillars, onUpdate }: Props) {
       title: '',
       description: '',
       status: 'todo',
-      evaluation: 'not_started',
       priority: 'medium',
       dependencies: [],
+      linked_status: [],
       notes: '',
       created: date,
       updated: date,
@@ -89,7 +207,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
     let finalId = id
     let i = 2
     while (existingIds.includes(finalId)) finalId = `${id}-${i++}`
-    onUpdate([...pillars, { id: finalId, name, description: '', tasks: [] }])
+    onUpdate([...pillars, { id: finalId, name, description: '', current_status: [], target_status: [], tasks: [] }])
     setNewPillarName('')
     setAddingPillar(false)
   }
@@ -105,6 +223,11 @@ export function PillarList({ pillars, onUpdate }: Props) {
           wip: pillar.tasks.filter((t) => t.status === 'wip').length,
           todo: pillar.tasks.filter((t) => t.status === 'todo').length,
         }
+        const statusIds = allStatusIdsForPillar(pillar)
+        const statusItems = [
+          ...(pillar.current_status || []).map((s) => ({ ...s, list: 'current' as const })),
+          ...(pillar.target_status || []).map((s) => ({ ...s, list: 'target' as const })),
+        ]
 
         return (
           <div key={pillar.id} style={pillarCard}>
@@ -152,11 +275,30 @@ export function PillarList({ pillars, onUpdate }: Props) {
                   />
                 </TextField>
 
+                <StatusBulletList
+                  label="📍 Current Status"
+                  items={pillar.current_status || []}
+                  pillarId={pillar.id}
+                  idPrefix="cs"
+                  allIds={statusIds}
+                  onUpdate={(items) => updatePillar(idx, { ...pillar, current_status: items })}
+                />
+
+                <StatusBulletList
+                  label="🎯 Target Status"
+                  items={pillar.target_status || []}
+                  pillarId={pillar.id}
+                  idPrefix="ts"
+                  allIds={statusIds}
+                  onUpdate={(items) => updatePillar(idx, { ...pillar, target_status: items })}
+                />
+
                 {pillar.tasks.map((task, tIdx) => (
                   <TaskEditor
                     key={task.id}
                     task={task}
                     allTasks={all}
+                    statusItems={statusItems}
                     onUpdate={(updated) => {
                       const tasks = [...pillar.tasks]
                       tasks[tIdx] = updated
@@ -223,4 +365,35 @@ const pillarHeaderRow: React.CSSProperties = {
   background: 'var(--color-bg)',
   borderBottom: '1px solid var(--color-border)',
   gap: '0.5rem',
+}
+
+const statusItemRow: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.35rem',
+  marginBottom: '0.25rem',
+}
+
+const statusBullet: React.CSSProperties = {
+  fontSize: '0.9em',
+  color: 'var(--color-text-muted)',
+  flexShrink: 0,
+}
+
+const statusIdLabel: React.CSSProperties = {
+  fontSize: '0.7em',
+  color: 'var(--color-text-faint)',
+  fontFamily: 'var(--font-mono)',
+  flexShrink: 0,
+}
+
+const evalBtnStyle: React.CSSProperties = {
+  background: 'none',
+  border: '1px solid var(--color-border)',
+  borderRadius: 'var(--radius-md)',
+  cursor: 'pointer',
+  padding: '0.15em 0.3em',
+  fontSize: '0.85em',
+  lineHeight: 1,
+  flexShrink: 0,
 }

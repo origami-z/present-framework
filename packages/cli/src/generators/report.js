@@ -22,9 +22,15 @@ export function generateReport(plan) {
 
   const enrichedPillars = plan.pillars.map((pillar) => {
     const stats = pillarStats(pillar);
+    for (const item of pillar.current_status || []) {
+      if (item.evaluation === 'at_risk') atRisk.push({ ...item, pillarName: pillar.name });
+      if (item.evaluation === 'blocked') blocked.push({ ...item, pillarName: pillar.name });
+    }
+    for (const item of pillar.target_status || []) {
+      if (item.evaluation === 'at_risk') atRisk.push({ ...item, pillarName: pillar.name });
+      if (item.evaluation === 'blocked') blocked.push({ ...item, pillarName: pillar.name });
+    }
     for (const task of pillar.tasks) {
-      if (task.evaluation === 'at_risk') atRisk.push({ ...task, pillarName: pillar.name });
-      if (task.evaluation === 'blocked') blocked.push({ ...task, pillarName: pillar.name });
       if (task.status === 'done') recentDone.push({ ...task, pillarName: pillar.name });
     }
     return { ...pillar, stats };
