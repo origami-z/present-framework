@@ -1,8 +1,23 @@
+import { useEffect, useState } from 'react'
+
 interface Props {
   content: string
 }
 
 export function DeckPreview({ content }: Props) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!content) {
+      setBlobUrl(null)
+      return
+    }
+    const blob = new Blob([content], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    setBlobUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [content])
+
   if (!content) {
     return (
       <div style={emptyStyle}>
@@ -11,23 +26,20 @@ export function DeckPreview({ content }: Props) {
     )
   }
 
-  if (typeof window === 'undefined') {
+  if (!blobUrl) {
     return <div style={emptyStyle}>Loading deck preview...</div>
   }
-
-  const blob = new Blob([content], { type: 'text/html' })
-  const url = URL.createObjectURL(blob)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <iframe
-        src={url}
+        src={blobUrl}
         style={iframeStyle}
         title="Presentation deck"
         sandbox="allow-scripts allow-same-origin"
       />
       <a
-        href={url}
+        href={blobUrl}
         download="deck.html"
         style={downloadStyle}
       >
