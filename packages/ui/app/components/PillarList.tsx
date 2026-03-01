@@ -33,8 +33,8 @@ function generateId(prefix: string, existing: string[]) {
   return `${prefix}-${String(i).padStart(3, '0')}`
 }
 
-function allTaskIds(pillars: Pillar[]) {
-  return pillars.flatMap((p) => p.tasks.map((t) => t.id))
+function allTasks(pillars: Pillar[]) {
+  return pillars.flatMap((p) => p.tasks.map((t) => ({ id: t.id, title: t.title })))
 }
 
 export function PillarList({ pillars, onUpdate }: Props) {
@@ -58,7 +58,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
 
   const addTask = (pillarIdx: number) => {
     const pillar = pillars[pillarIdx]
-    const existing = allTaskIds(pillars)
+    const existing = allTasks(pillars).map((t) => t.id)
     const prefix = pillar.id.slice(0, 8)
     const id = generateId(prefix, existing)
     const date = new Date().toISOString().split('T')[0]
@@ -94,7 +94,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
     setAddingPillar(false)
   }
 
-  const all = allTaskIds(pillars)
+  const all = allTasks(pillars)
 
   return (
     <div>
@@ -156,7 +156,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
                   <TaskEditor
                     key={task.id}
                     task={task}
-                    allTaskIds={all}
+                    allTasks={all}
                     onUpdate={(updated) => {
                       const tasks = [...pillar.tasks]
                       tasks[tIdx] = updated
@@ -211,7 +211,7 @@ const pillarCard: React.CSSProperties = {
   border: '1px solid var(--color-border)',
   borderRadius: 'var(--radius-lg)',
   marginBottom: '0.75rem',
-  overflow: 'hidden',
+  overflow: 'clip',
   background: 'var(--color-surface)',
 }
 

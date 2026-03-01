@@ -27,7 +27,8 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(--color-bg); color: var(--color-text); line-height: 1.5; }
+html { overflow: clip; }
+body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(--color-bg); color: var(--color-text); line-height: 1.5; overflow: clip; }
 
 /* ─── Buttons ──────────────────────────────────────────────────────────── */
 .btn {
@@ -189,6 +190,40 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(
 .select-item[data-selected] { background: var(--color-primary-light); color: var(--color-primary); font-weight: 600; }
 .select-item[data-selected][data-focused] { background: #c7d2fe; }
 
+/* ─── Dependencies ComboBox ─────────────────────────────────────────────── */
+.deps-combobox { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.deps-tags { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+
+.dep-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border-radius: var(--radius-sm);
+  padding: 1px 4px 1px 6px;
+  font-weight: 600;
+}
+
+.dep-tag-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-primary);
+  font-size: 1em;
+  line-height: 1;
+  padding: 0 1px;
+  opacity: 0.6;
+}
+.dep-tag-remove:hover { opacity: 1; }
+
+.deps-input-row { display: flex; align-items: center; gap: 0.25rem; }
+.deps-input-row .field-input { flex: 1; width: 0; }
+.deps-input-row .select-btn { width: auto; flex-shrink: 0; }
+
 /* ─── CheckboxGroup / Checkbox ──────────────────────────────────────────── */
 .checkbox-group { display: flex; flex-wrap: wrap; gap: 0.3rem; }
 
@@ -226,8 +261,28 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(
 
 .checkbox-check { color: #fff; font-size: 9px; line-height: 1; }
 
+/* ─── Tooltip ──────────────────────────────────────────────────────────── */
+.react-aria-Tooltip {
+  background: #1e293b;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8em;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  pointer-events: none;
+  max-width: 240px;
+  word-wrap: break-word;
+}
+.react-aria-Tooltip[data-entering] { animation: tooltipIn 120ms ease; }
+.react-aria-Tooltip[data-exiting]  { animation: tooltipIn 80ms ease reverse; }
+
+@keyframes tooltipIn {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ─── Tabs ──────────────────────────────────────────────────────────────── */
-.tabs { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.tabs { display: flex; flex-direction: column; flex: 1; overflow: clip; }
 .tablist {
   display: flex;
   border-bottom: 1px solid var(--color-border);

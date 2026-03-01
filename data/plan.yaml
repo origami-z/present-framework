@@ -1,254 +1,225 @@
 # yaml-language-server: $schema=../schema/plan.schema.json
 # Edit this file directly — IDE autocomplete is enabled via the schema above.
-#
-# COPILOT CHAT TIPS:
-#   "Suggest 3 more tasks for the infrastructure pillar"
-#   "What dependencies am I missing between these tasks?"
-#   "Update infra-002 status to wip and evaluation to on_track"
-#   "Summarize my current plan progress"
 
 meta:
-  title: "2025 Engineering Technical Roadmap"
-  owner: "Platform Engineering Team"
-  created: "2025-01-01"
-  updated: "2025-01-01"
+  title: 2025 Engineering Technical Roadmap
+  owner: Platform Engineering Team
+  created: '2025-01-01'
+  updated: '2026-03-01'
   version: 1
-
 ai:
-  provider: anthropic          # anthropic | openai | github-copilot | ollama | none
+  provider: anthropic
   model: claude-sonnet-4-6
-  # Provider env vars:
-  #   anthropic      → ANTHROPIC_API_KEY
-  #   openai         → OPENAI_API_KEY
-  #   github-copilot → GITHUB_TOKEN
-  #   ollama         → no key needed (default: http://localhost:11434)
-
 current_state: |
   Our platform runs as a monolithic Rails application deployed on bare metal servers.
   Infrastructure is managed manually with ad-hoc scripts. Test coverage is around 30%.
   Security posture has not been formally audited. On-call burden is high due to fragile
   deployments and lack of observability.
-
 target_state: |
   Fully containerized microservices deployed on Kubernetes with GitOps workflows.
   Infrastructure managed entirely through Terraform IaC. Test coverage above 80%.
   SOC2 Type II compliant. On-call burden reduced by 60% through better observability
   and automated remediation. Developer productivity improved with standardized tooling.
-
 pillars:
   - id: infrastructure
-    name: "Infrastructure"
-    description: "Cloud infrastructure, containerization, and DevOps automation"
+    name: Infrastructure
+    description: Cloud infrastructure, containerization, and DevOps automation
     tasks:
       - id: infra-001
-        title: "Containerize all services with Docker"
-        description: "Create Dockerfiles for each service, set up docker-compose for local dev"
+        title: Containerize all services with Docker
+        description: Create Dockerfiles for each service, set up docker-compose for local dev
         status: done
         evaluation: exceeds
         priority: high
-        created: "2025-01-01"
-        updated: "2025-02-15"
+        created: '2025-01-01'
+        updated: '2025-02-15'
         dependencies: []
-        notes: "Completed ahead of schedule. All 12 services containerized."
-
+        notes: Completed ahead of schedule. All 12 services containerized.
       - id: infra-002
-        title: "Migrate to Kubernetes (staging)"
-        description: "Deploy containerized services to K8s staging cluster"
+        title: Migrate to Kubernetes (staging)
+        description: Deploy containerized services to K8s staging cluster
         status: wip
         evaluation: on_track
         priority: high
-        created: "2025-01-01"
-        updated: "2025-03-01"
+        created: '2025-01-01'
+        updated: '2025-03-01'
         dependencies:
           - infra-001
-        notes: "Staging migration 70% complete. 8/12 services migrated."
-
+        notes: Staging migration 70% complete. 8/12 services migrated.
       - id: infra-003
-        title: "Migrate to Kubernetes (production)"
-        description: "Promote K8s setup to production with zero-downtime migration"
+        title: Migrate to Kubernetes (production)
+        description: Promote K8s setup to production with zero-downtime migration
         status: todo
         evaluation: not_started
         priority: high
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - infra-002
-        notes: ""
-
+        notes: ''
       - id: infra-004
-        title: "Implement Terraform IaC"
-        description: "Replace all manual infrastructure provisioning with Terraform modules"
+        title: Implement Terraform IaC
+        description: Replace all manual infrastructure provisioning with Terraform modules
         status: todo
         evaluation: not_started
         priority: high
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - infra-003
-        notes: ""
-
+        notes: ''
       - id: infra-005
-        title: "Set up GitOps with ArgoCD"
-        description: "Automate K8s deployments via ArgoCD watching git repositories"
+        title: Set up GitOps with ArgoCD
+        description: Automate K8s deployments via ArgoCD watching git repositories
         status: todo
         evaluation: not_started
         priority: medium
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - infra-003
-        notes: ""
-
+        notes: ''
   - id: observability
-    name: "Observability"
-    description: "Logging, metrics, tracing, and alerting"
+    name: Observability
+    description: Logging, metrics, tracing, and alerting
     tasks:
       - id: obs-001
-        title: "Centralize logs with ELK/Loki stack"
-        description: "Aggregate logs from all services into a searchable central store"
+        title: Centralize logs with ELK/Loki stack
+        description: Aggregate logs from all services into a searchable central store
         status: wip
         evaluation: needs_attention
         priority: high
-        created: "2025-01-01"
-        updated: "2025-03-10"
+        created: '2025-01-01'
+        updated: '2025-03-10'
         dependencies: []
-        notes: "Loki setup done. Still integrating 4 legacy services."
-
+        notes: Loki setup done. Still integrating 4 legacy services.
       - id: obs-002
-        title: "Add Prometheus metrics + Grafana dashboards"
-        description: "Instrument services with Prometheus client, build Grafana dashboards"
+        title: Add Prometheus metrics + Grafana dashboards
+        description: Instrument services with Prometheus client, build Grafana dashboards
         status: todo
         evaluation: not_started
         priority: high
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - infra-002
-        notes: ""
-
+        notes: ''
       - id: obs-003
-        title: "Distributed tracing with OpenTelemetry"
-        description: "Add OTEL instrumentation to all services, route to Jaeger/Tempo"
+        title: Distributed tracing with OpenTelemetry
+        description: Add OTEL instrumentation to all services, route to Jaeger/Tempo
         status: todo
         evaluation: not_started
         priority: medium
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - obs-002
-        notes: ""
-
+        notes: ''
       - id: obs-004
-        title: "On-call runbooks and alert tuning"
-        description: "Write runbooks for top 10 alerts, tune thresholds to reduce noise"
+        title: On-call runbooks and alert tuning
+        description: Write runbooks for top 10 alerts, tune thresholds to reduce noise
         status: todo
         evaluation: not_started
         priority: medium
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - obs-002
-        notes: ""
-
+        notes: ''
   - id: security
-    name: "Security"
-    description: "Security posture, compliance, and vulnerability management"
+    name: Security
+    description: Security posture, compliance, and vulnerability management
     tasks:
       - id: sec-001
-        title: "External security audit"
-        description: "Engage external security firm for penetration testing and audit"
+        title: External security audit
+        description: Engage external security firm for penetration testing and audit
         status: done
         evaluation: on_track
         priority: high
-        created: "2025-01-01"
-        updated: "2025-02-01"
-        dependencies: []
-        notes: "Audit completed Feb 2025. Report received with 3 critical findings."
-
+        created: '2025-01-01'
+        updated: '2026-03-01'
+        dependencies:
+          - sec-002
+          - infra-005
+        notes: Audit completed Feb 2025. Report received with 3 critical findings.
       - id: sec-002
-        title: "Remediate critical audit findings"
-        description: "Address all 3 critical findings from external security audit"
+        title: Remediate critical audit findings
+        description: Address all 3 critical findings from external security audit
         status: wip
         evaluation: at_risk
         priority: high
-        created: "2025-02-01"
-        updated: "2025-03-05"
+        created: '2025-02-01'
+        updated: '2025-03-05'
         dependencies:
           - sec-001
-        notes: "2/3 findings resolved. SQL injection in legacy endpoint still open — blocked on refactor."
-
+        notes: 2/3 findings resolved. SQL injection in legacy endpoint still open — blocked on refactor.
       - id: sec-003
-        title: "Implement secrets management (Vault)"
-        description: "Replace hardcoded secrets and .env files with HashiCorp Vault"
+        title: Implement secrets management (Vault)
+        description: Replace hardcoded secrets and .env files with HashiCorp Vault
         status: todo
         evaluation: not_started
         priority: high
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - infra-002
-        notes: ""
-
+        notes: ''
       - id: sec-004
-        title: "Achieve SOC2 Type II compliance"
-        description: "Work with compliance partner to achieve SOC2 Type II certification"
+        title: Achieve SOC2 Type II compliance
+        description: Work with compliance partner to achieve SOC2 Type II certification
         status: todo
         evaluation: not_started
         priority: high
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - sec-002
           - sec-003
-        notes: ""
-
+        notes: ''
   - id: developer-experience
-    name: "Developer Experience"
-    description: "Tooling, workflows, and productivity improvements for engineers"
+    name: Developer Experience
+    description: Tooling, workflows, and productivity improvements for engineers
     tasks:
       - id: devex-001
-        title: "Standardize local dev environment"
-        description: "Create consistent local dev setup with docker-compose and devcontainer"
+        title: Standardize local dev environment
+        description: Create consistent local dev setup with docker-compose and devcontainer
         status: done
         evaluation: exceeds
         priority: medium
-        created: "2025-01-01"
-        updated: "2025-01-20"
+        created: '2025-01-01'
+        updated: '2025-01-20'
         dependencies:
           - infra-001
-        notes: "Shipped devcontainer.json and onboarding script. Setup time reduced from 4h to 20min."
-
+        notes: Shipped devcontainer.json and onboarding script. Setup time reduced from 4h to 20min.
       - id: devex-002
-        title: "CI/CD pipeline standardization"
-        description: "Migrate all repos to unified GitHub Actions pipeline templates"
+        title: CI/CD pipeline standardization
+        description: Migrate all repos to unified GitHub Actions pipeline templates
         status: wip
         evaluation: on_track
         priority: high
-        created: "2025-01-01"
-        updated: "2025-03-01"
+        created: '2025-01-01'
+        updated: '2025-03-01'
         dependencies:
           - infra-001
-        notes: "15/23 repos migrated."
-
+        notes: 15/23 repos migrated.
       - id: devex-003
-        title: "Internal developer portal (Backstage)"
-        description: "Deploy Backstage with service catalog, docs, and scaffolding templates"
+        title: Internal developer portal (Backstage)
+        description: Deploy Backstage with service catalog, docs, and scaffolding templates
         status: todo
         evaluation: not_started
         priority: medium
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - devex-002
-        notes: ""
-
+        notes: ''
       - id: devex-004
-        title: "Increase test coverage to 80%"
-        description: "Add unit and integration tests to bring coverage from 30% to 80%"
+        title: Increase test coverage to 80%
+        description: Add unit and integration tests to bring coverage from 30% to 80%
         status: todo
         evaluation: not_started
         priority: medium
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies: []
-        notes: ""
+        notes: ''

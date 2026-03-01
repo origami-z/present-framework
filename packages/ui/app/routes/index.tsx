@@ -216,7 +216,7 @@ function PlannerPage() {
               flex: 1,
               display: "flex",
               flexDirection: "column",
-              overflow: "hidden",
+              overflow: "clip",
             }}
           >
             <div style={tabBarRow}>
@@ -266,7 +266,7 @@ const appStyle: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
   height: "100vh",
-  overflow: "hidden",
+  overflow: "clip",
 };
 
 const headerStyle: React.CSSProperties = {
@@ -283,7 +283,7 @@ const headerStyle: React.CSSProperties = {
 const bodyStyle: React.CSSProperties = {
   display: "flex",
   flex: 1,
-  overflow: "hidden",
+  overflow: "clip",
 };
 
 const leftPanel: React.CSSProperties = {
@@ -298,7 +298,7 @@ const leftPanel: React.CSSProperties = {
 const rightPanel: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
-  overflow: "hidden",
+  overflow: "clip",
 };
 
 const tabBarRow: React.CSSProperties = {

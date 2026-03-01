@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm install react-resizable-panels)",
       "Bash(npm install react-resizable-panels --workspace=packages/ui)",
-      "Bash(node -e \"const m = require\\(''react-resizable-panels''\\); console.log\\(Object.keys\\(m\\)\\)\")"
+      "Bash(node -e \"const m = require\\(''react-resizable-panels''\\); console.log\\(Object.keys\\(m\\)\\)\")",
+      "WebFetch(domain:react-aria.adobe.com)"
     ]
   }
 }
