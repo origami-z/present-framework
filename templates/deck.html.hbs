@@ -66,7 +66,7 @@
             <h4>📍 Current Status</h4>
             <ul>
             {{#each current_status}}
-              <li>{{text}}</li>
+              <li>{{evalEmoji evaluation}} {{text}}</li>
             {{/each}}
             </ul>
           </div>
@@ -74,7 +74,7 @@
             <h4>🎯 Target Status</h4>
             <ul>
             {{#each target_status}}
-              <li>{{text}}</li>
+              <li>{{evalEmoji evaluation}} {{text}}</li>
             {{/each}}
             </ul>
           </div>
@@ -86,13 +86,12 @@
           <div class="stat-box"><div class="num">{{stats.todo}}</div><div class="lbl">Todo</div></div>
         </div>
         <table>
-          <thead><tr><th>Task</th><th>Status</th><th>Eval</th><th>Priority</th></tr></thead>
+          <thead><tr><th>Task</th><th>Status</th><th>Priority</th></tr></thead>
           <tbody>
           {{#each keyTasks}}
             <tr>
               <td>{{title}}</td>
               <td>{{{statusBadge status}}}</td>
-              <td>{{evalEmoji evaluation}}</td>
               <td>{{priority}}</td>
             </tr>
           {{/each}}

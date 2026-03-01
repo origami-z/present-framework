@@ -16,7 +16,6 @@ const makeTask = (id: string, status = 'todo') => ({
   id,
   title: `Task ${id}`,
   status,
-  evaluation: 'not_started',
   priority: 'medium',
   dependencies: [],
   linked_status: [],
@@ -143,11 +142,11 @@ describe('PillarList', () => {
     expect(updatedPillars[0].tasks[0].linked_status).toEqual([])
   })
 
-  it('renders current and target status bullet lists', () => {
+  it('renders current and target status bullet lists with evaluation', () => {
     const pillar = {
       ...makePillar('infra', 'Infrastructure'),
-      current_status: [{ id: 'infra-cs-001', text: 'Running on bare metal' }],
-      target_status: [{ id: 'infra-ts-001', text: 'Fully on Kubernetes' }],
+      current_status: [{ id: 'infra-cs-001', text: 'Running on bare metal', evaluation: 'at_risk' }],
+      target_status: [{ id: 'infra-ts-001', text: 'Fully on Kubernetes', evaluation: 'on_track' }],
     }
     render(<PillarList pillars={[pillar]} onUpdate={vi.fn()} />)
     expect(screen.getByText('📍 Current Status')).toBeInTheDocument()
@@ -170,5 +169,6 @@ describe('PillarList', () => {
     const [updatedPillars] = onUpdate.mock.calls[0]
     expect(updatedPillars[0].current_status).toHaveLength(1)
     expect(updatedPillars[0].current_status[0].id).toBe('sec-cs-001')
+    expect(updatedPillars[0].current_status[0].evaluation).toBe('not_started')
   })
 })

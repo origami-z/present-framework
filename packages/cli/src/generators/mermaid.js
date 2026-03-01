@@ -1,13 +1,10 @@
-import { EVALUATION_EMOJI } from '../models.js';
-
 function safeId(id) {
   return id.replace(/[^a-zA-Z0-9_]/g, '_');
 }
 
 function nodeLabel(task) {
-  const evalEmoji = EVALUATION_EMOJI[task.evaluation] || '⬜';
   const title = task.title.replace(/"/g, "'").replace(/\n/g, ' ');
-  return `["${title}<br/>${evalEmoji} ${task.evaluation}"]`;
+  return `["${title}"]`;
 }
 
 export function generateMermaid(plan) {

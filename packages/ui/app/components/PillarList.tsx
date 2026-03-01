@@ -1,17 +1,35 @@
 import { useState } from 'react'
-import { Button, TextField, Input } from 'react-aria-components'
+import { Button, TextField, Input, Select, SelectValue, Label, Popover, ListBox, ListBoxItem } from 'react-aria-components'
 import { TaskEditor } from './TaskEditor'
+
+const EVALUATIONS = [
+  'not_started',
+  'on_track',
+  'needs_attention',
+  'at_risk',
+  'blocked',
+  'exceeds',
+] as const
+
+const EVAL_EMOJI: Record<string, string> = {
+  not_started: '⬜',
+  on_track: '🟢',
+  needs_attention: '🟡',
+  at_risk: '🔴',
+  blocked: '⛔',
+  exceeds: '⭐',
+}
 
 interface StatusItem {
   id: string
   text: string
+  evaluation: string
 }
 
 interface Task {
   id: string
   title: string
   status: string
-  evaluation: string
   priority: string
   dependencies: string[]
   linked_status: string[]
@@ -69,12 +87,12 @@ function StatusBulletList({
 }) {
   const addItem = () => {
     const id = generateId(`${pillarId}-${idPrefix}`, allIds)
-    onUpdate([...items, { id, text: '' }])
+    onUpdate([...items, { id, text: '', evaluation: 'not_started' }])
   }
 
-  const updateItem = (idx: number, text: string) => {
+  const updateItem = (idx: number, partial: Partial<StatusItem>) => {
     const next = [...items]
-    next[idx] = { ...next[idx], text }
+    next[idx] = { ...next[idx], ...partial }
     onUpdate(next)
   }
 
@@ -87,10 +105,27 @@ function StatusBulletList({
       <span className="field-label">{label}</span>
       {items.map((item, idx) => (
         <div key={item.id} style={statusItemRow}>
-          <span style={statusBullet}>•</span>
+          <Select
+            selectedKey={item.evaluation || 'not_started'}
+            onSelectionChange={(key) => updateItem(idx, { evaluation: key as string })}
+            aria-label={`Evaluation for ${item.id}`}
+          >
+            <Button className="eval-btn" style={evalBtnStyle}>
+              <SelectValue>{EVAL_EMOJI[item.evaluation] || '⬜'}</SelectValue>
+            </Button>
+            <Popover className="select-popover">
+              <ListBox className="select-listbox">
+                {EVALUATIONS.map((e) => (
+                  <ListBoxItem key={e} id={e} className="select-item">
+                    {EVAL_EMOJI[e]} {e}
+                  </ListBoxItem>
+                ))}
+              </ListBox>
+            </Popover>
+          </Select>
           <TextField
             value={item.text}
-            onChange={(v) => updateItem(idx, v)}
+            onChange={(v) => updateItem(idx, { text: v })}
             style={{ flex: 1 }}
           >
             <Input
@@ -150,7 +185,6 @@ export function PillarList({ pillars, onUpdate }: Props) {
       title: '',
       description: '',
       status: 'todo',
-      evaluation: 'not_started',
       priority: 'medium',
       dependencies: [],
       linked_status: [],
@@ -350,5 +384,16 @@ const statusIdLabel: React.CSSProperties = {
   fontSize: '0.7em',
   color: 'var(--color-text-faint)',
   fontFamily: 'var(--font-mono)',
+  flexShrink: 0,
+}
+
+const evalBtnStyle: React.CSSProperties = {
+  background: 'none',
+  border: '1px solid var(--color-border)',
+  borderRadius: 'var(--radius-md)',
+  cursor: 'pointer',
+  padding: '0.15em 0.3em',
+  fontSize: '0.85em',
+  lineHeight: 1,
   flexShrink: 0,
 }

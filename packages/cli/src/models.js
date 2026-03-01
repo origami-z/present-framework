@@ -62,7 +62,6 @@ export function defaultTask(id) {
     title: '',
     description: '',
     status: 'todo',
-    evaluation: 'not_started',
     priority: 'medium',
     created: date,
     updated: date,
@@ -72,8 +71,8 @@ export function defaultTask(id) {
   };
 }
 
-export function defaultStatusItem(id, text = '') {
-  return { id, text };
+export function defaultStatusItem(id, text = '', evaluation = 'not_started') {
+  return { id, text, evaluation };
 }
 
 export function generateStatusId(prefix, existingIds = []) {

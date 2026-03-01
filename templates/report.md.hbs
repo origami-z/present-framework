@@ -23,20 +23,20 @@
 {{#if current_status.length}}
 ### 📍 Current Status
 {{#each current_status}}
-- {{text}}
+- {{evalEmoji evaluation}} {{text}}
 {{/each}}
 {{/if}}
 
 {{#if target_status.length}}
 ### 🎯 Target Status
 {{#each target_status}}
-- {{text}}
+- {{evalEmoji evaluation}} {{text}}
 {{/each}}
 {{/if}}
 
-| Task | Status | Eval | Priority | Dependencies | Linked Status |
-|------|--------|------|----------|--------------|---------------|
-{{#each tasks}}| **{{title}}** | {{statusEmoji status}} {{status}} | {{evalEmoji evaluation}} {{evaluation}} | {{priority}} | {{joinDeps dependencies}} | {{joinDeps linked_status}} |
+| Task | Status | Priority | Dependencies | Linked Status |
+|------|--------|----------|--------------|---------------|
+{{#each tasks}}| **{{title}}** | {{statusEmoji status}} {{status}} | {{priority}} | {{joinDeps dependencies}} | {{joinDeps linked_status}} |
 {{/each}}
 
 {{/each}}
@@ -48,14 +48,14 @@
 {{#if atRisk}}
 ### ⚠️ At Risk
 {{#each atRisk}}
-- **{{pillarName}}** → {{title}} {{evalEmoji evaluation}} `{{evaluation}}`
+- **{{pillarName}}** → {{text}} (`{{id}}`)
 {{/each}}
 {{/if}}
 
 {{#if blocked}}
 ### ⛔ Blocked
 {{#each blocked}}
-- **{{pillarName}}** → {{title}} (waiting on: `{{joinDeps dependencies}}`)
+- **{{pillarName}}** → {{text}} (`{{id}}`)
 {{/each}}
 {{/if}}
 

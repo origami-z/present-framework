@@ -9,7 +9,6 @@ interface Task {
   title: string
   description?: string
   status: string
-  evaluation: string
   priority: string
   dependencies: string[]
   linked_status: string[]
@@ -23,7 +22,6 @@ const baseTask: Task = {
   title: 'My Task',
   description: 'A description',
   status: 'todo',
-  evaluation: 'not_started',
   priority: 'medium',
   dependencies: [],
   linked_status: [],
@@ -39,10 +37,10 @@ const otherTasksList = [
   { id: 'pillar-003', title: 'Third Task' },
 ]
 
-const noStatusItems: { id: string; text: string; list: 'current' | 'target' }[] = []
-const sampleStatusItems: { id: string; text: string; list: 'current' | 'target' }[] = [
-  { id: 'infra-cs-001', text: 'Running on bare metal', list: 'current' },
-  { id: 'infra-ts-001', text: 'Fully on Kubernetes', list: 'target' },
+const noStatusItems: { id: string; text: string; evaluation: string; list: 'current' | 'target' }[] = []
+const sampleStatusItems: { id: string; text: string; evaluation: string; list: 'current' | 'target' }[] = [
+  { id: 'infra-cs-001', text: 'Running on bare metal', evaluation: 'at_risk', list: 'current' },
+  { id: 'infra-ts-001', text: 'Fully on Kubernetes', evaluation: 'on_track', list: 'target' },
 ]
 
 /** Stateful wrapper so controlled inputs work correctly in tests. */
@@ -55,7 +53,7 @@ function StatefulEditor({
 }: {
   task: Task
   allTasks: { id: string; title: string }[]
-  statusItems?: { id: string; text: string; list: 'current' | 'target' }[]
+  statusItems?: { id: string; text: string; evaluation: string; list: 'current' | 'target' }[]
   onUpdate?: (t: Task) => void
   onDelete?: () => void
 }) {

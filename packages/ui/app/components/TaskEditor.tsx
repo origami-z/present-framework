@@ -14,24 +14,7 @@ import {
 } from "react-aria-components";
 
 const STATUSES = ["todo", "wip", "done", "archive"] as const;
-const EVALUATIONS = [
-  "not_started",
-  "on_track",
-  "needs_attention",
-  "at_risk",
-  "blocked",
-  "exceeds",
-] as const;
 const PRIORITIES = ["high", "medium", "low"] as const;
-
-const EVAL_EMOJI: Record<string, string> = {
-  not_started: "⬜",
-  on_track: "🟢",
-  needs_attention: "🟡",
-  at_risk: "🔴",
-  blocked: "⛔",
-  exceeds: "⭐",
-};
 
 const STATUS_COLOR: Record<string, string> = {
   todo: "var(--color-todo)",
@@ -45,7 +28,6 @@ interface Task {
   title: string;
   description?: string;
   status: string;
-  evaluation: string;
   priority: string;
   dependencies: string[];
   linked_status: string[];
@@ -57,6 +39,7 @@ interface Task {
 interface StatusOption {
   id: string;
   text: string;
+  evaluation: string;
   list: "current" | "target";
 }
 
@@ -383,9 +366,6 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
               </em>
             )}
           </span>
-          <span style={{ fontSize: "0.9em" }}>
-            {EVAL_EMOJI[task.evaluation] || "⬜"}
-          </span>
           {(task.linked_status?.length ?? 0) > 0 && (
             <span
               style={{
@@ -449,7 +429,7 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
+              gridTemplateColumns: "1fr 1fr",
               gap: "0.75rem",
               marginBottom: "0.5rem",
             }}
@@ -460,13 +440,6 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
               options={STATUSES}
               renderOption={(s) => s}
               onChange={(v) => update("status", v)}
-            />
-            <EnumSelect
-              label="Evaluation"
-              value={task.evaluation as any}
-              options={EVALUATIONS}
-              renderOption={(e) => `${EVAL_EMOJI[e]} ${e}`}
-              onChange={(v) => update("evaluation", v)}
             />
             <EnumSelect
               label="Priority"
