@@ -274,6 +274,19 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ─── Panel resize handle ───────────────────────────────────────────────── */
+.resize-handle {
+  width: 5px;
+  background: var(--color-border);
+  cursor: col-resize;
+  flex-shrink: 0;
+  transition: background var(--transition);
+}
+.resize-handle:hover,
+.resize-handle[data-resize-handle-active] {
+  background: var(--color-primary);
+}
+
 /* ─── Misc layout helpers ───────────────────────────────────────────────── */
 .section-title {
   font-size: 0.78em;
