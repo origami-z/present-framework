@@ -8,7 +8,7 @@ A CLI + web UI for long-term technical planning. Capture current state, define t
 
 - **Structured planning** — pillars, tasks, statuses, evaluation emojis, dependencies
 - **AI brainstorming** — suggest tasks and dependencies using Anthropic, OpenAI, GitHub Copilot, or Ollama
-- **Version-controlled** — `data/plan.yaml` is human-readable and git-trackable
+- **Version-controlled** — `plan.yaml` is human-readable and git-trackable (folder is configurable)
 - **Iteration snapshots** — dated snapshots with auto-generated artifacts and git commits
 - **3 generated artifacts** per iteration:
   1. `output/diagram.md` — Mermaid dependency graph
@@ -55,7 +55,7 @@ present generate all
 
 | Command | Description |
 |---|---|
-| `present init` | Create `data/plan.yaml` interactively |
+| `present init` | Create `plan.yaml` interactively (inside `PLAN_FOLDER`) |
 | `present status` | Display all pillars and tasks with status/evaluation |
 | `present add pillar` | Add a new pillar |
 | `present add task <pillar-id>` | Add a task to a pillar |
@@ -72,7 +72,7 @@ present generate all
 
 ## Data Model
 
-`data/plan.yaml` is the single source of truth. It has a JSON Schema (`schema/plan.schema.json`) for IDE autocomplete.
+`plan.yaml` (inside `PLAN_FOLDER`, default `data/`) is the single source of truth. It has a JSON Schema (`schema/plan.schema.json`) for IDE autocomplete.
 
 ### Task Fields
 
@@ -96,9 +96,33 @@ present generate all
 
 ---
 
+## Configuration
+
+The CLI loads a `.env` file from the directory where you run `present` commands. Create one to avoid exporting variables in your shell:
+
+```dotenv
+# .env (in your project directory)
+PLAN_FOLDER=plans          # subfolder that contains plan.yaml (default: data)
+ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+GITHUB_TOKEN=ghp_...
+```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `PLAN_FOLDER` | `data` | Subfolder (relative to project root) where `plan.yaml` lives |
+| `ANTHROPIC_API_KEY` | — | API key for Anthropic provider |
+| `OPENAI_API_KEY` | — | API key for OpenAI provider |
+| `GITHUB_TOKEN` | — | Token for GitHub Copilot provider |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Base URL for Ollama |
+
+---
+
 ## AI Brainstorming
 
-Configure your provider in `data/plan.yaml`:
+Configure your provider in `plan.yaml` (inside your `PLAN_FOLDER`):
 
 ```yaml
 ai:
@@ -106,7 +130,7 @@ ai:
   model: claude-sonnet-4-6
 ```
 
-Set the corresponding environment variable and run:
+Set the corresponding key in your `.env` file (or shell) and run:
 
 ```bash
 # Anthropic
@@ -172,14 +196,14 @@ Features:
 ## IDE Setup (VS Code)
 
 1. Install the [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
-2. Open `data/plan.yaml` — autocomplete activates via the `# yaml-language-server:` comment
+2. Open your `plan.yaml` — autocomplete activates via the `# yaml-language-server:` comment
 3. Use GitHub Copilot Chat:
    ```
    "Suggest 3 more tasks for the security pillar"
    "What dependencies am I missing between these tasks?"
    ```
 
-See `data/EDITING_GUIDE.md` for more Copilot Chat prompts.
+See `EDITING_GUIDE.md` (inside your plan folder) for more Copilot Chat prompts.
 
 ---
 
@@ -187,7 +211,8 @@ See `data/EDITING_GUIDE.md` for more Copilot Chat prompts.
 
 ```
 present-framework/
-├── data/
+├── .env                       # Optional: PLAN_FOLDER, API keys, etc. (not committed)
+├── data/                      # Default plan folder (set PLAN_FOLDER to change)
 │   ├── plan.yaml              # Your planning data (edit this)
 │   └── example_plan.yaml      # Reference example
 ├── schema/
