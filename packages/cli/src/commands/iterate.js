@@ -7,7 +7,7 @@ import {
   snapshotPlan,
   writeIterationOutput,
   writeOutput,
-  getProjectRoot,
+  getPlanFolderPath,
 } from '../storage.js';
 import { generateMermaid } from '../generators/mermaid.js';
 import { generateReport } from '../generators/report.js';
@@ -61,11 +61,23 @@ export function iterateCommand(program) {
       // Git commit
       if (opts.commit !== false) {
         try {
-          const root = getProjectRoot();
-          execSync('git add -A', { cwd: root, stdio: 'pipe' });
+          const planFolder = getPlanFolderPath();
+
+          // Initialize a git repo in PLAN_FOLDER if one doesn't exist yet
+          let isNewRepo = false;
+          try {
+            execSync('git rev-parse --git-dir', { cwd: planFolder, stdio: 'pipe' });
+          } catch {
+            execSync('git init', { cwd: planFolder, stdio: 'pipe' });
+            isNewRepo = true;
+            console.log(chalk.green(`\n  ✅ Git repo initialized in ${planFolder}`));
+          }
+
+          execSync('git add -A', { cwd: planFolder, stdio: 'pipe' });
           const msg = `Iteration snapshot ${iterName} (v${plan.meta.version})`;
-          execSync(`git commit -m "${msg}"`, { cwd: root, stdio: 'pipe' });
-          console.log(chalk.green(`\n  ✅ Git commit: "${msg}"`));
+          execSync(`git commit -m "${msg}"`, { cwd: planFolder, stdio: 'pipe' });
+          if (!isNewRepo) console.log('');
+          console.log(chalk.green(`  ✅ Git commit: "${msg}"`));
         } catch (err) {
           console.log(chalk.yellow('\n  ⚠️  Git commit failed (repo may have no changes or no git):'));
           console.log(chalk.dim(`     ${err.message?.split('\n')[0]}`));

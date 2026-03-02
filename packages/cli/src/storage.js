@@ -30,16 +30,20 @@ export function getProjectRoot() {
   return findProjectRoot();
 }
 
+export function getPlanFolderPath() {
+  return join(findProjectRoot(), PLAN_FOLDER);
+}
+
 export function getPlanPath() {
   return join(findProjectRoot(), PLAN_FOLDER, 'plan.yaml');
 }
 
 export function getOutputDir() {
-  return join(findProjectRoot(), 'output');
+  return join(getPlanFolderPath(), 'output');
 }
 
 export function getIterationsDir() {
-  return join(findProjectRoot(), 'iterations');
+  return join(getPlanFolderPath(), 'iterations');
 }
 
 export function getTemplatesDir() {
