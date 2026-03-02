@@ -1,8 +1,12 @@
 #!/usr/bin/env node
+import { config as loadDotenv } from 'dotenv';
 import { Command } from 'commander';
 import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+
+// Load .env from the directory where the CLI is invoked, before any dynamic imports
+loadDotenv({ path: join(process.cwd(), '.env') });
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'));
