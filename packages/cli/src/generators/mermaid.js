@@ -10,7 +10,7 @@ function nodeLabel(task) {
 export function generateMermaid(plan) {
   const lines = [];
   lines.push('```mermaid');
-  lines.push('graph LR');
+  lines.push('graph TD');
   lines.push('');
 
   // Status class definitions
