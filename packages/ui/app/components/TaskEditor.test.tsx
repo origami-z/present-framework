@@ -108,6 +108,7 @@ describe('TaskEditor', () => {
     const titleInput = screen.getByLabelText('Title')
     await user.clear(titleInput)
     await user.type(titleInput, 'New Title')
+    await user.tab() // blur triggers onUpdate
 
     const lastCall = onUpdate.mock.calls[onUpdate.mock.calls.length - 1][0]
     expect(lastCall.title).toBe('New Title')
