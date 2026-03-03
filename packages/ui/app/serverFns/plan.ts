@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join, dirname } from 'path'
-import { fileURLToPath } from 'url'
+import { fileURLToPath, pathToFileURL } from 'url'
 import yaml from 'js-yaml'
 
 const PLAN_ROOT = process.env.PLAN_ROOT || process.cwd()
@@ -59,13 +59,13 @@ export const generateArtifacts = createServerFn({ method: 'POST' })
     const results: Record<string, string> = {}
 
     const { generateMermaid } = await import(
-      /* @vite-ignore */ join(GENERATORS_DIR, 'mermaid.js')
+      /* @vite-ignore */ pathToFileURL(join(GENERATORS_DIR, 'mermaid.js')).href
     )
     const { generateReport } = await import(
-      /* @vite-ignore */ join(GENERATORS_DIR, 'report.js')
+      /* @vite-ignore */ pathToFileURL(join(GENERATORS_DIR, 'report.js')).href
     )
     const { generateDeck } = await import(
-      /* @vite-ignore */ join(GENERATORS_DIR, 'deck.js')
+      /* @vite-ignore */ pathToFileURL(join(GENERATORS_DIR, 'deck.js')).href
     )
 
     if (data.type === 'diagram' || data.type === 'all') {
