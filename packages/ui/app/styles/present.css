@@ -308,7 +308,7 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(
 .tab[data-selected]       { color: var(--color-primary); border-bottom-color: var(--color-primary); }
 .tab[data-focus-visible]  { outline: 2px solid var(--color-primary); outline-offset: -2px; }
 
-.tabpanel { flex: 1; overflow: auto; background: var(--color-surface); outline: none; }
+.tabpanel { flex: 1; overflow: auto; background: var(--color-surface); outline: none; min-height: 0; }
 
 /* ─── Toast notification ────────────────────────────────────────────────── */
 .toast {
