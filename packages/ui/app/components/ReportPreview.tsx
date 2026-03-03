@@ -33,6 +33,8 @@ const emptyStyle: React.CSSProperties = {
 const wrapStyle: React.CSSProperties = {
   padding: '1.5rem',
   overflow: 'auto',
+  height: '100%',
+  boxSizing: 'border-box',
   fontSize: '0.9rem',
   lineHeight: 1.6,
 }

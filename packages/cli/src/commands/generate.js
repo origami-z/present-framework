@@ -8,8 +8,8 @@ async function runGenerate(type, plan) {
   switch (type) {
     case 'diagram': {
       const content = generateMermaid(plan);
-      writeOutput('diagram.md', content);
-      console.log(chalk.green('  ✅ output/diagram.md'));
+      writeOutput('diagram.mmd', content);
+      console.log(chalk.green('  ✅ output/diagram.mmd'));
       return content;
     }
     case 'report': {
@@ -36,7 +36,7 @@ export function generateCommand(program) {
 
   gen
     .command('diagram')
-    .description('Generate Mermaid dependency diagram → output/diagram.md')
+    .description('Generate Mermaid dependency diagram → output/diagram.mmd')
     .action(() => {
       const plan = loadPlan();
       console.log(chalk.bold('\n🔷 Generating diagram...\n'));
