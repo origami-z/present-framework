@@ -196,6 +196,7 @@ function PlannerPage() {
               display: "flex",
               flexDirection: "column",
               overflow: "clip",
+              minHeight: 0,
             }}
           >
             <div style={tabBarRow}>
