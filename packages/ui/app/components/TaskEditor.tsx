@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Button,
   ComboBox,
@@ -296,6 +296,19 @@ function EnumSelect<T extends string>({
 
 export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [localTitle, setLocalTitle] = useState(task.title);
+  const [localDescription, setLocalDescription] = useState(task.description || "");
+  const [localNotes, setLocalNotes] = useState(task.notes || "");
+  const taskIdRef = useRef(task.id);
+
+  useEffect(() => {
+    if (task.id !== taskIdRef.current) {
+      taskIdRef.current = task.id;
+      setLocalTitle(task.title);
+      setLocalDescription(task.description || "");
+      setLocalNotes(task.notes || "");
+    }
+  }, [task.id]);
 
   const update = (field: keyof Task, value: any) => {
     onUpdate({
@@ -406,23 +419,24 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
         >
           <TextField
             className="field"
-            value={task.title}
-            onChange={(v) => update("title", v)}
+            value={localTitle}
+            onChange={setLocalTitle}
           >
             <Label className="field-label">Title</Label>
-            <Input className="field-input" placeholder="Task title" />
+            <Input className="field-input" placeholder="Task title" onBlur={() => update("title", localTitle)} />
           </TextField>
 
           <TextField
             className="field"
-            value={task.description || ""}
-            onChange={(v) => update("description", v)}
+            value={localDescription}
+            onChange={setLocalDescription}
           >
             <Label className="field-label">Description</Label>
             <TextArea
               className="field-textarea"
               placeholder="Optional description"
               style={{ minHeight: 60 }}
+              onBlur={() => update("description", localDescription)}
             />
           </TextField>
 
@@ -470,14 +484,15 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
 
           <TextField
             className="field"
-            value={task.notes || ""}
-            onChange={(v) => update("notes", v)}
+            value={localNotes}
+            onChange={setLocalNotes}
           >
             <Label className="field-label">Notes</Label>
             <TextArea
               className="field-textarea"
               placeholder="Notes, links, blockers..."
               style={{ minHeight: 50 }}
+              onBlur={() => update("notes", localNotes)}
             />
           </TextField>
 

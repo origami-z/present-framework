@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button, TextField, Input, Select, SelectValue, Label, Popover, ListBox, ListBoxItem } from 'react-aria-components'
 import { TaskEditor } from './TaskEditor'
 
@@ -70,6 +70,67 @@ function allStatusIdsForPillar(pillar: Pillar): string[] {
   ]
 }
 
+function StatusBulletItemRow({
+  item,
+  idx,
+  onUpdate,
+  onRemove,
+}: {
+  item: StatusItem
+  idx: number
+  onUpdate: (idx: number, partial: Partial<StatusItem>) => void
+  onRemove: (idx: number) => void
+}) {
+  const [localText, setLocalText] = useState(item.text)
+
+  useEffect(() => {
+    setLocalText(item.text)
+  }, [item.id])
+
+  return (
+    <div style={statusItemRow}>
+      <Select
+        selectedKey={item.evaluation || 'not_started'}
+        onSelectionChange={(key) => onUpdate(idx, { evaluation: key as string })}
+        aria-label={`Evaluation for ${item.id}`}
+      >
+        <Button className="eval-btn" style={evalBtnStyle}>
+          <SelectValue>{EVAL_EMOJI[item.evaluation] || '⬜'}</SelectValue>
+        </Button>
+        <Popover className="select-popover">
+          <ListBox className="select-listbox">
+            {EVALUATIONS.map((e) => (
+              <ListBoxItem key={e} id={e} className="select-item">
+                {EVAL_EMOJI[e]} {e}
+              </ListBoxItem>
+            ))}
+          </ListBox>
+        </Popover>
+      </Select>
+      <TextField
+        value={localText}
+        onChange={setLocalText}
+        style={{ flex: 1 }}
+      >
+        <Input
+          className="field-input-inline"
+          placeholder="Status bullet point..."
+          onBlur={() => onUpdate(idx, { text: localText })}
+        />
+      </TextField>
+      <span style={statusIdLabel}>{item.id}</span>
+      <Button
+        className="btn btn-icon"
+        onPress={() => onRemove(idx)}
+        aria-label={`Remove status ${item.id}`}
+        style={{ fontSize: '0.75em', padding: '0 0.3rem' }}
+      >
+        ×
+      </Button>
+    </div>
+  )
+}
+
 function StatusBulletList({
   label,
   items,
@@ -104,45 +165,13 @@ function StatusBulletList({
     <div style={{ marginBottom: '0.5rem' }}>
       <span className="field-label">{label}</span>
       {items.map((item, idx) => (
-        <div key={item.id} style={statusItemRow}>
-          <Select
-            selectedKey={item.evaluation || 'not_started'}
-            onSelectionChange={(key) => updateItem(idx, { evaluation: key as string })}
-            aria-label={`Evaluation for ${item.id}`}
-          >
-            <Button className="eval-btn" style={evalBtnStyle}>
-              <SelectValue>{EVAL_EMOJI[item.evaluation] || '⬜'}</SelectValue>
-            </Button>
-            <Popover className="select-popover">
-              <ListBox className="select-listbox">
-                {EVALUATIONS.map((e) => (
-                  <ListBoxItem key={e} id={e} className="select-item">
-                    {EVAL_EMOJI[e]} {e}
-                  </ListBoxItem>
-                ))}
-              </ListBox>
-            </Popover>
-          </Select>
-          <TextField
-            value={item.text}
-            onChange={(v) => updateItem(idx, { text: v })}
-            style={{ flex: 1 }}
-          >
-            <Input
-              className="field-input-inline"
-              placeholder="Status bullet point..."
-            />
-          </TextField>
-          <span style={statusIdLabel}>{item.id}</span>
-          <Button
-            className="btn btn-icon"
-            onPress={() => removeItem(idx)}
-            aria-label={`Remove status ${item.id}`}
-            style={{ fontSize: '0.75em', padding: '0 0.3rem' }}
-          >
-            ×
-          </Button>
-        </div>
+        <StatusBulletItemRow
+          key={item.id}
+          item={item}
+          idx={idx}
+          onUpdate={updateItem}
+          onRemove={removeItem}
+        />
       ))}
       <Button
         className="btn btn-secondary"
@@ -159,6 +188,9 @@ export function PillarList({ pillars, onUpdate }: Props) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   const [newPillarName, setNewPillarName] = useState('')
   const [addingPillar, setAddingPillar] = useState(false)
+  const [localDescriptions, setLocalDescriptions] = useState<Record<string, string>>(
+    () => Object.fromEntries(pillars.map((p) => [p.id, p.description || '']))
+  )
 
   const toggle = (id: string) =>
     setCollapsed((prev) => ({ ...prev, [id]: !prev[id] }))
@@ -265,13 +297,14 @@ export function PillarList({ pillars, onUpdate }: Props) {
             {!isCollapsed && (
               <div style={{ padding: '0.5rem 0.75rem' }}>
                 <TextField
-                  value={pillar.description || ''}
-                  onChange={(v) => updatePillar(idx, { ...pillar, description: v })}
+                  value={localDescriptions[pillar.id] ?? ''}
+                  onChange={(v) => setLocalDescriptions((prev) => ({ ...prev, [pillar.id]: v }))}
                 >
                   <Input
                     className="field-input-inline"
                     placeholder="Pillar description (optional)"
                     style={{ marginBottom: '0.5rem' }}
+                    onBlur={() => updatePillar(idx, { ...pillar, description: localDescriptions[pillar.id] ?? '' })}
                   />
                 </TextField>
 
