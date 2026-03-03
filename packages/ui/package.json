@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite dev --port 3001",
+    "dev": "vite dev",
     "build": "vite build",
     "start": "node .output/server/index.mjs",
     "generate-routes": "node -e \"const {getConfig,Generator}=require('@tanstack/router-generator');const c=getConfig({target:'react',routesDirectory:'./app/routes',generatedRouteTree:'./app/routeTree.gen.ts',quoteStyle:'single',semicolons:false},process.cwd());new Generator({config:c,root:process.cwd()}).run()\"",
