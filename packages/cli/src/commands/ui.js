@@ -10,9 +10,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 export function uiCommand(program) {
   program
     .command('ui')
-    .description('Start the browser-based planning UI (TanStack Router + Vite + Express)')
-    .option('--ui-port <port>', 'Vite dev server port', '5173')
-    .option('--api-port <port>', 'API server port', '3001')
+    .description('Start the browser-based planning UI (TanStack Start full-stack)')
+    .option('--port <port>', 'Server port', '3001')
     .action((opts) => {
       const uiDir = join(__dirname, '../../../..', 'packages/ui');
       if (!existsSync(uiDir)) {
@@ -22,8 +21,7 @@ export function uiCommand(program) {
       }
 
       console.log(chalk.bold.cyan('\n🌐 Starting Present UI...\n'));
-      console.log(chalk.dim(`   API  → http://localhost:${opts.apiPort}`));
-      console.log(chalk.dim(`   UI   → http://localhost:${opts.uiPort}`));
+      console.log(chalk.dim(`   → http://localhost:${opts.port}`));
       console.log(chalk.dim(`   Press Ctrl+C to stop\n`));
 
       const proc = spawn('npm', ['run', 'dev'], {
@@ -31,8 +29,7 @@ export function uiCommand(program) {
         stdio: 'inherit',
         env: {
           ...process.env,
-          VITE_PORT: opts.uiPort,
-          API_PORT: opts.apiPort,
+          PORT: opts.port,
           PLAN_ROOT: getProjectRoot(),
           PLAN_FOLDER: process.env.PLAN_FOLDER || 'data',
         },
