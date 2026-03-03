@@ -1,10 +1,16 @@
 import { createServerFn } from '@tanstack/react-start'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join, dirname } from 'path'
+import { fileURLToPath } from 'url'
 import yaml from 'js-yaml'
 
 const PLAN_ROOT = process.env.PLAN_ROOT || process.cwd()
 const PLAN_FOLDER = process.env.PLAN_FOLDER || 'data'
+
+// Generators are part of the package itself, not the user's project.
+// Use import.meta.url so this resolves correctly when npm linked.
+const _dirname = dirname(fileURLToPath(import.meta.url))
+const GENERATORS_DIR = join(_dirname, '../../../cli/src/generators')
 
 function getPlanPath() {
   return join(PLAN_ROOT, PLAN_FOLDER, 'plan.yaml')
@@ -52,15 +58,14 @@ export const generateArtifacts = createServerFn({ method: 'POST' })
 
     const results: Record<string, string> = {}
 
-    const generatorsDir = join(PLAN_ROOT, 'packages', 'cli', 'src', 'generators')
     const { generateMermaid } = await import(
-      /* @vite-ignore */ join(generatorsDir, 'mermaid.js')
+      /* @vite-ignore */ join(GENERATORS_DIR, 'mermaid.js')
     )
     const { generateReport } = await import(
-      /* @vite-ignore */ join(generatorsDir, 'report.js')
+      /* @vite-ignore */ join(GENERATORS_DIR, 'report.js')
     )
     const { generateDeck } = await import(
-      /* @vite-ignore */ join(generatorsDir, 'deck.js')
+      /* @vite-ignore */ join(GENERATORS_DIR, 'deck.js')
     )
 
     if (data.type === 'diagram' || data.type === 'all') {
