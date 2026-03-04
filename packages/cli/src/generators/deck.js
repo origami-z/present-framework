@@ -29,7 +29,7 @@ export function generateDeck(plan) {
   const enrichedPillars = plan.pillars.map((pillar) => ({
     ...pillar,
     stats: pillarStats(pillar),
-    keyTasks: pillar.tasks.filter((t) => t.status !== 'archive').slice(0, 8),
+    keyTasks: pillar.tasks.filter((t) => t.status !== 'archive'),
     hasStatus: (pillar.current_status?.length > 0) || (pillar.target_status?.length > 0),
   }));
 

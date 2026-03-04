@@ -56,48 +56,57 @@
         </div>
       </section>
 
-      {{! One slide per pillar }}
+      {{! One vertical section per pillar: summary + tasks sub-slide }}
       {{#each pillars}}
       <section>
-        <h2>{{name}}</h2>
-        {{#if description}}<p style="font-size:0.75em;color:#6b7280;margin-bottom:0.5em">{{description}}</p>{{/if}}
-        {{#if hasStatus}}
-        <div class="current-target" style="margin-bottom:0.5em">
-          <div class="box">
-            <h4>📍 Current Status</h4>
-            <ul>
-            {{#each current_status}}
-              <li>{{evalEmoji evaluation}} {{text}}</li>
-            {{/each}}
-            </ul>
+        {{! Pillar summary slide }}
+        <section>
+          <h2>{{name}}</h2>
+          {{#if description}}<p style="font-size:0.75em;color:#6b7280;margin-bottom:0.5em">{{description}}</p>{{/if}}
+          {{#if hasStatus}}
+          <div class="current-target" style="margin-bottom:0.5em">
+            <div class="box">
+              <h4>📍 Current Status</h4>
+              <ul>
+              {{#each current_status}}
+                <li>{{evalEmoji evaluation}} {{text}}</li>
+              {{/each}}
+              </ul>
+            </div>
+            <div class="box">
+              <h4>🎯 Target Status</h4>
+              <ul>
+              {{#each target_status}}
+                <li>{{evalEmoji evaluation}} {{text}}</li>
+              {{/each}}
+              </ul>
+            </div>
           </div>
-          <div class="box">
-            <h4>🎯 Target Status</h4>
-            <ul>
-            {{#each target_status}}
-              <li>{{evalEmoji evaluation}} {{text}}</li>
-            {{/each}}
-            </ul>
+          {{/if}}
+          <div class="stat-grid">
+            <div class="stat-box"><div class="num">{{stats.done}}</div><div class="lbl">Done</div></div>
+            <div class="stat-box"><div class="num">{{stats.wip}}</div><div class="lbl">WIP</div></div>
+            <div class="stat-box"><div class="num">{{stats.todo}}</div><div class="lbl">Todo</div></div>
           </div>
-        </div>
+        </section>
+        {{! Tasks sub-slide (navigate with ↓) }}
+        {{#if keyTasks}}
+        <section>
+          <h2>{{name}} — Tasks</h2>
+          <table>
+            <thead><tr><th>Task</th><th>Status</th><th>Priority</th></tr></thead>
+            <tbody>
+            {{#each keyTasks}}
+              <tr>
+                <td>{{title}}</td>
+                <td>{{{statusBadge status}}}</td>
+                <td>{{priority}}</td>
+              </tr>
+            {{/each}}
+            </tbody>
+          </table>
+        </section>
         {{/if}}
-        <div class="stat-grid" style="margin-bottom:0.5em">
-          <div class="stat-box"><div class="num">{{stats.done}}</div><div class="lbl">Done</div></div>
-          <div class="stat-box"><div class="num">{{stats.wip}}</div><div class="lbl">WIP</div></div>
-          <div class="stat-box"><div class="num">{{stats.todo}}</div><div class="lbl">Todo</div></div>
-        </div>
-        <table>
-          <thead><tr><th>Task</th><th>Status</th><th>Priority</th></tr></thead>
-          <tbody>
-          {{#each keyTasks}}
-            <tr>
-              <td>{{title}}</td>
-              <td>{{{statusBadge status}}}</td>
-              <td>{{priority}}</td>
-            </tr>
-          {{/each}}
-          </tbody>
-        </table>
       </section>
       {{/each}}
 
