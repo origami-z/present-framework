@@ -66,17 +66,17 @@
           {{#if hasStatus}}
           <div class="current-target" style="margin-bottom:0.5em">
             <div class="box">
-              <h4>📍 Current Status</h4>
+              <h4>📋 Short-term Goals</h4>
               <ul>
-              {{#each current_status}}
+              {{#each short_term_goal}}
                 <li>{{evalEmoji evaluation}} {{text}}</li>
               {{/each}}
               </ul>
             </div>
             <div class="box">
-              <h4>🎯 Target Status</h4>
+              <h4>🔭 Long-term Goals</h4>
               <ul>
-              {{#each target_status}}
+              {{#each long_term_goal}}
                 <li>{{evalEmoji evaluation}} {{text}}</li>
               {{/each}}
               </ul>

@@ -40,7 +40,7 @@ interface StatusOption {
   id: string;
   text: string;
   evaluation: string;
-  list: "current" | "target";
+  list: "short_term" | "long_term";
 }
 
 interface Props {
@@ -201,7 +201,7 @@ function LinkedStatusComboBox({
               filteredOptions.map(({ id, text, list }) => (
                 <ListBoxItem key={id} id={id} className="select-item">
                   <span style={{ fontSize: "0.8em", marginRight: "0.3em" }}>
-                    {list === "current" ? "📍" : "🎯"}
+                    {list === "short_term" ? "📋" : "🔭"}
                   </span>
                   <span
                     style={{
@@ -242,7 +242,7 @@ function LinkedStatusComboBox({
             const item = options.find((o) => o.id === id);
             return (
               <span key={id} className="dep-tag" title={item?.text}>
-                {item?.list === "current" ? "📍" : "🎯"} {id}
+                {item?.list === "short_term" ? "📋" : "🔭"} {id}
                 <button
                   className="dep-tag-remove"
                   onClick={() => onChange(selected.filter((s) => s !== id))}

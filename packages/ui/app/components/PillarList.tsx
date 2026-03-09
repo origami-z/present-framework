@@ -1,101 +1,119 @@
-import { useState, useEffect } from 'react'
-import { Button, TextField, Input, Select, SelectValue, Label, Popover, ListBox, ListBoxItem } from 'react-aria-components'
-import { TaskEditor } from './TaskEditor'
+import { useState, useEffect } from "react";
+import {
+  Button,
+  TextField,
+  Input,
+  Select,
+  SelectValue,
+  Label,
+  Popover,
+  ListBox,
+  ListBoxItem,
+} from "react-aria-components";
+import { TaskEditor } from "./TaskEditor";
 
 const EVALUATIONS = [
-  'not_started',
-  'on_track',
-  'needs_attention',
-  'at_risk',
-  'blocked',
-  'exceeds',
-] as const
+  "not_started",
+  "on_track",
+  "needs_attention",
+  "at_risk",
+  "blocked",
+  "exceeds",
+] as const;
 
 const EVAL_EMOJI: Record<string, string> = {
-  not_started: '⬜',
-  on_track: '🟢',
-  needs_attention: '🟡',
-  at_risk: '🔴',
-  blocked: '⛔',
-  exceeds: '⭐',
-}
+  not_started: "⬜",
+  on_track: "🟢",
+  needs_attention: "🟡",
+  at_risk: "🔴",
+  blocked: "⛔",
+  exceeds: "⭐",
+};
 
 interface StatusItem {
-  id: string
-  text: string
-  evaluation: string
+  id: string;
+  text: string;
+  evaluation: string;
 }
 
 interface Task {
-  id: string
-  title: string
-  status: string
-  priority: string
-  dependencies: string[]
-  linked_status: string[]
-  description?: string
-  notes?: string
-  created?: string
-  updated?: string
+  id: string;
+  title: string;
+  status: string;
+  priority: string;
+  dependencies: string[];
+  linked_status: string[];
+  description?: string;
+  notes?: string;
+  created?: string;
+  updated?: string;
 }
 
 interface Pillar {
-  id: string
-  name: string
-  description?: string
-  current_status: StatusItem[]
-  target_status: StatusItem[]
-  tasks: Task[]
+  id: string;
+  name: string;
+  description?: string;
+  short_term_goal: StatusItem[];
+  long_term_goal: StatusItem[];
+  tasks: Task[];
 }
 
 interface Props {
-  pillars: Pillar[]
-  onUpdate: (pillars: Pillar[]) => void
+  pillars: Pillar[];
+  onUpdate: (pillars: Pillar[]) => void;
 }
 
 function generateId(prefix: string, existing: string[]) {
-  let i = 1
-  while (existing.includes(`${prefix}-${String(i).padStart(3, '0')}`)) i++
-  return `${prefix}-${String(i).padStart(3, '0')}`
+  let i = 1;
+  while (existing.includes(`${prefix}-${String(i).padStart(3, "0")}`)) i++;
+  return `${prefix}-${String(i).padStart(3, "0")}`;
 }
 
 function allTasks(pillars: Pillar[]) {
-  return pillars.flatMap((p) => p.tasks.map((t) => ({ id: t.id, title: t.title })))
+  return pillars.flatMap((p) =>
+    p.tasks.map((t) => ({ id: t.id, title: t.title })),
+  );
 }
 
 function allStatusIdsForPillar(pillar: Pillar): string[] {
   return [
-    ...(pillar.current_status || []).map((s) => s.id),
-    ...(pillar.target_status || []).map((s) => s.id),
-  ]
+    ...(pillar.short_term_goal || []).map((s) => s.id),
+    ...(pillar.long_term_goal || []).map((s) => s.id),
+  ];
 }
 
 function StatusBulletItemRow({
   item,
   idx,
+  moveLabel,
   onUpdate,
   onRemove,
+  onMove,
 }: {
-  item: StatusItem
-  idx: number
-  onUpdate: (idx: number, partial: Partial<StatusItem>) => void
-  onRemove: (idx: number) => void
+  item: StatusItem;
+  idx: number;
+  moveLabel: string;
+  onUpdate: (idx: number, partial: Partial<StatusItem>) => void;
+  onRemove: (idx: number) => void;
+  onMove: (idx: number) => void;
 }) {
-  const [localText, setLocalText] = useState(item.text)
+  const [localText, setLocalText] = useState(item.text);
 
   useEffect(() => {
-    setLocalText(item.text)
-  }, [item.id])
+    setLocalText(item.text);
+  }, [item.id]);
 
   return (
     <div style={statusItemRow}>
       <Select
-        selectedKey={item.evaluation || 'not_started'}
-        onSelectionChange={(key) => onUpdate(idx, { evaluation: key as string })}
+        selectedKey={item.evaluation || "not_started"}
+        onSelectionChange={(key) =>
+          onUpdate(idx, { evaluation: key as string })
+        }
         aria-label={`Evaluation for ${item.id}`}
       >
         <Button className="eval-btn" style={evalBtnStyle}>
-          <SelectValue>{EVAL_EMOJI[item.evaluation] || '⬜'}</SelectValue>
+          <SelectValue>{EVAL_EMOJI[item.evaluation] || "⬜"}</SelectValue>
         </Button>
         <Popover className="select-popover">
           <ListBox className="select-listbox">
@@ -107,159 +125,196 @@ function StatusBulletItemRow({
           </ListBox>
         </Popover>
       </Select>
-      <TextField
-        value={localText}
-        onChange={setLocalText}
-        style={{ flex: 1 }}
-      >
+      <TextField value={localText} onChange={setLocalText} style={{ flex: 1 }}>
         <Input
           className="field-input-inline"
-          placeholder="Status bullet point..."
+          placeholder="Goal bullet point..."
           onBlur={() => onUpdate(idx, { text: localText })}
         />
       </TextField>
       <span style={statusIdLabel}>{item.id}</span>
       <Button
         className="btn btn-icon"
+        onPress={() => onMove(idx)}
+        aria-label={`Move to ${moveLabel}`}
+        style={{ fontSize: "0.75em", padding: "0 0.3rem" }}
+      >
+        {moveLabel === "Long-term" ? "→" : "←"}
+      </Button>
+      <Button
+        className="btn btn-icon"
         onPress={() => onRemove(idx)}
-        aria-label={`Remove status ${item.id}`}
-        style={{ fontSize: '0.75em', padding: '0 0.3rem' }}
+        aria-label={`Remove ${item.id}`}
+        style={{ fontSize: "0.75em", padding: "0 0.3rem" }}
       >
         ×
       </Button>
     </div>
-  )
+  );
 }
 
 function StatusBulletList({
   label,
+  moveLabel,
   items,
   pillarId,
   idPrefix,
   allIds,
   onUpdate,
+  onMove,
 }: {
-  label: string
-  items: StatusItem[]
-  pillarId: string
-  idPrefix: string
-  allIds: string[]
-  onUpdate: (items: StatusItem[]) => void
+  label: string;
+  moveLabel: string;
+  items: StatusItem[];
+  pillarId: string;
+  idPrefix: string;
+  allIds: string[];
+  onUpdate: (items: StatusItem[]) => void;
+  onMove: (item: StatusItem, updatedSourceItems: StatusItem[]) => void;
 }) {
   const addItem = () => {
-    const id = generateId(`${pillarId}-${idPrefix}`, allIds)
-    onUpdate([...items, { id, text: '', evaluation: 'not_started' }])
-  }
+    const id = generateId(`${pillarId}-${idPrefix}`, allIds);
+    onUpdate([...items, { id, text: "", evaluation: "not_started" }]);
+  };
 
   const updateItem = (idx: number, partial: Partial<StatusItem>) => {
-    const next = [...items]
-    next[idx] = { ...next[idx], ...partial }
-    onUpdate(next)
-  }
+    const next = [...items];
+    next[idx] = { ...next[idx], ...partial };
+    onUpdate(next);
+  };
 
   const removeItem = (idx: number) => {
-    onUpdate(items.filter((_, i) => i !== idx))
-  }
+    onUpdate(items.filter((_, i) => i !== idx));
+  };
+
+  const moveItem = (idx: number) => {
+    const item = items[idx];
+    const updatedSourceItems = items.filter((_, i) => i !== idx);
+    onMove(item, updatedSourceItems);
+  };
 
   return (
-    <div style={{ marginBottom: '0.5rem' }}>
+    <div style={{ marginBottom: "0.5rem" }}>
       <span className="field-label">{label}</span>
       {items.map((item, idx) => (
         <StatusBulletItemRow
           key={item.id}
           item={item}
           idx={idx}
+          moveLabel={moveLabel}
           onUpdate={updateItem}
           onRemove={removeItem}
+          onMove={moveItem}
         />
       ))}
       <Button
         className="btn btn-secondary"
         onPress={addItem}
-        style={{ fontSize: '0.75em', padding: '0.2rem 0.5rem', marginTop: '0.25rem' }}
+        style={{
+          fontSize: "0.75em",
+          padding: "0.2rem 0.5rem",
+          marginTop: "0.25rem",
+        }}
       >
         + Add
       </Button>
     </div>
-  )
+  );
 }
 
 export function PillarList({ pillars, onUpdate }: Props) {
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
-  const [newPillarName, setNewPillarName] = useState('')
-  const [addingPillar, setAddingPillar] = useState(false)
-  const [localDescriptions, setLocalDescriptions] = useState<Record<string, string>>(
-    () => Object.fromEntries(pillars.map((p) => [p.id, p.description || '']))
-  )
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [newPillarName, setNewPillarName] = useState("");
+  const [addingPillar, setAddingPillar] = useState(false);
+  const [localDescriptions, setLocalDescriptions] = useState<
+    Record<string, string>
+  >(() => Object.fromEntries(pillars.map((p) => [p.id, p.description || ""])));
 
   const toggle = (id: string) =>
-    setCollapsed((prev) => ({ ...prev, [id]: !prev[id] }))
+    setCollapsed((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const updatePillar = (idx: number, updated: Pillar) => {
-    const next = [...pillars]
-    next[idx] = updated
-    onUpdate(next)
-  }
+    const next = [...pillars];
+    next[idx] = updated;
+    onUpdate(next);
+  };
 
   const removePillar = (idx: number) => {
-    if (!confirm(`Remove pillar "${pillars[idx].name}" and all its tasks?`)) return
-    onUpdate(pillars.filter((_, i) => i !== idx))
-  }
+    if (!confirm(`Remove pillar "${pillars[idx].name}" and all its tasks?`))
+      return;
+    onUpdate(pillars.filter((_, i) => i !== idx));
+  };
 
   const addTask = (pillarIdx: number) => {
-    const pillar = pillars[pillarIdx]
-    const existing = allTasks(pillars).map((t) => t.id)
-    const prefix = pillar.id.slice(0, 8)
-    const id = generateId(prefix, existing)
-    const date = new Date().toISOString().split('T')[0]
+    const pillar = pillars[pillarIdx];
+    const existing = allTasks(pillars).map((t) => t.id);
+    const prefix = pillar.id.slice(0, 8);
+    const id = generateId(prefix, existing);
+    const date = new Date().toISOString().split("T")[0];
     const newTask: Task = {
       id,
-      title: '',
-      description: '',
-      status: 'todo',
-      priority: 'medium',
+      title: "",
+      description: "",
+      status: "todo",
+      priority: "medium",
       dependencies: [],
       linked_status: [],
-      notes: '',
+      notes: "",
       created: date,
       updated: date,
-    }
-    updatePillar(pillarIdx, { ...pillar, tasks: [...pillar.tasks, newTask] })
-  }
+    };
+    updatePillar(pillarIdx, { ...pillar, tasks: [...pillar.tasks, newTask] });
+  };
 
   const addPillar = () => {
-    if (!newPillarName.trim()) return
-    const name = newPillarName.trim()
+    if (!newPillarName.trim()) return;
+    const name = newPillarName.trim();
     const id = name
       .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '')
-      .slice(0, 16)
-    const existingIds = pillars.map((p) => p.id)
-    let finalId = id
-    let i = 2
-    while (existingIds.includes(finalId)) finalId = `${id}-${i++}`
-    onUpdate([...pillars, { id: finalId, name, description: '', current_status: [], target_status: [], tasks: [] }])
-    setNewPillarName('')
-    setAddingPillar(false)
-  }
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "")
+      .slice(0, 16);
+    const existingIds = pillars.map((p) => p.id);
+    let finalId = id;
+    let i = 2;
+    while (existingIds.includes(finalId)) finalId = `${id}-${i++}`;
+    onUpdate([
+      ...pillars,
+      {
+        id: finalId,
+        name,
+        description: "",
+        short_term_goal: [],
+        long_term_goal: [],
+        tasks: [],
+      },
+    ]);
+    setNewPillarName("");
+    setAddingPillar(false);
+  };
 
-  const all = allTasks(pillars)
+  const all = allTasks(pillars);
 
   return (
     <div>
       {pillars.map((pillar, idx) => {
-        const isCollapsed = collapsed[pillar.id]
+        const isCollapsed = collapsed[pillar.id];
         const stats = {
-          done: pillar.tasks.filter((t) => t.status === 'done').length,
-          wip: pillar.tasks.filter((t) => t.status === 'wip').length,
-          todo: pillar.tasks.filter((t) => t.status === 'todo').length,
-        }
-        const statusIds = allStatusIdsForPillar(pillar)
+          done: pillar.tasks.filter((t) => t.status === "done").length,
+          wip: pillar.tasks.filter((t) => t.status === "wip").length,
+          todo: pillar.tasks.filter((t) => t.status === "todo").length,
+        };
+        const statusIds = allStatusIdsForPillar(pillar);
         const statusItems = [
-          ...(pillar.current_status || []).map((s) => ({ ...s, list: 'current' as const })),
-          ...(pillar.target_status || []).map((s) => ({ ...s, list: 'target' as const })),
-        ]
+          ...(pillar.short_term_goal || []).map((s) => ({
+            ...s,
+            list: "short_term" as const,
+          })),
+          ...(pillar.long_term_goal || []).map((s) => ({
+            ...s,
+            list: "long_term" as const,
+          })),
+        ];
 
         return (
           <div key={pillar.id} style={pillarCard}>
@@ -267,21 +322,46 @@ export function PillarList({ pillars, onUpdate }: Props) {
               <Button
                 onPress={() => toggle(pillar.id)}
                 style={{
-                  flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
-                  background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0,
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  padding: 0,
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.95em' }}>{pillar.name}</span>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <span style={{ fontWeight: 700, fontSize: "0.95em" }}>
+                    {pillar.name}
+                  </span>
                   <span className="pillar-id-badge">{pillar.id}</span>
-                  <span style={{ color: 'var(--color-text-faint)', fontSize: '0.8em', marginLeft: '0.5rem' }}>
-                    {isCollapsed ? '▶' : '▼'}
+                  <span
+                    style={{
+                      color: "var(--color-text-faint)",
+                      fontSize: "0.8em",
+                      marginLeft: "0.5rem",
+                    }}
+                  >
+                    {isCollapsed ? "▶" : "▼"}
                   </span>
                 </div>
-                <div style={{ fontSize: '0.75em', color: 'var(--color-text-muted)', marginTop: '0.2rem' }}>
+                <div
+                  style={{
+                    fontSize: "0.75em",
+                    color: "var(--color-text-muted)",
+                    marginTop: "0.2rem",
+                  }}
+                >
                   ✅ {stats.done} &nbsp; 🔵 {stats.wip} &nbsp; 📋 {stats.todo}
                   {pillar.description && (
-                    <span style={{ marginLeft: '0.75rem', fontStyle: 'italic' }}>{pillar.description}</span>
+                    <span
+                      style={{ marginLeft: "0.75rem", fontStyle: "italic" }}
+                    >
+                      {pillar.description}
+                    </span>
                   )}
                 </div>
               </Button>
@@ -295,36 +375,71 @@ export function PillarList({ pillars, onUpdate }: Props) {
             </div>
 
             {!isCollapsed && (
-              <div style={{ padding: '0.5rem 0.75rem' }}>
+              <div style={{ padding: "0.5rem 0.75rem" }}>
                 <TextField
-                  value={localDescriptions[pillar.id] ?? ''}
-                  onChange={(v) => setLocalDescriptions((prev) => ({ ...prev, [pillar.id]: v }))}
+                  value={localDescriptions[pillar.id] ?? ""}
+                  onChange={(v) =>
+                    setLocalDescriptions((prev) => ({
+                      ...prev,
+                      [pillar.id]: v,
+                    }))
+                  }
                 >
                   <Input
                     className="field-input-inline"
                     placeholder="Pillar description (optional)"
-                    style={{ marginBottom: '0.5rem' }}
-                    onBlur={() => updatePillar(idx, { ...pillar, description: localDescriptions[pillar.id] ?? '' })}
+                    style={{ marginBottom: "0.5rem" }}
+                    onBlur={() =>
+                      updatePillar(idx, {
+                        ...pillar,
+                        description: localDescriptions[pillar.id] ?? "",
+                      })
+                    }
                   />
                 </TextField>
 
                 <StatusBulletList
-                  label="📍 Current Status"
-                  items={pillar.current_status || []}
+                  label="📋 Short-term Goals"
+                  moveLabel="Long-term"
+                  items={pillar.short_term_goal || []}
                   pillarId={pillar.id}
-                  idPrefix="cs"
+                  idPrefix="stg"
                   allIds={statusIds}
-                  onUpdate={(items) => updatePillar(idx, { ...pillar, current_status: items })}
+                  onUpdate={(items) =>
+                    updatePillar(idx, { ...pillar, short_term_goal: items })
+                  }
+                  onMove={(item, updatedSourceItems) =>
+                    updatePillar(idx, {
+                      ...pillar,
+                      short_term_goal: updatedSourceItems,
+                      long_term_goal: [...(pillar.long_term_goal || []), item],
+                    })
+                  }
                 />
 
                 <StatusBulletList
-                  label="🎯 Target Status"
-                  items={pillar.target_status || []}
+                  label="🔭 Long-term Goals"
+                  moveLabel="Short-term"
+                  items={pillar.long_term_goal || []}
                   pillarId={pillar.id}
-                  idPrefix="ts"
+                  idPrefix="ltg"
                   allIds={statusIds}
-                  onUpdate={(items) => updatePillar(idx, { ...pillar, target_status: items })}
+                  onUpdate={(items) =>
+                    updatePillar(idx, { ...pillar, long_term_goal: items })
+                  }
+                  onMove={(item, updatedSourceItems) =>
+                    updatePillar(idx, {
+                      ...pillar,
+                      long_term_goal: updatedSourceItems,
+                      short_term_goal: [
+                        ...(pillar.short_term_goal || []),
+                        item,
+                      ],
+                    })
+                  }
                 />
+
+                <span className="field-label">Tasks</span>
 
                 {pillar.tasks.map((task, tIdx) => (
                   <TaskEditor
@@ -333,100 +448,114 @@ export function PillarList({ pillars, onUpdate }: Props) {
                     allTasks={all}
                     statusItems={statusItems}
                     onUpdate={(updated) => {
-                      const tasks = [...pillar.tasks]
-                      tasks[tIdx] = updated
-                      updatePillar(idx, { ...pillar, tasks })
+                      const tasks = [...pillar.tasks];
+                      tasks[tIdx] = updated;
+                      updatePillar(idx, { ...pillar, tasks });
                     }}
                     onDelete={() => {
-                      const tasks = pillar.tasks.filter((_, i) => i !== tIdx)
-                      updatePillar(idx, { ...pillar, tasks })
+                      const tasks = pillar.tasks.filter((_, i) => i !== tIdx);
+                      updatePillar(idx, { ...pillar, tasks });
                     }}
                   />
                 ))}
 
-                <Button className="btn btn-add-task" onPress={() => addTask(idx)}>
+                <Button
+                  className="btn btn-add-task"
+                  onPress={() => addTask(idx)}
+                >
                   + Add Task
                 </Button>
               </div>
             )}
           </div>
-        )
+        );
       })}
 
       {addingPillar ? (
-        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
-          <TextField value={newPillarName} onChange={setNewPillarName} style={{ flex: 1 }}>
+        <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
+          <TextField
+            value={newPillarName}
+            onChange={setNewPillarName}
+            style={{ flex: 1 }}
+          >
             <Input
               className="field-input"
               placeholder="Pillar name (e.g. Security)"
               onKeyDown={(e) => {
-                if (e.key === 'Enter') addPillar()
-                if (e.key === 'Escape') setAddingPillar(false)
+                if (e.key === "Enter") addPillar();
+                if (e.key === "Escape") setAddingPillar(false);
               }}
               autoFocus
             />
           </TextField>
-          <Button className="btn btn-primary" onPress={addPillar}>Add</Button>
-          <Button className="btn btn-secondary" onPress={() => setAddingPillar(false)}>Cancel</Button>
+          <Button className="btn btn-primary" onPress={addPillar}>
+            Add
+          </Button>
+          <Button
+            className="btn btn-secondary"
+            onPress={() => setAddingPillar(false)}
+          >
+            Cancel
+          </Button>
         </div>
       ) : (
         <Button
           className="btn btn-secondary"
-          style={{ marginTop: '0.75rem', width: '100%' }}
+          style={{ marginTop: "0.75rem", width: "100%" }}
           onPress={() => setAddingPillar(true)}
         >
           + Add Pillar
         </Button>
       )}
     </div>
-  )
+  );
 }
 
 const pillarCard: React.CSSProperties = {
-  border: '1px solid var(--color-border)',
-  borderRadius: 'var(--radius-lg)',
-  marginBottom: '0.75rem',
-  overflow: 'clip',
-  background: 'var(--color-surface)',
-}
+  border: "1px solid var(--color-border)",
+  borderRadius: "var(--radius-lg)",
+  marginBottom: "0.75rem",
+  overflow: "clip",
+  background: "var(--color-surface)",
+};
 
 const pillarHeaderRow: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'flex-start',
-  justifyContent: 'space-between',
-  padding: '0.75rem',
-  background: 'var(--color-bg)',
-  borderBottom: '1px solid var(--color-border)',
-  gap: '0.5rem',
-}
+  display: "flex",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  padding: "0.75rem",
+  background: "var(--color-bg)",
+  borderBottom: "1px solid var(--color-border)",
+  gap: "0.5rem",
+};
 
 const statusItemRow: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.35rem',
-  marginBottom: '0.25rem',
-}
+  display: "flex",
+  alignItems: "center",
+  gap: "0.35rem",
+  marginBottom: "0.25rem",
+};
 
 const statusBullet: React.CSSProperties = {
-  fontSize: '0.9em',
-  color: 'var(--color-text-muted)',
+  fontSize: "0.9em",
+  color: "var(--color-text-muted)",
   flexShrink: 0,
-}
+};
 
 const statusIdLabel: React.CSSProperties = {
-  fontSize: '0.7em',
-  color: 'var(--color-text-faint)',
-  fontFamily: 'var(--font-mono)',
+  fontSize: "0.7em",
+  color: "var(--color-text-faint)",
+  fontFamily: "var(--font-mono)",
   flexShrink: 0,
-}
+};
 
 const evalBtnStyle: React.CSSProperties = {
-  background: 'none',
-  border: '1px solid var(--color-border)',
-  borderRadius: 'var(--radius-md)',
-  cursor: 'pointer',
-  padding: '0.15em 0.3em',
-  fontSize: '0.85em',
+  background: "none",
+  border: "1px solid var(--color-border)",
+  borderRadius: "var(--radius-md)",
+  cursor: "pointer",
+  padding: "0.15em 0.3em",
+  fontSize: "0.85em",
   lineHeight: 1,
   flexShrink: 0,
-}
+};

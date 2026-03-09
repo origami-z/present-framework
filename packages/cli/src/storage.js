@@ -51,13 +51,44 @@ export function getTemplatesDir() {
   return join(__dirname, '../../../templates');
 }
 
+/** Migrate plan from old current_status/target_status fields to short_term_goal/long_term_goal.
+ *  Returns true if any pillar was migrated. */
+function migrateGoalFields(plan) {
+  let migrated = false;
+  for (const pillar of plan.pillars || []) {
+    if (pillar.current_status !== undefined || pillar.target_status !== undefined) {
+      migrated = true;
+      pillar.short_term_goal = [
+        ...(pillar.current_status || []),
+        ...(pillar.target_status || []),
+      ];
+      pillar.long_term_goal = pillar.long_term_goal || [];
+      delete pillar.current_status;
+      delete pillar.target_status;
+    }
+  }
+  return migrated;
+}
+
 export function loadPlan() {
   const path = getPlanPath();
   if (!existsSync(path)) {
     throw new Error(`No plan.yaml found. Run 'present init' to create one.`);
   }
   const raw = readFileSync(path, 'utf8');
-  return yaml.load(raw);
+  const plan = yaml.load(raw);
+
+  if (migrateGoalFields(plan)) {
+    console.log(
+      '\n⚙️  Auto-migrated plan.yaml: "current_status" and "target_status" per pillar\n' +
+      '   have been renamed to "short_term_goal" and "long_term_goal".\n' +
+      '   All items were merged into "short_term_goal" — move any long-horizon goals\n' +
+      '   to "long_term_goal" when ready.\n'
+    );
+    savePlan(plan);
+  }
+
+  return plan;
 }
 
 export function savePlan(plan) {
