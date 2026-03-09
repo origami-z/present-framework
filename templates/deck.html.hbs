@@ -19,15 +19,23 @@
     .pill { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.65em; font-weight: 700; margin: 2px; }
     .stat-grid { display: flex; gap: 1em; justify-content: center; flex-wrap: wrap; margin: 0.5em 0; }
     .stat-box { background: #f3f4f6; border-radius: 8px; padding: 0.5em 1.2em; text-align: center; }
-    .stat-box .num { font-size: 1.8em; font-weight: 700; color: #1a56db; }
+    .stat-box .num          { font-size: 1.8em; font-weight: 700; color: #6b7280; }
+    .stat-box .num--done    { color: #16a34a; }
+    .stat-box .num--wip     { color: #1a56db; }
+    .stat-box .num--todo    { color: #9ca3af; }
+    .stat-box .num--pct     { color: #1a56db; }
     .stat-box .lbl { font-size: 0.65em; color: #6b7280; }
     .pillar-tag { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 3px 12px; border-radius: 4px; margin: 4px; font-size: 0.75em; font-weight: 600; }
-    .current-target { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; text-align: left; font-size: 0.75em; }
+    .current-target         { text-align: left; font-size: 0.75em; }
+    .current-target.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; align-items: start; }
+    .current-target.one-col { display: block; }
     .box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1em; }
+    .box--short { border-left: 4px solid #1a56db; }
+    .box--long  { border-left: 4px solid #7c3aed; }
     .box h4 { margin: 0 0 0.5em; color: #374151; }
     .box ul { margin: 0; padding-left: 1.2em; }
     .box li { margin-bottom: 0.3em; }
-    .reveal .slides section { overflow-y: auto; max-height: 100%; }
+    .current-target { max-height: 55vh; overflow-y: auto; }
   </style>
 </head>
 <body>
@@ -39,10 +47,10 @@
         <h1>{{meta.title}}</h1>
         <p class="meta">{{meta.owner}} &nbsp;·&nbsp; {{generatedAt}} &nbsp;·&nbsp; v{{meta.version}}</p>
         <div class="stat-grid" style="margin-top:1.5em">
-          <div class="stat-box"><div class="num">{{overall.done}}</div><div class="lbl">Done</div></div>
-          <div class="stat-box"><div class="num">{{overall.wip}}</div><div class="lbl">In Progress</div></div>
-          <div class="stat-box"><div class="num">{{overall.todo}}</div><div class="lbl">Todo</div></div>
-          <div class="stat-box"><div class="num">{{overall.pct}}%</div><div class="lbl">Complete</div></div>
+          <div class="stat-box"><div class="num num--done">{{overall.done}}</div><div class="lbl">Done</div></div>
+          <div class="stat-box"><div class="num num--wip">{{overall.wip}}</div><div class="lbl">In Progress</div></div>
+          <div class="stat-box"><div class="num num--todo">{{overall.todo}}</div><div class="lbl">Todo</div></div>
+          <div class="stat-box"><div class="num num--pct">{{overall.pct}}%</div><div class="lbl">Complete</div></div>
         </div>
       </section>
 
@@ -64,8 +72,9 @@
           <h2>{{name}}</h2>
           {{#if description}}<p style="font-size:0.75em;color:#6b7280;margin-bottom:0.5em">{{description}}</p>{{/if}}
           {{#if hasStatus}}
-          <div class="current-target" style="margin-bottom:0.5em">
-            <div class="box">
+          <div class="current-target {{goalsLayout}}" style="margin-bottom:0.5em">
+            {{#if hasShortGoal}}
+            <div class="box box--short">
               <h4>📋 Short-term Goals</h4>
               <ul>
               {{#each short_term_goal}}
@@ -73,7 +82,9 @@
               {{/each}}
               </ul>
             </div>
-            <div class="box">
+            {{/if}}
+            {{#if hasLongGoal}}
+            <div class="box box--long">
               <h4>🔭 Long-term Goals</h4>
               <ul>
               {{#each long_term_goal}}
@@ -81,12 +92,13 @@
               {{/each}}
               </ul>
             </div>
+            {{/if}}
           </div>
           {{/if}}
           <div class="stat-grid">
-            <div class="stat-box"><div class="num">{{stats.done}}</div><div class="lbl">Done</div></div>
-            <div class="stat-box"><div class="num">{{stats.wip}}</div><div class="lbl">WIP</div></div>
-            <div class="stat-box"><div class="num">{{stats.todo}}</div><div class="lbl">Todo</div></div>
+            <div class="stat-box"><div class="num num--done">{{stats.done}}</div><div class="lbl">Done</div></div>
+            <div class="stat-box"><div class="num num--wip">{{stats.wip}}</div><div class="lbl">WIP</div></div>
+            <div class="stat-box"><div class="num num--todo">{{stats.todo}}</div><div class="lbl">Todo</div></div>
           </div>
         </section>
         {{! Tasks sub-slide (navigate with ↓) }}
@@ -100,7 +112,7 @@
               <tr>
                 <td>{{title}}</td>
                 <td>{{{statusBadge status}}}</td>
-                <td>{{priority}}</td>
+                <td>{{{priorityBadge priority}}}</td>
               </tr>
             {{/each}}
             </tbody>
@@ -114,8 +126,8 @@
       <section>
         <h2>Summary &amp; Next Steps</h2>
         <div class="stat-grid">
-          <div class="stat-box"><div class="num">{{overall.done}}/{{overall.total}}</div><div class="lbl">Tasks Done</div></div>
-          <div class="stat-box"><div class="num">{{overall.pct}}%</div><div class="lbl">Complete</div></div>
+          <div class="stat-box"><div class="num num--done">{{overall.done}}/{{overall.total}}</div><div class="lbl">Tasks Done</div></div>
+          <div class="stat-box"><div class="num num--pct">{{overall.pct}}%</div><div class="lbl">Complete</div></div>
         </div>
         <div style="text-align:left;margin-top:1em">
           <h3>Pillars</h3>
