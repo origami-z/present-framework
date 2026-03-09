@@ -37,10 +37,10 @@ const otherTasksList = [
   { id: 'pillar-003', title: 'Third Task' },
 ]
 
-const noStatusItems: { id: string; text: string; evaluation: string; list: 'current' | 'target' }[] = []
-const sampleStatusItems: { id: string; text: string; evaluation: string; list: 'current' | 'target' }[] = [
-  { id: 'infra-cs-001', text: 'Running on bare metal', evaluation: 'at_risk', list: 'current' },
-  { id: 'infra-ts-001', text: 'Fully on Kubernetes', evaluation: 'on_track', list: 'target' },
+const noStatusItems: { id: string; text: string; evaluation: string; list: 'short_term' | 'long_term' }[] = []
+const sampleStatusItems: { id: string; text: string; evaluation: string; list: 'short_term' | 'long_term' }[] = [
+  { id: 'infra-stg-001', text: 'Running on bare metal', evaluation: 'at_risk', list: 'short_term' },
+  { id: 'infra-ltg-001', text: 'Fully on Kubernetes', evaluation: 'on_track', list: 'long_term' },
 ]
 
 /** Stateful wrapper so controlled inputs work correctly in tests. */
@@ -53,7 +53,7 @@ function StatefulEditor({
 }: {
   task: Task
   allTasks: { id: string; title: string }[]
-  statusItems?: { id: string; text: string; evaluation: string; list: 'current' | 'target' }[]
+  statusItems?: { id: string; text: string; evaluation: string; list: 'short_term' | 'long_term' }[]
   onUpdate?: (t: Task) => void
   onDelete?: () => void
 }) {
@@ -173,32 +173,32 @@ describe('TaskEditor', () => {
 
   it('renders existing linked status as removable tags', async () => {
     const user = userEvent.setup()
-    const taskWithLinked = { ...baseTask, linked_status: ['infra-cs-001'] }
+    const taskWithLinked = { ...baseTask, linked_status: ['infra-stg-001'] }
     render(<StatefulEditor task={taskWithLinked} allTasks={noOtherTasks} statusItems={sampleStatusItems} />)
 
     await user.click(screen.getByRole('button', { name: /My Task/i }))
 
-    expect(screen.getByText(/infra-cs-001/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Remove infra-cs-001/i })).toBeInTheDocument()
+    expect(screen.getByText(/infra-stg-001/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Remove infra-stg-001/i })).toBeInTheDocument()
   })
 
   it('removes a linked status tag when the remove button is clicked', async () => {
     const user = userEvent.setup()
     const onUpdate = vi.fn()
-    const taskWithLinked = { ...baseTask, linked_status: ['infra-cs-001'] }
+    const taskWithLinked = { ...baseTask, linked_status: ['infra-stg-001'] }
     render(
       <StatefulEditor task={taskWithLinked} allTasks={noOtherTasks} statusItems={sampleStatusItems} onUpdate={onUpdate} />,
     )
 
     await user.click(screen.getByRole('button', { name: /My Task/i }))
-    await user.click(screen.getByRole('button', { name: /Remove infra-cs-001/i }))
+    await user.click(screen.getByRole('button', { name: /Remove infra-stg-001/i }))
 
     const lastCall = onUpdate.mock.calls[onUpdate.mock.calls.length - 1][0]
     expect(lastCall.linked_status).toEqual([])
   })
 
   it('shows linked status count badge in collapsed state when task has linked statuses', () => {
-    const taskWithLinked = { ...baseTask, linked_status: ['infra-cs-001', 'infra-ts-001'] }
+    const taskWithLinked = { ...baseTask, linked_status: ['infra-stg-001', 'infra-ts-001'] }
     render(<StatefulEditor task={taskWithLinked} allTasks={noOtherTasks} statusItems={sampleStatusItems} />)
 
     expect(screen.getByText('🔗 2')).toBeInTheDocument()
