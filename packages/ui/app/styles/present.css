@@ -19,6 +19,12 @@
   --color-wip: #1a56db;
   --color-done: #16a34a;
   --color-archive: #9ca3af;
+  --color-p1: #dc2626;
+  --color-p1-bg: #fee2e2;
+  --color-p2: #d97706;
+  --color-p2-bg: #fef3c7;
+  --color-p3: #2563eb;
+  --color-p3-bg: #dbeafe;
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;

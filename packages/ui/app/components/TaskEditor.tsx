@@ -16,6 +16,18 @@ import {
 const STATUSES = ["todo", "wip", "done", "archive"] as const;
 const PRIORITIES = ["high", "medium", "low"] as const;
 
+const PRIORITY_LABEL: Record<string, string> = {
+  high: "P1",
+  medium: "P2",
+  low: "P3",
+};
+
+const PRIORITY_COLOR: Record<string, { color: string; background: string }> = {
+  high:   { color: "var(--color-p1)", background: "var(--color-p1-bg)" },
+  medium: { color: "var(--color-p2)", background: "var(--color-p2-bg)" },
+  low:    { color: "var(--color-p3)", background: "var(--color-p3-bg)" },
+};
+
 const STATUS_COLOR: Record<string, string> = {
   todo: "var(--color-todo)",
   wip: "var(--color-wip)",
@@ -367,6 +379,19 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
           />
           <span
             style={{
+              fontSize: "0.7em",
+              fontWeight: 600,
+              borderRadius: "var(--radius-md)",
+              padding: "0.1em 0.35em",
+              flexShrink: 0,
+              fontFamily: "var(--font-mono)",
+              ...PRIORITY_COLOR[task.priority],
+            }}
+          >
+            {PRIORITY_LABEL[task.priority] ?? task.priority}
+          </span>
+          <span
+            style={{
               fontWeight: 500,
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -459,7 +484,7 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
               label="Priority"
               value={task.priority as any}
               options={PRIORITIES}
-              renderOption={(p) => p}
+              renderOption={(p) => `${PRIORITY_LABEL[p] ?? p} – ${p}`}
               onChange={(v) => update("priority", v)}
             />
           </div>
