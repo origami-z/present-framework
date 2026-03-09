@@ -48,16 +48,16 @@
           },
           "name": { "type": "string", "description": "Display name, e.g. 'Infrastructure'" },
           "description": { "type": "string", "description": "Optional short description" },
-          "current_status": {
+          "short_term_goal": {
             "type": "array",
-            "description": "Bullet points describing where this pillar stands today",
+            "description": "Bullet points describing near-term goals for this pillar",
             "items": {
               "$ref": "#/definitions/status_item"
             }
           },
-          "target_status": {
+          "long_term_goal": {
             "type": "array",
-            "description": "Bullet points describing the desired future state for this pillar",
+            "description": "Bullet points describing longer-horizon goals for this pillar",
             "items": {
               "$ref": "#/definitions/status_item"
             }
@@ -113,7 +113,7 @@
                 "linked_status": {
                   "type": "array",
                   "items": { "type": "string" },
-                  "description": "List of status item IDs from this pillar's current_status or target_status that this task relates to"
+                  "description": "List of status item IDs from this pillar's short_term_goal or long_term_goal that this task relates to"
                 }
               },
               "additionalProperties": false

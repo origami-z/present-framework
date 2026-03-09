@@ -5,7 +5,7 @@ meta:
   title: 2025 Engineering Technical Roadmap
   owner: Platform Engineering Team
   created: '2025-01-01'
-  updated: '2026-03-01'
+  updated: '2026-03-09'
   version: 1
 ai:
   provider: anthropic
@@ -14,14 +14,13 @@ pillars:
   - id: infrastructure
     name: Infrastructure
     description: Cloud infrastructure, containerization, and DevOps automation
-    current_status:
+    short_term_goal:
       - id: infrastructure-cs-001
         text: Monolithic Rails app deployed on bare metal servers
         evaluation: exceeds
       - id: infrastructure-cs-002
         text: Infrastructure managed manually with ad-hoc scripts
         evaluation: not_started
-    target_status:
       - id: infrastructure-ts-001
         text: Fully containerized microservices deployed on Kubernetes
         evaluation: on_track
@@ -93,14 +92,14 @@ pillars:
         linked_status:
           - infrastructure-ts-003
         notes: ''
+    long_term_goal: []
   - id: observability
     name: Observability
     description: Logging, metrics, tracing, and alerting
-    current_status:
+    short_term_goal:
       - id: observability-cs-001
         text: On-call burden is high due to fragile deployments and lack of observability
         evaluation: needs_attention
-    target_status:
       - id: observability-ts-001
         text: On-call burden reduced by 60% through better observability and automated remediation
         evaluation: needs_attention
@@ -155,11 +154,10 @@ pillars:
   - id: security
     name: Security
     description: Security posture, compliance, and vulnerability management
-    current_status:
+    short_term_goal:
       - id: security-cs-001
         text: Security posture has not been formally audited
         evaluation: at_risk
-    target_status:
       - id: security-ts-001
         text: SOC2 Type II compliant
         evaluation: not_started
@@ -216,11 +214,10 @@ pillars:
   - id: developer-experience
     name: Developer Experience
     description: Tooling, workflows, and productivity improvements for engineers
-    current_status:
+    short_term_goal:
       - id: developer-experience-cs-001
         text: Test coverage is around 30%
         evaluation: not_started
-    target_status:
       - id: developer-experience-ts-001
         text: Developer productivity improved with standardized tooling
         evaluation: on_track

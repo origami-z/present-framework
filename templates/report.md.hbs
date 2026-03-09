@@ -45,16 +45,16 @@
 
 {{#if description}}*{{description}}*{{/if}}
 
-{{#if current_status.length}}
-### 📍 Current Status
-{{#each current_status}}
+{{#if short_term_goal.length}}
+### 📋 Short-term Goals
+{{#each short_term_goal}}
 - {{evalEmoji evaluation}} {{text}}
 {{/each}}
 {{/if}}
 
-{{#if target_status.length}}
-### 🎯 Target Status
-{{#each target_status}}
+{{#if long_term_goal.length}}
+### 🔭 Long-term Goals
+{{#each long_term_goal}}
 - {{evalEmoji evaluation}} {{text}}
 {{/each}}
 {{/if}}

@@ -88,8 +88,8 @@ export function defaultPillar(id, name) {
     id,
     name,
     description: '',
-    current_status: [],
-    target_status: [],
+    short_term_goal: [],
+    long_term_goal: [],
     tasks: [],
   };
 }
@@ -112,21 +112,21 @@ export function defaultPlan(title, owner) {
   };
 }
 
-/** Collect all status item IDs across a pillar's current_status and target_status */
+/** Collect all status item IDs across a pillar's short_term_goal and long_term_goal */
 export function allStatusIds(pillar) {
   return [
-    ...(pillar.current_status || []).map((s) => s.id),
-    ...(pillar.target_status || []).map((s) => s.id),
+    ...(pillar.short_term_goal || []).map((s) => s.id),
+    ...(pillar.long_term_goal || []).map((s) => s.id),
   ];
 }
 
 /** Find a status item by ID within a pillar, return { item, list } or null */
 export function findStatusItem(pillar, statusId) {
-  for (const item of pillar.current_status || []) {
-    if (item.id === statusId) return { item, list: 'current_status' };
+  for (const item of pillar.short_term_goal || []) {
+    if (item.id === statusId) return { item, list: 'short_term_goal' };
   }
-  for (const item of pillar.target_status || []) {
-    if (item.id === statusId) return { item, list: 'target_status' };
+  for (const item of pillar.long_term_goal || []) {
+    if (item.id === statusId) return { item, list: 'long_term_goal' };
   }
   return null;
 }

@@ -13,10 +13,11 @@ packages/ui/app/routeTree.gen.ts
 packages/ui/app.config.timestamp_*.js
 
 # Generated output (optional — remove this line to track artifacts in git)
-# output/
+output/
 data/output/
 
 # Editor
 .vscode/settings.json
 .idea/
 *.swp
+
