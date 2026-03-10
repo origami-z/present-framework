@@ -46,6 +46,8 @@ interface Task {
   notes?: string;
   created?: string;
   updated?: string;
+  start_date?: string;
+  end_date?: string;
 }
 
 interface StatusOption {
@@ -487,6 +489,58 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
               renderOption={(p) => `${PRIORITY_LABEL[p] ?? p} – ${p}`}
               onChange={(v) => update("priority", v)}
             />
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "0.75rem",
+              marginBottom: "0.5rem",
+            }}
+          >
+            <div className="field">
+              <Label className="field-label">Start Date</Label>
+              <div style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
+                <input
+                  type="date"
+                  className="field-input"
+                  value={task.start_date || ""}
+                  onChange={(e) => update("start_date", e.target.value || undefined)}
+                />
+                {task.start_date && (
+                  <Button
+                    className="btn btn-icon"
+                    onPress={() => update("start_date", undefined)}
+                    aria-label="Clear start date"
+                    style={{ fontSize: "0.8em" }}
+                  >
+                    ×
+                  </Button>
+                )}
+              </div>
+            </div>
+            <div className="field">
+              <Label className="field-label">End Date</Label>
+              <div style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
+                <input
+                  type="date"
+                  className="field-input"
+                  value={task.end_date || ""}
+                  onChange={(e) => update("end_date", e.target.value || undefined)}
+                />
+                {task.end_date && (
+                  <Button
+                    className="btn btn-icon"
+                    onPress={() => update("end_date", undefined)}
+                    aria-label="Clear end date"
+                    style={{ fontSize: "0.8em" }}
+                  >
+                    ×
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="field">
