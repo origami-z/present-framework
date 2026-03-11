@@ -581,6 +581,7 @@ export function GanttPreview({ pillars }: Props) {
               </div>
             );
           })}
+          <div style={{ height: ROW_HEIGHT }} />
         </div>
 
         {/* Resize handle */}
@@ -599,7 +600,7 @@ export function GanttPreview({ pillars }: Props) {
 
         {/* Right scrollable timeline */}
         <div ref={scrollRef} onScroll={handleTimelineScroll} style={timelineScrollStyle}>
-          <div style={{ position: "relative", width: totalWidth, minHeight: "100%" }}>
+          <div style={{ position: "relative", width: totalWidth, minHeight: HEADER_HEIGHT + rows.length * ROW_HEIGHT + ROW_HEIGHT }}>
             {/* Header row */}
             <div style={{ position: "sticky", top: 0, zIndex: 3, height: HEADER_HEIGHT, display: "flex", background: "var(--color-surface)", borderBottom: "1px solid var(--color-border)" }}>
               {timeline.map((col, i) => (
