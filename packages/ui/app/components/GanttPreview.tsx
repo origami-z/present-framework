@@ -316,8 +316,51 @@ function buildRows(
 
 /* ── Component ────────────────────────────────────────────────────────────── */
 
+/* ── Filter rows ──────────────────────────────────────────────────────────── */
+
+function filterRows(rows: GanttRow[], query: string): GanttRow[] {
+  if (!query) return rows;
+  const lower = query.toLowerCase();
+
+  // First pass: find which rows directly match
+  const directMatch = new Set<string>();
+  for (const row of rows) {
+    if (row.label.toLowerCase().includes(lower) || row.id.toLowerCase().includes(lower)) {
+      directMatch.add(row.id);
+    }
+  }
+
+  // Second pass: if a child task matches, include its parent goal
+  const goalIdsToKeep = new Set<string>();
+  for (const row of rows) {
+    if (row.type === "task" && row.goalId && directMatch.has(row.id)) {
+      goalIdsToKeep.add(row.goalId);
+    }
+  }
+
+  // Third pass: if a goal matches directly, include all its child tasks
+  const goalsMatchedDirectly = new Set<string>();
+  for (const row of rows) {
+    if (row.type === "goal" && directMatch.has(row.id)) {
+      goalsMatchedDirectly.add(row.id);
+    }
+  }
+
+  return rows.filter((row) => {
+    if (directMatch.has(row.id)) return true;
+    // Keep goal if any child matched
+    if (row.type === "goal" && goalIdsToKeep.has(row.id)) return true;
+    // Keep child tasks if parent goal matched directly
+    if (row.type === "task" && row.goalId && goalsMatchedDirectly.has(row.goalId)) return true;
+    return false;
+  });
+}
+
+/* ── Component ────────────────────────────────────────────────────────────── */
+
 export function GanttPreview({ pillars }: Props) {
   const [zoom, setZoom] = useState<ZoomLevel>("monthly");
+  const [filterText, setFilterText] = useState("");
   const [collapsedGoals, setCollapsedGoals] = useState<Set<string>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLDivElement>(null);
@@ -352,9 +395,14 @@ export function GanttPreview({ pillars }: Props) {
     requestAnimationFrame(() => { syncingScroll.current = false; });
   }, []);
 
-  const { rows, minDate, maxDate } = useMemo(
+  const { rows: allRows, minDate, maxDate } = useMemo(
     () => buildRows(pillars, collapsedGoals),
     [pillars, collapsedGoals],
+  );
+
+  const rows = useMemo(
+    () => filterRows(allRows, filterText),
+    [allRows, filterText],
   );
 
   const timeline = useMemo(
@@ -390,6 +438,38 @@ export function GanttPreview({ pillars }: Props) {
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       {/* Toolbar */}
       <div style={toolbarStyle}>
+        <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+          <span style={{ position: "absolute", left: 8, fontSize: "0.78em", color: "var(--color-text-faint)", pointerEvents: "none" }}>
+            &#x1F50D;
+          </span>
+          <input
+            type="text"
+            className="field-input"
+            placeholder="Filter by name..."
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+            style={{ paddingLeft: "1.8rem", fontSize: "0.78em", width: 180, height: 28 }}
+          />
+          {filterText && (
+            <button
+              onClick={() => setFilterText("")}
+              style={{
+                position: "absolute",
+                right: 4,
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--color-text-faint)",
+                fontSize: "0.85em",
+                padding: "0 4px",
+                fontFamily: "inherit",
+              }}
+            >
+              ×
+            </button>
+          )}
+        </div>
+        <div style={{ width: 1, height: 18, background: "var(--color-border)" }} />
         <span style={{ fontSize: "0.8em", color: "var(--color-text-muted)", fontWeight: 600 }}>
           Zoom:
         </span>
@@ -415,7 +495,7 @@ export function GanttPreview({ pillars }: Props) {
           ))}
         </div>
         <span style={{ fontSize: "0.72em", color: "var(--color-text-faint)", marginLeft: "auto" }}>
-          {rows.length} items
+          {rows.length}{filterText ? ` / ${allRows.length}` : ""} items
         </span>
       </div>
 
