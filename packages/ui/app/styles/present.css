@@ -348,6 +348,49 @@ body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(
   background: var(--color-primary);
 }
 
+/* ─── Goal ID inline rename ─────────────────────────────────────────────── */
+.goal-id-label {
+  font-size: 0.7em;
+  color: var(--color-text-faint);
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+  cursor: default;
+  border-radius: var(--radius-sm);
+  padding: 1px 4px;
+  transition: background var(--transition), color var(--transition);
+  white-space: nowrap;
+}
+.goal-id-label:hover {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.goal-id-edit-input {
+  font-family: var(--font-mono);
+  font-size: 0.7em;
+  padding: 1px 4px;
+  border: 1px solid var(--color-border-focus);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+  outline: none;
+  width: 9em;
+  box-shadow: 0 0 0 2px rgba(26, 86, 219, 0.15);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.goal-id-edit-input.error {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+}
+
+.goal-id-error {
+  font-size: 0.65em;
+  color: var(--color-danger);
+  white-space: nowrap;
+  line-height: 1.3;
+  margin-top: 1px;
+}
+
 /* ─── Misc layout helpers ───────────────────────────────────────────────── */
 .section-title {
   font-size: 0.78em;

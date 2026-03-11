@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Button,
   TextField,
@@ -90,22 +90,93 @@ function StatusBulletItemRow({
   item,
   idx,
   moveLabel,
+  allIds,
   onUpdate,
   onRemove,
   onMove,
+  onRenameId,
 }: {
   item: StatusItem;
   idx: number;
   moveLabel: string;
+  allIds: string[];
   onUpdate: (idx: number, partial: Partial<StatusItem>) => void;
   onRemove: (idx: number) => void;
   onMove: (idx: number) => void;
+  onRenameId: (idx: number, oldId: string, newId: string) => void;
 }) {
   const [localText, setLocalText] = useState(item.text);
+  const [editingId, setEditingId] = useState(false);
+  const [idDraft, setIdDraft] = useState(item.id);
+  const [idError, setIdError] = useState<string | null>(null);
+  const justCommittedRef = useRef(false);
+  const idInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setLocalText(item.text);
   }, [item.id]);
+
+  useEffect(() => {
+    setIdDraft(item.id);
+  }, [item.id]);
+
+  const handleCommit = () => {
+    const newId = idDraft.trim();
+    if (newId === item.id) {
+      justCommittedRef.current = true;
+      setEditingId(false);
+      setIdError(null);
+      return;
+    }
+    if (!newId) {
+      setIdError("ID cannot be empty");
+      return;
+    }
+    const otherIds = allIds.filter((id) => id !== item.id);
+    if (otherIds.includes(newId)) {
+      setIdError(`"${newId}" already exists`);
+      return;
+    }
+    justCommittedRef.current = true;
+    setIdError(null);
+    setEditingId(false);
+    onRenameId(idx, item.id, newId);
+  };
+
+  const handleBlur = () => {
+    if (justCommittedRef.current) {
+      justCommittedRef.current = false;
+      return;
+    }
+    const newId = idDraft.trim();
+    if (newId === item.id) {
+      setIdError(null);
+      setEditingId(false);
+      return;
+    }
+    if (!newId) {
+      setIdError("ID cannot be empty");
+      setTimeout(() => idInputRef.current?.focus(), 0);
+      return;
+    }
+    const otherIds = allIds.filter((id) => id !== item.id);
+    if (otherIds.includes(newId)) {
+      setIdError(`"${newId}" already exists`);
+      setTimeout(() => idInputRef.current?.focus(), 0);
+      return;
+    }
+    // Valid new ID → commit
+    setIdError(null);
+    setEditingId(false);
+    onRenameId(idx, item.id, newId);
+  };
+
+  const cancelIdEdit = () => {
+    justCommittedRef.current = true;
+    setIdDraft(item.id);
+    setIdError(null);
+    setEditingId(false);
+  };
 
   return (
     <div style={{ marginBottom: "0.35rem" }}>
@@ -137,7 +208,44 @@ function StatusBulletItemRow({
             onBlur={() => onUpdate(idx, { text: localText })}
           />
         </TextField>
-        <span style={statusIdLabel}>{item.id}</span>
+        <div style={{ display: "flex", flexDirection: "column", flexShrink: 0 }}>
+          {editingId ? (
+            <>
+              <input
+                ref={idInputRef}
+                className={`goal-id-edit-input${idError ? " error" : ""}`}
+                value={idDraft}
+                onChange={(e) => {
+                  setIdDraft(e.target.value);
+                  setIdError(null);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleCommit();
+                  }
+                  if (e.key === "Escape") cancelIdEdit();
+                }}
+                onBlur={handleBlur}
+                autoFocus
+                aria-label="Rename goal ID"
+              />
+              {idError && <span className="goal-id-error">{idError}</span>}
+            </>
+          ) : (
+            <span
+              className="goal-id-label"
+              onDoubleClick={() => {
+                setIdDraft(item.id);
+                setIdError(null);
+                setEditingId(true);
+              }}
+              title="Double-click to rename"
+            >
+              {item.id}
+            </span>
+          )}
+        </div>
         <Button
           className="btn btn-icon"
           onPress={() => onMove(idx)}
@@ -196,6 +304,7 @@ function StatusBulletList({
   allIds,
   onUpdate,
   onMove,
+  onRenameId,
 }: {
   label: string;
   moveLabel: string;
@@ -205,6 +314,7 @@ function StatusBulletList({
   allIds: string[];
   onUpdate: (items: StatusItem[]) => void;
   onMove: (item: StatusItem, updatedSourceItems: StatusItem[]) => void;
+  onRenameId: (oldId: string, newId: string) => void;
 }) {
   const addItem = () => {
     const id = generateId(`${pillarId}-${idPrefix}`, allIds);
@@ -236,9 +346,11 @@ function StatusBulletList({
           item={item}
           idx={idx}
           moveLabel={moveLabel}
+          allIds={allIds}
           onUpdate={updateItem}
           onRemove={removeItem}
           onMove={moveItem}
+          onRenameId={(_, oldId, newId) => onRenameId(oldId, newId)}
         />
       ))}
       <Button
@@ -325,6 +437,28 @@ export function PillarList({ pillars, onUpdate }: Props) {
     ]);
     setNewPillarName("");
     setAddingPillar(false);
+  };
+
+  const handleRenameGoalId = (
+    pillarIdx: number,
+    oldId: string,
+    newId: string,
+  ) => {
+    const pillar = pillars[pillarIdx];
+    const renameInList = (items: StatusItem[]) =>
+      items.map((item) => (item.id === oldId ? { ...item, id: newId } : item));
+    const updatedTasks = pillar.tasks.map((task) => ({
+      ...task,
+      linked_goal: task.linked_goal.map((id: string) =>
+        id === oldId ? newId : id,
+      ),
+    }));
+    updatePillar(pillarIdx, {
+      ...pillar,
+      short_term_goal: renameInList(pillar.short_term_goal || []),
+      long_term_goal: renameInList(pillar.long_term_goal || []),
+      tasks: updatedTasks,
+    });
   };
 
   const all = allTasks(pillars);
@@ -449,6 +583,9 @@ export function PillarList({ pillars, onUpdate }: Props) {
                       long_term_goal: [...(pillar.long_term_goal || []), item],
                     })
                   }
+                  onRenameId={(oldId, newId) =>
+                    handleRenameGoalId(idx, oldId, newId)
+                  }
                 />
 
                 <StatusBulletList
@@ -470,6 +607,9 @@ export function PillarList({ pillars, onUpdate }: Props) {
                         item,
                       ],
                     })
+                  }
+                  onRenameId={(oldId, newId) =>
+                    handleRenameGoalId(idx, oldId, newId)
                   }
                 />
 
@@ -573,13 +713,6 @@ const statusItemRow: React.CSSProperties = {
 const statusBullet: React.CSSProperties = {
   fontSize: "0.9em",
   color: "var(--color-text-muted)",
-  flexShrink: 0,
-};
-
-const statusIdLabel: React.CSSProperties = {
-  fontSize: "0.7em",
-  color: "var(--color-text-faint)",
-  fontFamily: "var(--font-mono)",
   flexShrink: 0,
 };
 
