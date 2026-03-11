@@ -4,8 +4,8 @@
 meta:
   title: 2025 Engineering Technical Roadmap
   owner: Platform Engineering Team
-  created: "2025-01-01"
-  updated: "2026-03-11"
+  created: '2025-01-01'
+  updated: '2026-03-11'
   version: 1
 ai:
   provider: anthropic
@@ -18,8 +18,8 @@ pillars:
       - id: infrastructure-cs-001
         text: Monolithic Rails app deployed on bare metal servers
         evaluation: exceeds
-        start_date: "2026-03-16"
-        end_date: "2026-03-28"
+        start_date: '2026-03-16'
+        end_date: '2026-03-28'
       - id: infrastructure-cs-002
         text: Infrastructure managed manually with ad-hoc scripts
         evaluation: not_started
@@ -35,8 +35,8 @@ pillars:
         description: Create Dockerfiles for each service, set up docker-compose for local dev
         status: done
         priority: high
-        created: "2025-01-01"
-        updated: "2025-02-15"
+        created: '2025-01-01'
+        updated: '2025-02-15'
         dependencies: []
         linked_goal:
           - infrastructure-cs-001
@@ -47,45 +47,45 @@ pillars:
         description: Automate K8s deployments via ArgoCD watching git repositories
         status: todo
         priority: medium
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - infra-003
         linked_goal:
           - infrastructure-ts-003
-        notes: ""
+        notes: ''
       - id: infra-004
         title: Implement Terraform IaC
         description: Replace all manual infrastructure provisioning with Terraform modules
         status: todo
         priority: high
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - infra-003
         linked_goal:
           - infrastructure-cs-002
           - infrastructure-ts-002
-        notes: ""
+        notes: ''
       - id: infra-003
         title: Migrate to Kubernetes (production)
         description: Promote K8s setup to production with zero-downtime migration
         status: todo
         priority: high
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - infra-002
         linked_goal:
           - infrastructure-ts-001
-        notes: ""
+        notes: ''
       - id: infra-002
         title: Migrate to Kubernetes (staging)
         description: Deploy containerized services to K8s staging cluster
         status: wip
         priority: high
-        created: "2025-01-01"
-        updated: "2025-03-01"
+        created: '2025-01-01'
+        updated: '2025-03-01'
         dependencies:
           - infra-001
         linked_goal:
@@ -95,8 +95,8 @@ pillars:
       - id: infrastructure-ts-003
         text: GitOps workflows via ArgoCD
         evaluation: not_started
-        start_date: "2026-05-04"
-        end_date: "2027-07-30"
+        start_date: '2026-05-04'
+        end_date: '2027-07-30'
   - id: observability
     name: Observability
     description: Logging, metrics, tracing, and alerting
@@ -110,8 +110,8 @@ pillars:
         description: Aggregate logs from all services into a searchable central store
         status: wip
         priority: high
-        created: "2025-01-01"
-        updated: "2025-03-10"
+        created: '2025-01-01'
+        updated: '2025-03-10'
         dependencies: []
         linked_goal:
           - observability-ts-001
@@ -121,37 +121,37 @@ pillars:
         description: Instrument services with Prometheus client, build Grafana dashboards
         status: todo
         priority: high
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - infra-002
         linked_goal:
           - observability-ts-001
-        notes: ""
+        notes: ''
       - id: obs-003
         title: Distributed tracing with OpenTelemetry
         description: Add OTEL instrumentation to all services, route to Jaeger/Tempo
         status: todo
         priority: medium
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - obs-002
         linked_goal: []
-        notes: ""
+        notes: ''
       - id: obs-004
         title: On-call runbooks and alert tuning
         description: Write runbooks for top 10 alerts, tune thresholds to reduce noise
         status: todo
         priority: medium
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - obs-002
         linked_goal:
           - observability-cs-001
           - observability-ts-001
-        notes: ""
+        notes: ''
     long_term_goal:
       - id: observability-ts-001
         text: On-call burden reduced by 60% through better observability and automated remediation
@@ -172,8 +172,8 @@ pillars:
         description: Engage external security firm for penetration testing and audit
         status: done
         priority: high
-        created: "2025-01-01"
-        updated: "2026-03-01"
+        created: '2025-01-01'
+        updated: '2026-03-01'
         dependencies:
           - sec-002
           - infra-005
@@ -185,8 +185,8 @@ pillars:
         description: Address all 3 critical findings from external security audit
         status: wip
         priority: high
-        created: "2025-02-01"
-        updated: "2025-03-05"
+        created: '2025-02-01'
+        updated: '2025-03-05'
         dependencies:
           - sec-001
         linked_goal:
@@ -197,25 +197,25 @@ pillars:
         description: Replace hardcoded secrets and .env files with HashiCorp Vault
         status: todo
         priority: high
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - infra-002
         linked_goal: []
-        notes: ""
+        notes: ''
       - id: sec-004
         title: Achieve SOC2 Type II compliance
         description: Work with compliance partner to achieve SOC2 Type II certification
         status: todo
         priority: high
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - sec-002
           - sec-003
         linked_goal:
           - security-ts-001
-        notes: ""
+        notes: ''
   - id: developer-experience
     name: Developer Experience
     description: Tooling, workflows, and productivity improvements for engineers
@@ -235,8 +235,8 @@ pillars:
         description: Create consistent local dev setup with docker-compose and devcontainer
         status: done
         priority: medium
-        created: "2025-01-01"
-        updated: "2025-01-20"
+        created: '2025-01-01'
+        updated: '2025-01-20'
         dependencies:
           - infra-001
         linked_goal:
@@ -247,8 +247,8 @@ pillars:
         description: Migrate all repos to unified GitHub Actions pipeline templates
         status: wip
         priority: high
-        created: "2025-01-01"
-        updated: "2025-03-01"
+        created: '2025-01-01'
+        updated: '2025-03-01'
         dependencies:
           - infra-001
         linked_goal:
@@ -259,22 +259,22 @@ pillars:
         description: Deploy Backstage with service catalog, docs, and scaffolding templates
         status: todo
         priority: medium
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies:
           - devex-002
         linked_goal:
           - developer-experience-ts-001
-        notes: ""
+        notes: ''
       - id: devex-004
         title: Increase test coverage to 80%
         description: Add unit and integration tests to bring coverage from 30% to 80%
         status: todo
         priority: medium
-        created: "2025-01-01"
-        updated: "2025-01-01"
+        created: '2025-01-01'
+        updated: '2025-01-01'
         dependencies: []
         linked_goal:
           - developer-experience-cs-001
           - developer-experience-ts-002
-        notes: ""
+        notes: ''

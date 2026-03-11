@@ -3,6 +3,7 @@ import {
   Button,
   TextField,
   Input,
+  TextArea,
   Select,
   SelectValue,
   Label,
@@ -229,6 +230,8 @@ function StatusBulletItemRow({
                   }
                   if (e.key === "Escape") cancelIdEdit();
                 }}
+                // Keep the input width snug to its content
+                style={{ width: `${item.id.length + 2}ch` }}
                 onBlur={handleBlur}
                 autoFocus
                 aria-label="Rename goal ID"
@@ -358,7 +361,25 @@ function StatusBulletList({
 
   return (
     <div style={{ marginBottom: "0.5rem" }}>
-      <span className="field-label">{label}</span>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: "0.25rem",
+        }}
+      >
+        <span className="field-label" style={{ marginBottom: 0 }}>
+          {label}
+        </span>
+        <Button
+          className="btn btn-secondary"
+          onPress={addItem}
+          style={{ fontSize: "0.75em", padding: "0.2rem 0.5rem" }}
+        >
+          Add
+        </Button>
+      </div>
       {items.map((item, idx) => (
         <StatusBulletItemRow
           key={item.id}
@@ -372,17 +393,6 @@ function StatusBulletList({
           onRenameId={(_, oldId, newId) => onRenameId(oldId, newId)}
         />
       ))}
-      <Button
-        className="btn btn-secondary"
-        onPress={addItem}
-        style={{
-          fontSize: "0.75em",
-          padding: "0.2rem 0.5rem",
-          marginTop: "0.25rem",
-        }}
-      >
-        + Add
-      </Button>
     </div>
   );
 }
@@ -562,10 +572,11 @@ export function PillarList({ pillars, onUpdate }: Props) {
                     }))
                   }
                 >
-                  <Input
+                  <TextArea
                     className="field-input-inline"
                     placeholder="Pillar description (optional)"
-                    style={{ marginBottom: "0.5rem" }}
+                    rows={3}
+                    style={{ marginBottom: "0.5rem", resize: "vertical" }}
                     onBlur={() =>
                       updatePillar(idx, {
                         ...pillar,
