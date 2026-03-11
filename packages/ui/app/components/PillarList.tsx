@@ -377,7 +377,7 @@ function StatusBulletList({
           onPress={addItem}
           style={{ fontSize: "0.75em", padding: "0.2rem 0.5rem" }}
         >
-          Add
+          + Add
         </Button>
       </div>
       {items.map((item, idx) => (
