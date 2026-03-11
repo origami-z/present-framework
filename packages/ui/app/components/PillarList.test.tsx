@@ -18,7 +18,7 @@ const makeTask = (id: string, status = 'todo') => ({
   status,
   priority: 'medium',
   dependencies: [],
-  linked_status: [],
+  linked_goal: [],
 })
 
 describe('PillarList', () => {
@@ -139,7 +139,7 @@ describe('PillarList', () => {
     const [updatedPillars] = onUpdate.mock.calls[0]
     expect(updatedPillars[0].tasks).toHaveLength(1)
     expect(updatedPillars[0].tasks[0].status).toBe('todo')
-    expect(updatedPillars[0].tasks[0].linked_status).toEqual([])
+    expect(updatedPillars[0].tasks[0].linked_goal).toEqual([])
   })
 
   it('renders short-term and long-term goal bullet lists with evaluation', () => {

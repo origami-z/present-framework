@@ -67,7 +67,7 @@ export function defaultTask(id) {
     updated: date,
     dependencies: [],
     notes: '',
-    linked_status: [],
+    linked_goal: [],
   };
 }
 

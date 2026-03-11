@@ -42,10 +42,12 @@ interface Task {
   status: string;
   priority: string;
   dependencies: string[];
-  linked_status: string[];
+  linked_goal: string[];
   notes?: string;
   created?: string;
   updated?: string;
+  start_date?: string;
+  end_date?: string;
 }
 
 interface StatusOption {
@@ -404,7 +406,7 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
               </em>
             )}
           </span>
-          {(task.linked_status?.length ?? 0) > 0 && (
+          {(task.linked_goal?.length ?? 0) > 0 && (
             <span
               style={{
                 fontSize: "0.7em",
@@ -413,9 +415,9 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
                 borderRadius: "var(--radius-md)",
                 padding: "0.1em 0.35em",
               }}
-              title={`Linked to ${task.linked_status.length} status item(s)`}
+              title={`Linked to ${task.linked_goal.length} goal(s)`}
             >
-              🔗 {task.linked_status.length}
+              🔗 {task.linked_goal.length}
             </span>
           )}
         </div>
@@ -489,6 +491,58 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
             />
           </div>
 
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "0.75rem",
+              marginBottom: "0.5rem",
+            }}
+          >
+            <div className="field">
+              <Label className="field-label">Start Date</Label>
+              <div style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
+                <input
+                  type="date"
+                  className="field-input"
+                  value={task.start_date || ""}
+                  onChange={(e) => update("start_date", e.target.value || undefined)}
+                />
+                {task.start_date && (
+                  <Button
+                    className="btn btn-icon"
+                    onPress={() => update("start_date", undefined)}
+                    aria-label="Clear start date"
+                    style={{ fontSize: "0.8em" }}
+                  >
+                    ×
+                  </Button>
+                )}
+              </div>
+            </div>
+            <div className="field">
+              <Label className="field-label">End Date</Label>
+              <div style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
+                <input
+                  type="date"
+                  className="field-input"
+                  value={task.end_date || ""}
+                  onChange={(e) => update("end_date", e.target.value || undefined)}
+                />
+                {task.end_date && (
+                  <Button
+                    className="btn btn-icon"
+                    onPress={() => update("end_date", undefined)}
+                    aria-label="Clear end date"
+                    style={{ fontSize: "0.8em" }}
+                  >
+                    ×
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="field">
             <span className="field-label">Dependencies</span>
             <DepsComboBox
@@ -499,11 +553,11 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
           </div>
 
           <div className="field">
-            <span className="field-label">Linked Status</span>
+            <span className="field-label">Linked Goal</span>
             <LinkedStatusComboBox
-              selected={task.linked_status || []}
+              selected={task.linked_goal || []}
               options={statusItems}
-              onChange={(ids) => update("linked_status", ids)}
+              onChange={(ids) => update("linked_goal", ids)}
             />
           </div>
 

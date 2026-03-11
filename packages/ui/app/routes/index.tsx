@@ -22,13 +22,14 @@ import { PillarList } from "../components/PillarList";
 import { DiagramPreview } from "../components/DiagramPreview";
 import { ReportPreview } from "../components/ReportPreview";
 import { DeckPreview } from "../components/DeckPreview";
+import { GanttPreview } from "../components/GanttPreview";
 
 export const Route = createFileRoute("/")({
   loader: () => getPlan(),
   component: PlannerPage,
 });
 
-type Tab = "diagram" | "report" | "deck";
+type Tab = "diagram" | "report" | "deck" | "gantt";
 
 function PlannerPage() {
   const initialPlan = Route.useLoaderData();
@@ -213,6 +214,9 @@ function PlannerPage() {
                 <Tab id="deck" className="tab">
                   Deck
                 </Tab>
+                <Tab id="gantt" className="tab">
+                  Gantt
+                </Tab>
               </TabList>
               <span
                 style={{
@@ -234,6 +238,9 @@ function PlannerPage() {
             </TabPanel>
             <TabPanel id="deck" className="tabpanel">
               <DeckPreview content={artifacts.deck || ""} />
+            </TabPanel>
+            <TabPanel id="gantt" className="tabpanel" style={{ overflow: "hidden" }}>
+              <GanttPreview pillars={plan?.pillars || []} />
             </TabPanel>
           </Tabs>
         </Panel>

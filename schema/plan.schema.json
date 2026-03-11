@@ -110,10 +110,20 @@
                   "type": "string",
                   "description": "Free-text notes, blockers, links"
                 },
-                "linked_status": {
+                "linked_goal": {
                   "type": "array",
                   "items": { "type": "string" },
-                  "description": "List of status item IDs from this pillar's short_term_goal or long_term_goal that this task relates to"
+                  "description": "List of goal IDs from this pillar's short_term_goal or long_term_goal that this task relates to"
+                },
+                "start_date": {
+                  "type": "string",
+                  "format": "date",
+                  "description": "Planned start date YYYY-MM-DD"
+                },
+                "end_date": {
+                  "type": "string",
+                  "format": "date",
+                  "description": "Planned end date YYYY-MM-DD"
                 }
               },
               "additionalProperties": false
@@ -141,6 +151,16 @@
           "type": "string",
           "enum": ["not_started", "on_track", "needs_attention", "at_risk", "blocked", "exceeds"],
           "description": "⬜ not_started | 🟢 on_track | 🟡 needs_attention | 🔴 at_risk | ⛔ blocked | ⭐ exceeds"
+        },
+        "start_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Planned start date YYYY-MM-DD"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Planned end date YYYY-MM-DD"
         }
       },
       "additionalProperties": false

@@ -34,6 +34,8 @@ interface StatusItem {
   id: string;
   text: string;
   evaluation: string;
+  start_date?: string;
+  end_date?: string;
 }
 
 interface Task {
@@ -42,11 +44,13 @@ interface Task {
   status: string;
   priority: string;
   dependencies: string[];
-  linked_status: string[];
+  linked_goal: string[];
   description?: string;
   notes?: string;
   created?: string;
   updated?: string;
+  start_date?: string;
+  end_date?: string;
 }
 
 interface Pillar {
@@ -104,51 +108,81 @@ function StatusBulletItemRow({
   }, [item.id]);
 
   return (
-    <div style={statusItemRow}>
-      <Select
-        selectedKey={item.evaluation || "not_started"}
-        onSelectionChange={(key) =>
-          onUpdate(idx, { evaluation: key as string })
-        }
-        aria-label={`Evaluation for ${item.id}`}
-      >
-        <Button className="eval-btn" style={evalBtnStyle}>
-          <SelectValue>{EVAL_EMOJI[item.evaluation] || "⬜"}</SelectValue>
+    <div style={{ marginBottom: "0.35rem" }}>
+      <div style={statusItemRow}>
+        <Select
+          selectedKey={item.evaluation || "not_started"}
+          onSelectionChange={(key) =>
+            onUpdate(idx, { evaluation: key as string })
+          }
+          aria-label={`Evaluation for ${item.id}`}
+        >
+          <Button className="eval-btn" style={evalBtnStyle}>
+            <SelectValue>{EVAL_EMOJI[item.evaluation] || "⬜"}</SelectValue>
+          </Button>
+          <Popover className="select-popover">
+            <ListBox className="select-listbox">
+              {EVALUATIONS.map((e) => (
+                <ListBoxItem key={e} id={e} className="select-item">
+                  {EVAL_EMOJI[e]} {e}
+                </ListBoxItem>
+              ))}
+            </ListBox>
+          </Popover>
+        </Select>
+        <TextField value={localText} onChange={setLocalText} style={{ flex: 1 }}>
+          <Input
+            className="field-input-inline"
+            placeholder="Goal bullet point..."
+            onBlur={() => onUpdate(idx, { text: localText })}
+          />
+        </TextField>
+        <span style={statusIdLabel}>{item.id}</span>
+        <Button
+          className="btn btn-icon"
+          onPress={() => onMove(idx)}
+          aria-label={`Move to ${moveLabel}`}
+          style={{ fontSize: "0.75em", padding: "0 0.3rem" }}
+        >
+          {moveLabel === "Long-term" ? "→" : "←"}
         </Button>
-        <Popover className="select-popover">
-          <ListBox className="select-listbox">
-            {EVALUATIONS.map((e) => (
-              <ListBoxItem key={e} id={e} className="select-item">
-                {EVAL_EMOJI[e]} {e}
-              </ListBoxItem>
-            ))}
-          </ListBox>
-        </Popover>
-      </Select>
-      <TextField value={localText} onChange={setLocalText} style={{ flex: 1 }}>
-        <Input
+        <Button
+          className="btn btn-icon"
+          onPress={() => onRemove(idx)}
+          aria-label={`Remove ${item.id}`}
+          style={{ fontSize: "0.75em", padding: "0 0.3rem" }}
+        >
+          ×
+        </Button>
+      </div>
+      <div style={{ display: "flex", gap: "0.35rem", marginLeft: "2rem", marginTop: "0.15rem", alignItems: "center" }}>
+        <label style={{ fontSize: "0.7em", color: "var(--color-text-faint)" }}>Start</label>
+        <input
+          type="date"
           className="field-input-inline"
-          placeholder="Goal bullet point..."
-          onBlur={() => onUpdate(idx, { text: localText })}
+          style={{ width: "auto", fontSize: "0.75em", padding: "1px 4px" }}
+          value={item.start_date || ""}
+          onChange={(e) => onUpdate(idx, { start_date: e.target.value || undefined })}
         />
-      </TextField>
-      <span style={statusIdLabel}>{item.id}</span>
-      <Button
-        className="btn btn-icon"
-        onPress={() => onMove(idx)}
-        aria-label={`Move to ${moveLabel}`}
-        style={{ fontSize: "0.75em", padding: "0 0.3rem" }}
-      >
-        {moveLabel === "Long-term" ? "→" : "←"}
-      </Button>
-      <Button
-        className="btn btn-icon"
-        onPress={() => onRemove(idx)}
-        aria-label={`Remove ${item.id}`}
-        style={{ fontSize: "0.75em", padding: "0 0.3rem" }}
-      >
-        ×
-      </Button>
+        <label style={{ fontSize: "0.7em", color: "var(--color-text-faint)", marginLeft: "0.25rem" }}>End</label>
+        <input
+          type="date"
+          className="field-input-inline"
+          style={{ width: "auto", fontSize: "0.75em", padding: "1px 4px" }}
+          value={item.end_date || ""}
+          onChange={(e) => onUpdate(idx, { end_date: e.target.value || undefined })}
+        />
+        {(item.start_date || item.end_date) && (
+          <Button
+            className="btn btn-icon"
+            onPress={() => onUpdate(idx, { start_date: undefined, end_date: undefined })}
+            aria-label="Clear dates"
+            style={{ fontSize: "0.7em", padding: "0 0.2rem" }}
+          >
+            ×
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
@@ -258,7 +292,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
       status: "todo",
       priority: "medium",
       dependencies: [],
-      linked_status: [],
+      linked_goal: [],
       notes: "",
       created: date,
       updated: date,
