@@ -1,160 +1,280 @@
-<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{meta.title}}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" />
-  <style>
-    :root { --r-heading-font: 'Segoe UI', system-ui, sans-serif; --r-main-font: 'Segoe UI', system-ui, sans-serif; }
-    .reveal h1 { font-size: 1.8em; }
-    .reveal h2 { font-size: 1.3em; color: #1a56db; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.3em; }
-    .reveal h3 { font-size: 1em; color: #374151; }
-    .reveal table { font-size: 0.7em; width: 100%; }
-    .reveal table th { background: #f3f4f6; color: #111; }
-    .reveal table td, .reveal table th { padding: 6px 10px; border: 1px solid #e5e7eb; }
-    .reveal table tr:nth-child(even) { background: #f9fafb; }
-    .meta { color: #6b7280; font-size: 0.7em; margin-top: 0.5em; }
-    .pill { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.65em; font-weight: 700; margin: 2px; }
-    .stat-grid { display: flex; gap: 1em; justify-content: center; flex-wrap: wrap; margin: 0.5em 0; }
-    .stat-box { background: #f3f4f6; border-radius: 8px; padding: 0.5em 1.2em; text-align: center; }
-    .stat-box .num          { font-size: 1.8em; font-weight: 700; color: #6b7280; }
-    .stat-box .num--done    { color: #16a34a; }
-    .stat-box .num--wip     { color: #1a56db; }
-    .stat-box .num--todo    { color: #9ca3af; }
-    .stat-box .num--pct     { color: #1a56db; }
-    .stat-box .lbl { font-size: 0.65em; color: #6b7280; }
-    .pillar-tag { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 3px 12px; border-radius: 4px; margin: 4px; font-size: 0.75em; font-weight: 600; }
-    .current-target         { text-align: left; font-size: 0.75em; }
-    .current-target.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; align-items: start; }
-    .current-target.one-col { display: block; }
-    .box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1em; }
-    .box--short { border-left: 4px solid #1a56db; }
-    .box--long  { border-left: 4px solid #7c3aed; }
-    .box h4 { margin: 0 0 0.5em; color: #374151; }
-    .box ul { margin: 0; padding-left: 1.2em; }
-    .box li { margin-bottom: 0.3em; }
-    .current-target { max-height: 55vh; overflow-y: auto; }
-  </style>
-</head>
-<body>
-  <div class="reveal">
-    <div class="slides">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{meta.title}}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css"
+    />
+    <style>
+      :root {
+        --r-heading-font: "Segoe UI", system-ui, sans-serif;
+        --r-main-font: "Segoe UI", system-ui, sans-serif;
+      }
+      .reveal h1 {
+        font-size: 1.8em;
+      }
+      .reveal h2 {
+        font-size: 1.3em;
+        color: #1a56db;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 0.3em;
+      }
+      .reveal h3 {
+        font-size: 1em;
+        color: #374151;
+      }
+      .reveal table {
+        font-size: 0.7em;
+        width: 100%;
+      }
+      .reveal table th {
+        background: #f3f4f6;
+        color: #111;
+      }
+      .reveal table td,
+      .reveal table th {
+        padding: 6px 10px;
+        border: 1px solid #e5e7eb;
+      }
+      .reveal table tr:nth-child(even) {
+        background: #f9fafb;
+      }
+      .meta {
+        color: #6b7280;
+        font-size: 0.7em;
+        margin-top: 0.5em;
+      }
+      .pill {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.65em;
+        font-weight: 700;
+        margin: 2px;
+      }
+      .stat-grid {
+        display: flex;
+        gap: 1em;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 0.5em 0;
+      }
+      .stat-box {
+        background: #f3f4f6;
+        border-radius: 8px;
+        padding: 0.5em 1.2em;
+        text-align: center;
+      }
+      .stat-box .num {
+        font-size: 1.8em;
+        font-weight: 700;
+        color: #6b7280;
+      }
+      .stat-box .num--done {
+        color: #16a34a;
+      }
+      .stat-box .num--wip {
+        color: #1a56db;
+      }
+      .stat-box .num--todo {
+        color: #9ca3af;
+      }
+      .stat-box .num--pct {
+        color: #1a56db;
+      }
+      .stat-box .lbl {
+        font-size: 0.65em;
+        color: #6b7280;
+      }
+      .pillar-tag {
+        display: inline-block;
+        background: #e0e7ff;
+        color: #3730a3;
+        padding: 3px 12px;
+        border-radius: 4px;
+        margin: 4px;
+        font-size: 0.75em;
+        font-weight: 600;
+      }
+      .current-target {
+        text-align: left;
+        font-size: 0.75em;
+      }
+      .current-target.two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1em;
+        align-items: start;
+      }
+      .current-target.one-col {
+        display: block;
+      }
+      .box {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 1em;
+      }
+      .box--short {
+        border-left: 4px solid #1a56db;
+      }
+      .box--long {
+        border-left: 4px solid #7c3aed;
+      }
+      .box h4 {
+        margin: 0 0 0.5em;
+        color: #374151;
+      }
+      .box ul {
+        margin: 0;
+        padding-left: 1.2em;
+      }
+      .box li {
+        margin-bottom: 0.3em;
+      }
+      .current-target {
+        max-height: 55vh;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
 
-      <!-- Slide 1: Title -->
-      <section>
-        <h1>{{meta.title}}</h1>
-        <p class="meta">{{meta.owner}} &nbsp;·&nbsp; {{generatedAt}} &nbsp;·&nbsp; v{{meta.version}}</p>
-        <div class="stat-grid" style="margin-top:1.5em">
-          <div class="stat-box"><div class="num num--done">{{overall.done}}</div><div class="lbl">Done</div></div>
-          <div class="stat-box"><div class="num num--wip">{{overall.wip}}</div><div class="lbl">In Progress</div></div>
-          <div class="stat-box"><div class="num num--todo">{{overall.todo}}</div><div class="lbl">Todo</div></div>
-          <div class="stat-box"><div class="num num--pct">{{overall.pct}}%</div><div class="lbl">Complete</div></div>
-        </div>
-      </section>
-
-      <!-- Slide 2: Agenda -->
-      <section>
-        <h2>Agenda</h2>
-        <div style="margin-top: 1em">
-          {{#each pillars}}
-          <div class="pillar-tag">{{name}}</div>
-          {{/each}}
-        </div>
-      </section>
-
-      {{! One vertical section per pillar: summary + tasks sub-slide }}
-      {{#each pillars}}
-      <section>
-        {{! Pillar summary slide }}
+        <!-- Slide 1: Title -->
         <section>
-          <h2>{{name}}</h2>
-          {{#if description}}<p style="font-size:0.75em;color:#6b7280;margin-bottom:0.5em">{{description}}</p>{{/if}}
-          {{#if hasStatus}}
-          <div class="current-target {{goalsLayout}}" style="margin-bottom:0.5em">
-            {{#if hasShortGoal}}
-            <div class="box box--short">
-              <h4>📋 Short-term Goals</h4>
-              <ul>
-              {{#each short_term_goal}}
-                <li>{{evalEmoji evaluation}} {{text}}</li>
-              {{/each}}
-              </ul>
-            </div>
-            {{/if}}
-            {{#if hasLongGoal}}
-            <div class="box box--long">
-              <h4>🔭 Long-term Goals</h4>
-              <ul>
-              {{#each long_term_goal}}
-                <li>{{evalEmoji evaluation}} {{text}}</li>
-              {{/each}}
-              </ul>
-            </div>
-            {{/if}}
-          </div>
-          {{/if}}
-          <div class="stat-grid">
-            <div class="stat-box"><div class="num num--done">{{stats.done}}</div><div class="lbl">Done</div></div>
-            <div class="stat-box"><div class="num num--wip">{{stats.wip}}</div><div class="lbl">WIP</div></div>
-            <div class="stat-box"><div class="num num--todo">{{stats.todo}}</div><div class="lbl">Todo</div></div>
+          <h1>{{meta.title}}</h1>
+          <p class="meta">{{meta.owner}}
+            &nbsp;·&nbsp;
+            {{generatedAt}}
+            &nbsp;·&nbsp; v{{meta.version}}</p>
+          <div class="stat-grid" style="margin-top:1.5em">
+            <div class="stat-box"><div class="num num--done">{{overall.done}}</div><div
+                class="lbl"
+              >Done</div></div>
+            <div class="stat-box"><div class="num num--wip">{{overall.wip}}</div><div class="lbl">In
+                Progress</div></div>
+            <div class="stat-box"><div class="num num--todo">{{overall.todo}}</div><div
+                class="lbl"
+              >Todo</div></div>
+            <div class="stat-box"><div class="num num--pct">{{overall.pct}}%</div><div
+                class="lbl"
+              >Complete</div></div>
           </div>
         </section>
-        {{! Tasks sub-slide (navigate with ↓) }}
-        {{#if keyTasks}}
-        <section>
-          <h2>{{name}} — Tasks</h2>
-          <table>
-            <thead><tr><th>Task</th><th>Status</th><th>Priority</th></tr></thead>
-            <tbody>
-            {{#each keyTasks}}
-              <tr>
-                <td>{{title}}</td>
-                <td>{{{statusBadge status}}}</td>
-                <td>{{{priorityBadge priority}}}</td>
-              </tr>
-            {{/each}}
-            </tbody>
-          </table>
-        </section>
-        {{/if}}
-      </section>
-      {{/each}}
 
-      <!-- Final Slide: Summary -->
-      <section>
-        <h2>Summary &amp; Next Steps</h2>
-        <div class="stat-grid">
-          <div class="stat-box"><div class="num num--done">{{overall.done}}/{{overall.total}}</div><div class="lbl">Tasks Done</div></div>
-          <div class="stat-box"><div class="num num--pct">{{overall.pct}}%</div><div class="lbl">Complete</div></div>
-        </div>
-        <div style="text-align:left;margin-top:1em">
-          <h3>Pillars</h3>
-          <table>
-            <thead><tr><th>Pillar</th><th>✅ Done</th><th>🔵 WIP</th><th>📋 Todo</th></tr></thead>
-            <tbody>
+        <!-- Slide 2: Agenda -->
+        <section>
+          <h2>Agenda</h2>
+          <div style="margin-top: 1em">
             {{#each pillars}}
-              <tr><td><strong>{{name}}</strong></td><td>{{stats.done}}</td><td>{{stats.wip}}</td><td>{{stats.todo}}</td></tr>
+              <div class="pillar-tag">{{name}}</div>
             {{/each}}
-            </tbody>
-          </table>
-        </div>
-      </section>
+          </div>
+        </section>
 
+        {{! One vertical section per pillar: summary + tasks sub-slide }}
+        {{#each pillars}}
+          <section>
+            {{! Pillar summary slide }}
+            <section>
+              <h2>{{name}}</h2>
+              {{#if description}}<p
+                  style="font-size:0.75em;color:#6b7280;margin-bottom:0.5em"
+                >{{description}}</p>{{/if}}
+              {{#if hasStatus}}
+                <div class="current-target {{goalsLayout}}" style="margin-bottom:0.5em">
+                  {{#if hasShortGoal}}
+                    <div class="box box--short">
+                      <h4>📋 Short-term Goals</h4>
+                      <ul>
+                        {{#each short_term_goal}}
+                          <li>{{evalEmoji evaluation}} {{text}}</li>
+                        {{/each}}
+                      </ul>
+                    </div>
+                  {{/if}}
+                  {{#if hasLongGoal}}
+                    <div class="box box--long">
+                      <h4>🔭 Long-term Goals</h4>
+                      <ul>
+                        {{#each long_term_goal}}
+                          <li>{{evalEmoji evaluation}} {{text}}</li>
+                        {{/each}}
+                      </ul>
+                    </div>
+                  {{/if}}
+                </div>
+              {{/if}}
+              <div class="stat-grid">
+                <div class="stat-box"><div class="num num--done">{{stats.done}}</div><div
+                    class="lbl"
+                  >Done</div></div>
+                <div class="stat-box"><div class="num num--wip">{{stats.wip}}</div><div
+                    class="lbl"
+                  >WIP</div></div>
+                <div class="stat-box"><div class="num num--todo">{{stats.todo}}</div><div
+                    class="lbl"
+                  >Todo</div></div>
+              </div>
+            </section>
+            {{! Tasks sub-slide (navigate with ↓) }}
+            {{#if keyTasks}}
+              <section>
+                <h2>{{name}} — Tasks</h2>
+                <table>
+                  <thead><tr><th>Task</th><th>Status</th><th>Priority</th></tr></thead>
+                  <tbody>
+                    {{#each keyTasks}}
+                      <tr>
+                        <td>{{title}}</td>
+                        <td>{{{statusBadge status}}}</td>
+                        <td>{{{priorityBadge priority}}}</td>
+                      </tr>
+                    {{/each}}
+                  </tbody>
+                </table>
+              </section>
+            {{/if}}
+          </section>
+        {{/each}}
+
+        <!-- Final Slide: Summary -->
+        <section>
+          <h2>Summary &amp; Next Steps</h2>
+          <div class="stat-grid">
+            <div class="stat-box"><div
+                class="num num--done"
+              >{{overall.done}}/{{overall.total}}</div><div class="lbl">Tasks Done</div></div>
+            <div class="stat-box"><div class="num num--pct">{{overall.pct}}%</div><div
+                class="lbl"
+              >Complete</div></div>
+          </div>
+          <div style="text-align:left;margin-top:1em">
+            <h3>Pillars</h3>
+            <table>
+              <thead><tr><th>Pillar</th><th>✅ Done</th><th>🔵 WIP</th><th>📋 Todo</th></tr></thead>
+              <tbody>
+                {{#each pillars}}
+                  <tr><td><strong>{{name}}</strong></td><td>{{stats.done}}</td><td
+                    >{{stats.wip}}</td><td>{{stats.todo}}</td></tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
     </div>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
-  <script>
-    Reveal.initialize({
-      hash: true,
-      slideNumber: 'c/t',
-      transition: 'slide',
-      controls: true,
-      progress: true,
-      center: false,
-    });
-  </script>
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+    <script>
+      Reveal.initialize({ hash: true, slideNumber: 'c/t', transition: 'slide', controls: true,
+      progress: true, center: false, });
+    </script>
+  </body>
 </html>

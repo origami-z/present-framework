@@ -2,10 +2,10 @@
   "name": "@present/cli",
   "version": "0.1.0",
   "description": "AI-powered long-term technical planning CLI",
-  "type": "module",
   "bin": {
     "present": "./src/index.js"
   },
+  "type": "module",
   "scripts": {
     "start": "node src/index.js"
   },

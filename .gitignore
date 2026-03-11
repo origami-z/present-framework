@@ -17,7 +17,6 @@ output/
 data/output/
 
 # Editor
-.vscode/settings.json
 .idea/
 *.swp
 

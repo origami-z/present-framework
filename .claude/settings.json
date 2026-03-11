@@ -7,5 +7,15 @@
       "WebFetch(domain:react-aria.adobe.com)",
       "Bash(npx tsc:*)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "npm run fmt",
+        "cwd": "${workspaceFolder}",
+        "timeout": 30
+      }
+    ]
   }
 }

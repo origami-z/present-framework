@@ -1,23 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useCallback, useRef, useEffect } from "react";
-import {
-  Button,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanel,
-} from "react-aria-components";
-import {
-  Group as PanelGroup,
-  Panel,
-  Separator as PanelResizeHandle,
-} from "react-resizable-panels";
-import {
-  getPlan,
-  savePlan,
-  generateArtifacts,
-  runIterate,
-} from "../serverFns/plan";
+import { Button, Tabs, TabList, Tab, TabPanel } from "react-aria-components";
+import { Group as PanelGroup, Panel, Separator as PanelResizeHandle } from "react-resizable-panels";
+import { getPlan, savePlan, generateArtifacts, runIterate } from "../serverFns/plan";
 import { PillarList } from "../components/PillarList";
 import { DiagramPreview } from "../components/DiagramPreview";
 import { ReportPreview } from "../components/ReportPreview";
@@ -63,29 +48,35 @@ function PlannerPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3500);
   }, []);
 
-  const debouncedSave = useCallback((updated: any) => {
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(async () => {
-      setSaving(true);
-      try {
-        const saved = await savePlan({ data: updated });
-        setPlan(saved);
-        setSavedAt(new Date().toLocaleTimeString());
-      } catch (e: any) {
-        showToast("Save failed: " + e.message);
-      } finally {
-        setSaving(false);
-      }
-    }, 800);
-  }, [showToast]);
+  const debouncedSave = useCallback(
+    (updated: any) => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(async () => {
+        setSaving(true);
+        try {
+          const saved = await savePlan({ data: updated });
+          setPlan(saved);
+          setSavedAt(new Date().toLocaleTimeString());
+        } catch (e: any) {
+          showToast("Save failed: " + e.message);
+        } finally {
+          setSaving(false);
+        }
+      }, 800);
+    },
+    [showToast],
+  );
 
-  const handlePlanChange = useCallback((partial: Partial<any>) => {
-    setPlan((prev: any) => {
-      const updated = { ...prev, ...partial };
-      debouncedSave(updated);
-      return updated;
-    });
-  }, [debouncedSave]);
+  const handlePlanChange = useCallback(
+    (partial: Partial<any>) => {
+      setPlan((prev: any) => {
+        const updated = { ...prev, ...partial };
+        debouncedSave(updated);
+        return updated;
+      });
+    },
+    [debouncedSave],
+  );
 
   const handleGenerateAll = useCallback(async () => {
     setGenerating(true);
@@ -148,24 +139,14 @@ function PlannerPage() {
           }}
         >
           {savedAt && (
-            <span
-              style={{ fontSize: "0.75em", color: "var(--color-text-faint)" }}
-            >
+            <span style={{ fontSize: "0.75em", color: "var(--color-text-faint)" }}>
               {saving ? "Saving..." : `Saved ${savedAt}`}
             </span>
           )}
-          <Button
-            className="btn btn-secondary"
-            onPress={handleIterate}
-            isDisabled={iterating}
-          >
+          <Button className="btn btn-secondary" onPress={handleIterate} isDisabled={iterating}>
             Iterate
           </Button>
-          <Button
-            className="btn btn-primary"
-            onPress={handleGenerateAll}
-            isDisabled={generating}
-          >
+          <Button className="btn btn-primary" onPress={handleGenerateAll} isDisabled={generating}>
             Generate All
           </Button>
         </div>
@@ -201,10 +182,7 @@ function PlannerPage() {
             }}
           >
             <div style={tabBarRow}>
-              <TabList
-                className="tablist"
-                style={{ borderBottom: "none", flex: 1 }}
-              >
+              <TabList className="tablist" style={{ borderBottom: "none", flex: 1 }}>
                 <Tab id="diagram" className="tab">
                   Diagram
                 </Tab>

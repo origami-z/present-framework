@@ -53,20 +53,20 @@ present generate all
 
 ## CLI Commands
 
-| Command | Description |
-|---|---|
-| `present init` | Create `plan.yaml` interactively (inside `PLAN_FOLDER`) |
-| `present status` | Display all pillars and tasks with status/evaluation |
-| `present add pillar` | Add a new pillar |
-| `present add task <pillar-id>` | Add a task to a pillar |
-| `present update <task-id> [--status] [--evaluation]` | Update task fields |
-| `present brainstorm <pillar-id>` | AI-powered task suggestions |
-| `present generate diagram` | → `output/diagram.md` |
-| `present generate report` | → `output/report.md` |
-| `present generate deck` | → `output/deck.html` |
-| `present generate all` | Generate all 3 artifacts |
-| `present iterate [--no-commit]` | Snapshot + generate + git commit |
-| `present ui` | Start browser UI |
+| Command                                              | Description                                             |
+| ---------------------------------------------------- | ------------------------------------------------------- |
+| `present init`                                       | Create `plan.yaml` interactively (inside `PLAN_FOLDER`) |
+| `present status`                                     | Display all pillars and tasks with status/evaluation    |
+| `present add pillar`                                 | Add a new pillar                                        |
+| `present add task <pillar-id>`                       | Add a task to a pillar                                  |
+| `present update <task-id> [--status] [--evaluation]` | Update task fields                                      |
+| `present brainstorm <pillar-id>`                     | AI-powered task suggestions                             |
+| `present generate diagram`                           | → `output/diagram.md`                                   |
+| `present generate report`                            | → `output/report.md`                                    |
+| `present generate deck`                              | → `output/deck.html`                                    |
+| `present generate all`                               | Generate all 3 artifacts                                |
+| `present iterate [--no-commit]`                      | Snapshot + generate + git commit                        |
+| `present ui`                                         | Start browser UI                                        |
 
 ---
 
@@ -76,23 +76,23 @@ present generate all
 
 ### Task Fields
 
-| Field | Values | Description |
-|---|---|---|
-| `status` | `todo` `wip` `done` `archive` | Lifecycle stage |
-| `evaluation` | see below | Health assessment emoji |
-| `priority` | `high` `medium` `low` | Task priority |
-| `dependencies` | list of task IDs | Blocking tasks |
+| Field          | Values                        | Description             |
+| -------------- | ----------------------------- | ----------------------- |
+| `status`       | `todo` `wip` `done` `archive` | Lifecycle stage         |
+| `evaluation`   | see below                     | Health assessment emoji |
+| `priority`     | `high` `medium` `low`         | Task priority           |
+| `dependencies` | list of task IDs              | Blocking tasks          |
 
 ### Evaluation Emojis
 
-| Value | Emoji |
-|---|---|
-| `not_started` | ⬜ |
-| `on_track` | 🟢 |
-| `needs_attention` | 🟡 |
-| `at_risk` | 🔴 |
-| `blocked` | ⛔ |
-| `exceeds` | ⭐ |
+| Value             | Emoji |
+| ----------------- | ----- |
+| `not_started`     | ⬜    |
+| `on_track`        | 🟢    |
+| `needs_attention` | 🟡    |
+| `at_risk`         | 🔴    |
+| `blocked`         | ⛔    |
+| `exceeds`         | ⭐    |
 
 ---
 
@@ -110,13 +110,13 @@ GITHUB_TOKEN=ghp_...
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|---|---|---|
-| `PLAN_FOLDER` | `data` | Subfolder (relative to project root) where `plan.yaml` lives |
-| `ANTHROPIC_API_KEY` | — | API key for Anthropic provider |
-| `OPENAI_API_KEY` | — | API key for OpenAI provider |
-| `GITHUB_TOKEN` | — | Token for GitHub Copilot provider |
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | Base URL for Ollama |
+| Variable            | Default                  | Description                                                  |
+| ------------------- | ------------------------ | ------------------------------------------------------------ |
+| `PLAN_FOLDER`       | `data`                   | Subfolder (relative to project root) where `plan.yaml` lives |
+| `ANTHROPIC_API_KEY` | —                        | API key for Anthropic provider                               |
+| `OPENAI_API_KEY`    | —                        | API key for OpenAI provider                                  |
+| `GITHUB_TOKEN`      | —                        | Token for GitHub Copilot provider                            |
+| `OLLAMA_BASE_URL`   | `http://localhost:11434` | Base URL for Ollama                                          |
 
 ---
 
@@ -126,7 +126,7 @@ Configure your provider in `plan.yaml` (inside your `PLAN_FOLDER`):
 
 ```yaml
 ai:
-  provider: anthropic          # anthropic | openai | github-copilot | ollama | none
+  provider: anthropic # anthropic | openai | github-copilot | ollama | none
   model: claude-sonnet-4-6
 ```
 
@@ -184,6 +184,7 @@ present ui
 ```
 
 Features:
+
 - Left panel: edit `current_state`, `target_state`, pillars, and tasks inline
 - Right panel: live preview tabs — Diagram | Report | Deck
 - Auto-saves changes with debounce

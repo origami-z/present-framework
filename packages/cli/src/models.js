@@ -1,93 +1,87 @@
-export const STATUSES = ['todo', 'wip', 'done', 'archive'];
+export const STATUSES = ["todo", "wip", "done", "archive"];
 
 export const EVALUATIONS = [
-  'not_started',
-  'on_track',
-  'needs_attention',
-  'at_risk',
-  'blocked',
-  'exceeds',
+  "not_started",
+  "on_track",
+  "needs_attention",
+  "at_risk",
+  "blocked",
+  "exceeds",
 ];
 
-export const PRIORITIES = ['high', 'medium', 'low'];
+export const PRIORITIES = ["high", "medium", "low"];
 
 export const EVALUATION_EMOJI = {
-  not_started: '⬜',
-  on_track: '🟢',
-  needs_attention: '🟡',
-  at_risk: '🔴',
-  blocked: '⛔',
-  exceeds: '⭐',
+  not_started: "⬜",
+  on_track: "🟢",
+  needs_attention: "🟡",
+  at_risk: "🔴",
+  blocked: "⛔",
+  exceeds: "⭐",
 };
 
 export const STATUS_LABEL = {
-  todo: '📋 todo',
-  wip: '🔵 wip',
-  done: '✅ done',
-  archive: '📦 archive',
+  todo: "📋 todo",
+  wip: "🔵 wip",
+  done: "✅ done",
+  archive: "📦 archive",
 };
 
-export const AI_PROVIDERS = [
-  'anthropic',
-  'openai',
-  'github-copilot',
-  'ollama',
-  'none',
-];
+export const AI_PROVIDERS = ["anthropic", "openai", "github-copilot", "ollama", "none"];
 
 export const DEFAULT_MODELS = {
-  anthropic: 'claude-sonnet-4-6',
-  openai: 'gpt-4o',
-  'github-copilot': 'gpt-4o',
-  ollama: 'llama3.2',
-  none: '',
+  anthropic: "claude-sonnet-4-6",
+  openai: "gpt-4o",
+  "github-copilot": "gpt-4o",
+  ollama: "llama3.2",
+  none: "",
 };
 
 export function today() {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().split("T")[0];
 }
 
 export function generateId(prefix, existingIds = []) {
   let i = 1;
-  while (existingIds.includes(`${prefix}-${String(i).padStart(3, '0')}`)) {
+  while (existingIds.includes(`${prefix}-${String(i).padStart(3, "0")}`)) {
     i++;
   }
-  return `${prefix}-${String(i).padStart(3, '0')}`;
+  return `${prefix}-${String(i).padStart(3, "0")}`;
 }
 
 export function defaultTask(id) {
   const date = today();
   return {
     id,
-    title: '',
-    description: '',
-    status: 'todo',
-    priority: 'medium',
+    title: "",
+    description: "",
+    status: "todo",
+    priority: "medium",
     created: date,
     updated: date,
     dependencies: [],
-    notes: '',
+    notes: "",
     linked_goal: [],
   };
 }
 
-export function defaultStatusItem(id, text = '', evaluation = 'not_started') {
+export function defaultStatusItem(id, text = "", evaluation = "not_started") {
   return { id, text, evaluation };
 }
 
 export function generateStatusId(prefix, existingIds = []) {
   let i = 1;
-  while (existingIds.includes(`${prefix}-${String(i).padStart(3, '0')}`)) {
+  while (existingIds.includes(`${prefix}-${String(i).padStart(3, "0")}`)) {
     i++;
   }
-  return `${prefix}-${String(i).padStart(3, '0')}`;
+  return `${prefix}-${String(i).padStart(3, "0")}`;
 }
 
 export function defaultPillar(id, name) {
   return {
     id,
     name,
-    description: '',
+    description: "",
     short_term_goal: [],
     long_term_goal: [],
     tasks: [],
@@ -105,8 +99,8 @@ export function defaultPlan(title, owner) {
       version: 1,
     },
     ai: {
-      provider: 'anthropic',
-      model: 'claude-sonnet-4-6',
+      provider: "anthropic",
+      model: "claude-sonnet-4-6",
     },
     pillars: [],
   };
@@ -123,10 +117,10 @@ export function allStatusIds(pillar) {
 /** Find a status item by ID within a pillar, return { item, list } or null */
 export function findStatusItem(pillar, statusId) {
   for (const item of pillar.short_term_goal || []) {
-    if (item.id === statusId) return { item, list: 'short_term_goal' };
+    if (item.id === statusId) return { item, list: "short_term_goal" };
   }
   for (const item of pillar.long_term_goal || []) {
-    if (item.id === statusId) return { item, list: 'long_term_goal' };
+    if (item.id === statusId) return { item, list: "long_term_goal" };
   }
   return null;
 }

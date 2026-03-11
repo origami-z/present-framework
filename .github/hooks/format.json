@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "npm run fmt",
+        "cwd": "${workspaceFolder}",
+        "timeout": 30,
+        "osx": {
+          "command": "npm run fmt",
+        },
+      },
+    ],
+  },
+}

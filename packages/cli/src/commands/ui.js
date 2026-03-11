@@ -1,47 +1,47 @@
-import chalk from 'chalk';
-import { execSync, spawn } from 'child_process';
-import { existsSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { getProjectRoot } from '../storage.js';
+import chalk from "chalk";
+import { execSync, spawn } from "child_process";
+import { existsSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+import { getProjectRoot } from "../storage.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export function uiCommand(program) {
   program
-    .command('ui')
-    .description('Start the browser-based planning UI (TanStack Start full-stack)')
-    .option('--port <port>', 'Server port', '3001')
+    .command("ui")
+    .description("Start the browser-based planning UI (TanStack Start full-stack)")
+    .option("--port <port>", "Server port", "3001")
     .action((opts) => {
-      const uiDir = join(__dirname, '../../../..', 'packages/ui');
+      const uiDir = join(__dirname, "../../../..", "packages/ui");
       if (!existsSync(uiDir)) {
-        console.error(chalk.red('UI package not found at ' + uiDir));
-        console.log(chalk.dim('Run `npm install` from the project root first.'));
+        console.error(chalk.red("UI package not found at " + uiDir));
+        console.log(chalk.dim("Run `npm install` from the project root first."));
         process.exit(1);
       }
 
-      console.log(chalk.bold.cyan('\n🌐 Starting Present UI...\n'));
+      console.log(chalk.bold.cyan("\n🌐 Starting Present UI...\n"));
       console.log(chalk.dim(`   → http://localhost:${opts.port}`));
       console.log(chalk.dim(`   Press Ctrl+C to stop\n`));
 
-      const proc = spawn('npm', ['run', 'dev'], {
+      const proc = spawn("npm", ["run", "dev"], {
         cwd: uiDir,
-        stdio: 'inherit',
+        stdio: "inherit",
         env: {
           ...process.env,
           PORT: opts.port,
           PLAN_ROOT: getProjectRoot(),
-          PLAN_FOLDER: process.env.PLAN_FOLDER || 'data',
+          PLAN_FOLDER: process.env.PLAN_FOLDER || "data",
         },
         shell: true,
       });
 
-      proc.on('error', (err) => {
+      proc.on("error", (err) => {
         console.error(chalk.red(`Failed to start UI: ${err.message}`));
-        console.log(chalk.dim('Make sure you ran `npm install` from the project root.'));
+        console.log(chalk.dim("Make sure you ran `npm install` from the project root."));
       });
 
-      proc.on('close', (code) => {
+      proc.on("close", (code) => {
         if (code !== 0) console.log(chalk.yellow(`\nUI process exited with code ${code}`));
       });
     });

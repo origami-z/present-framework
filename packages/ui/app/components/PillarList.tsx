@@ -81,9 +81,7 @@ function generateId(prefix: string, existing: string[]) {
 }
 
 function allTasks(pillars: Pillar[]) {
-  return pillars.flatMap((p) =>
-    p.tasks.map((t) => ({ id: t.id, title: t.title })),
-  );
+  return pillars.flatMap((p) => p.tasks.map((t) => ({ id: t.id, title: t.title })));
 }
 
 function allStatusIdsForPillar(pillar: Pillar): string[] {
@@ -190,9 +188,7 @@ function StatusBulletItemRow({
       <div style={statusItemRow}>
         <Select
           selectedKey={item.evaluation || "not_started"}
-          onSelectionChange={(key) =>
-            onUpdate(idx, { evaluation: key as string })
-          }
+          onSelectionChange={(key) => onUpdate(idx, { evaluation: key as string })}
           aria-label={`Evaluation for ${item.id}`}
         >
           <Button className="eval-btn" style={evalBtnStyle}>
@@ -208,20 +204,14 @@ function StatusBulletItemRow({
             </ListBox>
           </Popover>
         </Select>
-        <TextField
-          value={localText}
-          onChange={setLocalText}
-          style={{ flex: 1 }}
-        >
+        <TextField value={localText} onChange={setLocalText} style={{ flex: 1 }}>
           <Input
             className="field-input-inline"
             placeholder="Goal bullet point..."
             onBlur={() => onUpdate(idx, { text: localText })}
           />
         </TextField>
-        <div
-          style={{ display: "flex", flexDirection: "column", flexShrink: 0 }}
-        >
+        <div style={{ display: "flex", flexDirection: "column", flexShrink: 0 }}>
           {editingId ? (
             <>
               <input
@@ -285,17 +275,13 @@ function StatusBulletItemRow({
           alignItems: "center",
         }}
       >
-        <label style={{ fontSize: "0.7em", color: "var(--color-text-faint)" }}>
-          Start
-        </label>
+        <label style={{ fontSize: "0.7em", color: "var(--color-text-faint)" }}>Start</label>
         <input
           type="date"
           className="field-input-inline"
           style={{ width: "auto", fontSize: "0.75em", padding: "1px 4px" }}
           value={item.start_date || ""}
-          onChange={(e) =>
-            onUpdate(idx, { start_date: e.target.value || undefined })
-          }
+          onChange={(e) => onUpdate(idx, { start_date: e.target.value || undefined })}
         />
         <label
           style={{
@@ -311,16 +297,12 @@ function StatusBulletItemRow({
           className="field-input-inline"
           style={{ width: "auto", fontSize: "0.75em", padding: "1px 4px" }}
           value={item.end_date || ""}
-          onChange={(e) =>
-            onUpdate(idx, { end_date: e.target.value || undefined })
-          }
+          onChange={(e) => onUpdate(idx, { end_date: e.target.value || undefined })}
         />
         {(item.start_date || item.end_date) && (
           <Button
             className="btn btn-icon"
-            onPress={() =>
-              onUpdate(idx, { start_date: undefined, end_date: undefined })
-            }
+            onPress={() => onUpdate(idx, { start_date: undefined, end_date: undefined })}
             aria-label="Clear dates"
             style={{ fontSize: "0.7em", padding: "0 0.2rem" }}
           >
@@ -409,14 +391,13 @@ export function PillarList({ pillars, onUpdate }: Props) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [newPillarName, setNewPillarName] = useState("");
   const [addingPillar, setAddingPillar] = useState(false);
-  const [localDescriptions, setLocalDescriptions] = useState<
-    Record<string, string>
-  >(() => Object.fromEntries(pillars.map((p) => [p.id, p.description || ""])));
+  const [localDescriptions, setLocalDescriptions] = useState<Record<string, string>>(() =>
+    Object.fromEntries(pillars.map((p) => [p.id, p.description || ""])),
+  );
   const [reorderMode, setReorderMode] = useState<Record<string, boolean>>({});
   const dragIdx = useRef<number | null>(null);
 
-  const toggle = (id: string) =>
-    setCollapsed((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggle = (id: string) => setCollapsed((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const updatePillar = (idx: number, updated: Pillar) => {
     const next = [...pillars];
@@ -425,8 +406,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
   };
 
   const removePillar = (idx: number) => {
-    if (!confirm(`Remove pillar "${pillars[idx].name}" and all its tasks?`))
-      return;
+    if (!confirm(`Remove pillar "${pillars[idx].name}" and all its tasks?`)) return;
     onUpdate(pillars.filter((_, i) => i !== idx));
   };
 
@@ -478,19 +458,13 @@ export function PillarList({ pillars, onUpdate }: Props) {
     setAddingPillar(false);
   };
 
-  const handleRenameGoalId = (
-    pillarIdx: number,
-    oldId: string,
-    newId: string,
-  ) => {
+  const handleRenameGoalId = (pillarIdx: number, oldId: string, newId: string) => {
     const pillar = pillars[pillarIdx];
     const renameInList = (items: StatusItem[]) =>
       items.map((item) => (item.id === oldId ? { ...item, id: newId } : item));
     const updatedTasks = pillar.tasks.map((task) => ({
       ...task,
-      linked_goal: task.linked_goal.map((id: string) =>
-        id === oldId ? newId : id,
-      ),
+      linked_goal: task.linked_goal.map((id: string) => (id === oldId ? newId : id)),
     }));
     updatePillar(pillarIdx, {
       ...pillar,
@@ -541,9 +515,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center" }}>
-                  <span style={{ fontWeight: 700, fontSize: "0.95em" }}>
-                    {pillar.name}
-                  </span>
+                  <span style={{ fontWeight: 700, fontSize: "0.95em" }}>{pillar.name}</span>
                   <span className="pillar-id-badge">{pillar.id}</span>
                   <span
                     style={{
@@ -564,9 +536,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
                 >
                   ✅ {stats.done} &nbsp; 🔵 {stats.wip} &nbsp; 📋 {stats.todo}
                   {pillar.description && (
-                    <span
-                      style={{ marginLeft: "0.75rem", fontStyle: "italic" }}
-                    >
+                    <span style={{ marginLeft: "0.75rem", fontStyle: "italic" }}>
                       {pillar.description}
                     </span>
                   )}
@@ -612,9 +582,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
                   pillarId={pillar.id}
                   idPrefix="stg"
                   allIds={statusIds}
-                  onUpdate={(items) =>
-                    updatePillar(idx, { ...pillar, short_term_goal: items })
-                  }
+                  onUpdate={(items) => updatePillar(idx, { ...pillar, short_term_goal: items })}
                   onMove={(item, updatedSourceItems) =>
                     updatePillar(idx, {
                       ...pillar,
@@ -622,9 +590,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
                       long_term_goal: [...(pillar.long_term_goal || []), item],
                     })
                   }
-                  onRenameId={(oldId, newId) =>
-                    handleRenameGoalId(idx, oldId, newId)
-                  }
+                  onRenameId={(oldId, newId) => handleRenameGoalId(idx, oldId, newId)}
                 />
 
                 <StatusBulletList
@@ -634,22 +600,15 @@ export function PillarList({ pillars, onUpdate }: Props) {
                   pillarId={pillar.id}
                   idPrefix="ltg"
                   allIds={statusIds}
-                  onUpdate={(items) =>
-                    updatePillar(idx, { ...pillar, long_term_goal: items })
-                  }
+                  onUpdate={(items) => updatePillar(idx, { ...pillar, long_term_goal: items })}
                   onMove={(item, updatedSourceItems) =>
                     updatePillar(idx, {
                       ...pillar,
                       long_term_goal: updatedSourceItems,
-                      short_term_goal: [
-                        ...(pillar.short_term_goal || []),
-                        item,
-                      ],
+                      short_term_goal: [...(pillar.short_term_goal || []), item],
                     })
                   }
-                  onRenameId={(oldId, newId) =>
-                    handleRenameGoalId(idx, oldId, newId)
-                  }
+                  onRenameId={(oldId, newId) => handleRenameGoalId(idx, oldId, newId)}
                 />
 
                 <div
@@ -688,11 +647,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
                         }}
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={() => {
-                          if (
-                            dragIdx.current === null ||
-                            dragIdx.current === tIdx
-                          )
-                            return;
+                          if (dragIdx.current === null || dragIdx.current === tIdx) return;
                           const tasks = [...pillar.tasks];
                           const [moved] = tasks.splice(dragIdx.current, 1);
                           tasks.splice(tIdx, 0, moved);
@@ -742,9 +697,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
                           }}
                         >
                           {task.title || (
-                            <em style={{ color: "var(--color-text-faint)" }}>
-                              Untitled task
-                            </em>
+                            <em style={{ color: "var(--color-text-faint)" }}>Untitled task</em>
                           )}
                         </span>
                         <span className="id-chip">{task.id}</span>
@@ -762,18 +715,13 @@ export function PillarList({ pillars, onUpdate }: Props) {
                           updatePillar(idx, { ...pillar, tasks });
                         }}
                         onDelete={() => {
-                          const tasks = pillar.tasks.filter(
-                            (_, i) => i !== tIdx,
-                          );
+                          const tasks = pillar.tasks.filter((_, i) => i !== tIdx);
                           updatePillar(idx, { ...pillar, tasks });
                         }}
                       />
                     ))}
 
-                <Button
-                  className="btn btn-add-task"
-                  onPress={() => addTask(idx)}
-                >
+                <Button className="btn btn-add-task" onPress={() => addTask(idx)}>
                   + Add Task
                 </Button>
               </div>
@@ -784,11 +732,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
 
       {addingPillar ? (
         <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
-          <TextField
-            value={newPillarName}
-            onChange={setNewPillarName}
-            style={{ flex: 1 }}
-          >
+          <TextField value={newPillarName} onChange={setNewPillarName} style={{ flex: 1 }}>
             <Input
               className="field-input"
               placeholder="Pillar name (e.g. Security)"
@@ -802,10 +746,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
           <Button className="btn btn-primary" onPress={addPillar}>
             Add
           </Button>
-          <Button
-            className="btn btn-secondary"
-            onPress={() => setAddingPillar(false)}
-          >
+          <Button className="btn btn-secondary" onPress={() => setAddingPillar(false)}>
             Cancel
           </Button>
         </div>

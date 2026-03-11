@@ -10,10 +10,21 @@
       "type": "object",
       "required": ["title", "owner"],
       "properties": {
-        "title": { "type": "string", "description": "Plan title, e.g. 'Q1 2025 Technical Roadmap'" },
+        "title": {
+          "type": "string",
+          "description": "Plan title, e.g. 'Q1 2025 Technical Roadmap'"
+        },
         "owner": { "type": "string", "description": "Team or person owning this plan" },
-        "created": { "type": "string", "format": "date", "description": "Creation date YYYY-MM-DD" },
-        "updated": { "type": "string", "format": "date", "description": "Last update date YYYY-MM-DD" },
+        "created": {
+          "type": "string",
+          "format": "date",
+          "description": "Creation date YYYY-MM-DD"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date",
+          "description": "Last update date YYYY-MM-DD"
+        },
         "version": { "type": "integer", "minimum": 1, "description": "Iteration version number" }
       },
       "additionalProperties": false

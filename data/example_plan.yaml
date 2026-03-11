@@ -15,7 +15,7 @@ meta:
   version: 1
 
 ai:
-  provider: anthropic          # anthropic | openai | github-copilot | ollama | none
+  provider: anthropic # anthropic | openai | github-copilot | ollama | none
   model: claude-sonnet-4-6
   # Provider env vars:
   #   anthropic      → ANTHROPIC_API_KEY

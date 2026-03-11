@@ -23,9 +23,9 @@ const PRIORITY_LABEL: Record<string, string> = {
 };
 
 const PRIORITY_COLOR: Record<string, { color: string; background: string }> = {
-  high:   { color: "var(--color-p1)", background: "var(--color-p1-bg)" },
+  high: { color: "var(--color-p1)", background: "var(--color-p1-bg)" },
   medium: { color: "var(--color-p2)", background: "var(--color-p2-bg)" },
-  low:    { color: "var(--color-p3)", background: "var(--color-p3-bg)" },
+  low: { color: "var(--color-p3)", background: "var(--color-p3-bg)" },
 };
 
 const STATUS_COLOR: Record<string, string> = {
@@ -400,11 +400,7 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
               whiteSpace: "nowrap",
             }}
           >
-            {task.title || (
-              <em style={{ color: "var(--color-text-faint)" }}>
-                Untitled task
-              </em>
-            )}
+            {task.title || <em style={{ color: "var(--color-text-faint)" }}>Untitled task</em>}
           </span>
           {(task.linked_goal?.length ?? 0) > 0 && (
             <span
@@ -444,20 +440,16 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
             background: "var(--color-bg)",
           }}
         >
-          <TextField
-            className="field"
-            value={localTitle}
-            onChange={setLocalTitle}
-          >
+          <TextField className="field" value={localTitle} onChange={setLocalTitle}>
             <Label className="field-label">Title</Label>
-            <Input className="field-input" placeholder="Task title" onBlur={() => update("title", localTitle)} />
+            <Input
+              className="field-input"
+              placeholder="Task title"
+              onBlur={() => update("title", localTitle)}
+            />
           </TextField>
 
-          <TextField
-            className="field"
-            value={localDescription}
-            onChange={setLocalDescription}
-          >
+          <TextField className="field" value={localDescription} onChange={setLocalDescription}>
             <Label className="field-label">Description</Label>
             <TextArea
               className="field-textarea"
@@ -561,11 +553,7 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
             />
           </div>
 
-          <TextField
-            className="field"
-            value={localNotes}
-            onChange={setLocalNotes}
-          >
+          <TextField className="field" value={localNotes} onChange={setLocalNotes}>
             <Label className="field-label">Notes</Label>
             <TextArea
               className="field-textarea"

@@ -129,11 +129,7 @@ interface TimelineColumn {
   end: Date;
 }
 
-function generateTimeline(
-  minDate: Date,
-  maxDate: Date,
-  zoom: ZoomLevel,
-): TimelineColumn[] {
+function generateTimeline(minDate: Date, maxDate: Date, zoom: ZoomLevel): TimelineColumn[] {
   const cols: TimelineColumn[] = [];
   let cursor: Date;
 
@@ -160,11 +156,7 @@ function generateTimeline(
   } else {
     cursor = startOfQuarter(minDate);
     while (cursor <= maxDate) {
-      const nextQ = new Date(
-        cursor.getFullYear(),
-        cursor.getMonth() + 3,
-        1,
-      );
+      const nextQ = new Date(cursor.getFullYear(), cursor.getMonth() + 3, 1);
       const end = addDays(nextQ, -1);
       cols.push({ label: quarterLabel(cursor), start: new Date(cursor), end });
       cursor = nextQ;
@@ -370,27 +362,30 @@ export function GanttPreview({ pillars }: Props) {
   const resizing = useRef(false);
 
   // Drag-to-resize left panel
-  const handleResizeStart = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    resizing.current = true;
-    const startX = e.clientX;
-    const startWidth = labelWidth;
+  const handleResizeStart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      resizing.current = true;
+      const startX = e.clientX;
+      const startWidth = labelWidth;
 
-    const onMove = (ev: MouseEvent) => {
-      if (!resizing.current) return;
-      const newWidth = Math.max(120, Math.min(600, startWidth + ev.clientX - startX));
-      setLabelWidth(newWidth);
-    };
+      const onMove = (ev: MouseEvent) => {
+        if (!resizing.current) return;
+        const newWidth = Math.max(120, Math.min(600, startWidth + ev.clientX - startX));
+        setLabelWidth(newWidth);
+      };
 
-    const onUp = () => {
-      resizing.current = false;
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onUp);
-    };
+      const onUp = () => {
+        resizing.current = false;
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+      };
 
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onUp);
-  }, [labelWidth]);
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    },
+    [labelWidth],
+  );
 
   const toggleGoal = useCallback((goalId: string) => {
     setCollapsedGoals((prev) => {
@@ -408,7 +403,9 @@ export function GanttPreview({ pillars }: Props) {
     if (scrollRef.current && labelRef.current) {
       labelRef.current.scrollTop = scrollRef.current.scrollTop;
     }
-    requestAnimationFrame(() => { syncingScroll.current = false; });
+    requestAnimationFrame(() => {
+      syncingScroll.current = false;
+    });
   }, []);
 
   const handleLabelScroll = useCallback(() => {
@@ -417,18 +414,18 @@ export function GanttPreview({ pillars }: Props) {
     if (scrollRef.current && labelRef.current) {
       scrollRef.current.scrollTop = labelRef.current.scrollTop;
     }
-    requestAnimationFrame(() => { syncingScroll.current = false; });
+    requestAnimationFrame(() => {
+      syncingScroll.current = false;
+    });
   }, []);
 
-  const { rows: allRows, minDate, maxDate } = useMemo(
-    () => buildRows(pillars, collapsedGoals),
-    [pillars, collapsedGoals],
-  );
+  const {
+    rows: allRows,
+    minDate,
+    maxDate,
+  } = useMemo(() => buildRows(pillars, collapsedGoals), [pillars, collapsedGoals]);
 
-  const rows = useMemo(
-    () => filterRows(allRows, filterText),
-    [allRows, filterText],
-  );
+  const rows = useMemo(() => filterRows(allRows, filterText), [allRows, filterText]);
 
   const timeline = useMemo(
     () => generateTimeline(minDate, maxDate, zoom),
@@ -464,7 +461,15 @@ export function GanttPreview({ pillars }: Props) {
       {/* Toolbar */}
       <div style={toolbarStyle}>
         <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-          <span style={{ position: "absolute", left: 8, fontSize: "0.78em", color: "var(--color-text-faint)", pointerEvents: "none" }}>
+          <span
+            style={{
+              position: "absolute",
+              left: 8,
+              fontSize: "0.78em",
+              color: "var(--color-text-faint)",
+              pointerEvents: "none",
+            }}
+          >
             &#x1F50D;
           </span>
           <input
@@ -498,7 +503,14 @@ export function GanttPreview({ pillars }: Props) {
         <span style={{ fontSize: "0.8em", color: "var(--color-text-muted)", fontWeight: 600 }}>
           Zoom:
         </span>
-        <div style={{ display: "flex", borderRadius: "var(--radius-md)", overflow: "hidden", border: "1px solid var(--color-border)" }}>
+        <div
+          style={{
+            display: "flex",
+            borderRadius: "var(--radius-md)",
+            overflow: "hidden",
+            border: "1px solid var(--color-border)",
+          }}
+        >
           {(["weekly", "monthly", "quarterly"] as ZoomLevel[]).map((level) => (
             <button
               key={level}
@@ -520,16 +532,37 @@ export function GanttPreview({ pillars }: Props) {
           ))}
         </div>
         <span style={{ fontSize: "0.72em", color: "var(--color-text-faint)", marginLeft: "auto" }}>
-          {rows.length}{filterText ? ` / ${allRows.length}` : ""} items
+          {rows.length}
+          {filterText ? ` / ${allRows.length}` : ""} items
         </span>
       </div>
 
       {/* Chart area */}
       <div style={{ display: "flex", flex: 1, overflow: "hidden", minHeight: 0 }}>
         {/* Left labels */}
-        <div ref={labelRef} onScroll={handleLabelScroll} style={{ ...labelColumnStyle, width: labelWidth }}>
-          <div style={{ height: HEADER_HEIGHT, borderBottom: "1px solid var(--color-border)", display: "flex", alignItems: "flex-end", padding: "0 0.5rem 0.35rem" }}>
-            <span style={{ fontSize: "0.72em", fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+        <div
+          ref={labelRef}
+          onScroll={handleLabelScroll}
+          style={{ ...labelColumnStyle, width: labelWidth }}
+        >
+          <div
+            style={{
+              height: HEADER_HEIGHT,
+              borderBottom: "1px solid var(--color-border)",
+              display: "flex",
+              alignItems: "flex-end",
+              padding: "0 0.5rem 0.35rem",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "0.72em",
+                fontWeight: 700,
+                color: "var(--color-text-muted)",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
               Item
             </span>
           </div>
@@ -552,7 +585,14 @@ export function GanttPreview({ pillars }: Props) {
                 onClick={() => row.type === "goal" && toggleGoal(row.id)}
               >
                 {row.type === "goal" && (
-                  <span style={{ fontSize: "0.7em", color: "var(--color-text-faint)", flexShrink: 0, width: "1em" }}>
+                  <span
+                    style={{
+                      fontSize: "0.7em",
+                      color: "var(--color-text-faint)",
+                      flexShrink: 0,
+                      width: "1em",
+                    }}
+                  >
                     {collapsedGoals.has(row.id) ? "▶" : "▼"}
                   </span>
                 )}
@@ -600,9 +640,25 @@ export function GanttPreview({ pillars }: Props) {
 
         {/* Right scrollable timeline */}
         <div ref={scrollRef} onScroll={handleTimelineScroll} style={timelineScrollStyle}>
-          <div style={{ position: "relative", width: totalWidth, minHeight: HEADER_HEIGHT + rows.length * ROW_HEIGHT + ROW_HEIGHT * 2 }}>
+          <div
+            style={{
+              position: "relative",
+              width: totalWidth,
+              minHeight: HEADER_HEIGHT + rows.length * ROW_HEIGHT + ROW_HEIGHT * 2,
+            }}
+          >
             {/* Header row */}
-            <div style={{ position: "sticky", top: 0, zIndex: 3, height: HEADER_HEIGHT, display: "flex", background: "var(--color-surface)", borderBottom: "1px solid var(--color-border)" }}>
+            <div
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 3,
+                height: HEADER_HEIGHT,
+                display: "flex",
+                background: "var(--color-surface)",
+                borderBottom: "1px solid var(--color-border)",
+              }}
+            >
               {timeline.map((col, i) => (
                 <div
                   key={i}
@@ -621,7 +677,13 @@ export function GanttPreview({ pillars }: Props) {
                       {col.subLabel}
                     </span>
                   )}
-                  <span style={{ fontSize: "0.73em", fontWeight: 600, color: "var(--color-text-muted)" }}>
+                  <span
+                    style={{
+                      fontSize: "0.73em",
+                      fontWeight: 600,
+                      color: "var(--color-text-muted)",
+                    }}
+                  >
                     {col.label}
                   </span>
                 </div>
@@ -702,7 +764,7 @@ export function GanttPreview({ pillars }: Props) {
               const barEnd = row.endDate || row.startDate!;
               const x = diffDays(minDate, barStart) * pxPerDay;
               const w = Math.max((diffDays(barStart, barEnd) + 1) * pxPerDay, 6);
-              const opacity = row.status ? STATUS_OPACITY[row.status] ?? 1 : 1;
+              const opacity = row.status ? (STATUS_OPACITY[row.status] ?? 1) : 1;
               const isDashed = row.status === "todo" || row.status === "archive";
 
               return (

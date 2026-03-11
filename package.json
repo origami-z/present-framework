@@ -7,7 +7,12 @@
   "scripts": {
     "install:all": "npm install",
     "cli": "node packages/cli/src/index.js",
-    "ui": "PLAN_ROOT=$(pwd) npm run dev --workspace=packages/ui"
+    "ui": "PLAN_ROOT=$(pwd) npm run dev --workspace=packages/ui",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.38.0"
   },
   "overrides": {
     "vite": "7.3.1"

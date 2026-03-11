@@ -1,40 +1,35 @@
-import {
-  Outlet,
-  createRootRoute,
-  HeadContent,
-  Scripts,
-} from '@tanstack/react-router'
-import type { ReactNode } from 'react'
-import '../styles/present.css'
+import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import type { ReactNode } from "react";
+import "../styles/present.css";
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'Present — Technical Planning' },
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "Present — Technical Planning" },
     ],
     links: [
       {
-        rel: 'icon',
-        type: 'image/svg+xml',
-        href: '/favicon.svg',
+        rel: "icon",
+        type: "image/svg+xml",
+        href: "/favicon.svg",
       },
       {
-        rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
       },
     ],
   }),
   component: RootComponent,
-})
+});
 
 function RootComponent() {
   return (
     <RootDocument>
       <Outlet />
     </RootDocument>
-  )
+  );
 }
 
 function RootDocument({ children }: { children: ReactNode }) {
@@ -48,5 +43,5 @@ function RootDocument({ children }: { children: ReactNode }) {
         <Scripts />
       </body>
     </html>
-  )
+  );
 }
