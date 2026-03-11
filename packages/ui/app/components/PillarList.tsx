@@ -110,6 +110,7 @@ function StatusBulletItemRow({
   const [idDraft, setIdDraft] = useState(item.id);
   const [idError, setIdError] = useState<string | null>(null);
   const justCommittedRef = useRef(false);
+  const idInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setLocalText(item.text);
@@ -148,19 +149,26 @@ function StatusBulletItemRow({
       return;
     }
     const newId = idDraft.trim();
-    if (newId && newId !== item.id) {
-      const otherIds = allIds.filter((id) => id !== item.id);
-      if (!otherIds.includes(newId)) {
-        setIdError(null);
-        setEditingId(false);
-        onRenameId(idx, item.id, newId);
-        return;
-      }
+    if (newId === item.id) {
+      setIdError(null);
+      setEditingId(false);
+      return;
     }
-    // Same ID, empty, or duplicate → cancel edit
-    setIdDraft(item.id);
+    if (!newId) {
+      setIdError("ID cannot be empty");
+      setTimeout(() => idInputRef.current?.focus(), 0);
+      return;
+    }
+    const otherIds = allIds.filter((id) => id !== item.id);
+    if (otherIds.includes(newId)) {
+      setIdError(`"${newId}" already exists`);
+      setTimeout(() => idInputRef.current?.focus(), 0);
+      return;
+    }
+    // Valid new ID → commit
     setIdError(null);
     setEditingId(false);
+    onRenameId(idx, item.id, newId);
   };
 
   const cancelIdEdit = () => {
@@ -204,6 +212,7 @@ function StatusBulletItemRow({
           {editingId ? (
             <>
               <input
+                ref={idInputRef}
                 className={`goal-id-edit-input${idError ? " error" : ""}`}
                 value={idDraft}
                 onChange={(e) => {
