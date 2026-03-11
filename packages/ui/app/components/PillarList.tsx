@@ -449,7 +449,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
       items.map((item) => (item.id === oldId ? { ...item, id: newId } : item));
     const updatedTasks = pillar.tasks.map((task) => ({
       ...task,
-      linked_status: task.linked_status.map((id) =>
+      linked_goal: task.linked_goal.map((id: string) =>
         id === oldId ? newId : id,
       ),
     }));
