@@ -5,7 +5,7 @@ meta:
   title: 2025 Engineering Technical Roadmap
   owner: Platform Engineering Team
   created: '2025-01-01'
-  updated: '2026-03-09'
+  updated: '2026-03-11'
   version: 1
 ai:
   provider: anthropic
@@ -18,6 +18,8 @@ pillars:
       - id: infrastructure-cs-001
         text: Monolithic Rails app deployed on bare metal servers
         evaluation: exceeds
+        start_date: '2026-03-16'
+        end_date: '2026-03-28'
       - id: infrastructure-cs-002
         text: Infrastructure managed manually with ad-hoc scripts
         evaluation: not_started
@@ -26,9 +28,6 @@ pillars:
         evaluation: on_track
       - id: infrastructure-ts-002
         text: Infrastructure managed entirely through Terraform IaC
-        evaluation: not_started
-      - id: infrastructure-ts-003
-        text: GitOps workflows via ArgoCD
         evaluation: not_started
     tasks:
       - id: infra-001
@@ -43,29 +42,17 @@ pillars:
           - infrastructure-cs-001
           - infrastructure-ts-001
         notes: Completed ahead of schedule. All 12 services containerized.
-      - id: infra-002
-        title: Migrate to Kubernetes (staging)
-        description: Deploy containerized services to K8s staging cluster
-        status: wip
-        priority: high
-        created: '2025-01-01'
-        updated: '2025-03-01'
-        dependencies:
-          - infra-001
-        linked_goal:
-          - infrastructure-ts-001
-        notes: Staging migration 70% complete. 8/12 services migrated.
-      - id: infra-003
-        title: Migrate to Kubernetes (production)
-        description: Promote K8s setup to production with zero-downtime migration
+      - id: infra-005
+        title: Set up GitOps with ArgoCD
+        description: Automate K8s deployments via ArgoCD watching git repositories
         status: todo
-        priority: high
+        priority: medium
         created: '2025-01-01'
         updated: '2025-01-01'
         dependencies:
-          - infra-002
+          - infra-003
         linked_goal:
-          - infrastructure-ts-001
+          - infrastructure-ts-003
         notes: ''
       - id: infra-004
         title: Implement Terraform IaC
@@ -80,28 +67,42 @@ pillars:
           - infrastructure-cs-002
           - infrastructure-ts-002
         notes: ''
-      - id: infra-005
-        title: Set up GitOps with ArgoCD
-        description: Automate K8s deployments via ArgoCD watching git repositories
+      - id: infra-003
+        title: Migrate to Kubernetes (production)
+        description: Promote K8s setup to production with zero-downtime migration
         status: todo
-        priority: medium
+        priority: high
         created: '2025-01-01'
         updated: '2025-01-01'
         dependencies:
-          - infra-003
+          - infra-002
         linked_goal:
-          - infrastructure-ts-003
+          - infrastructure-ts-001
         notes: ''
-    long_term_goal: []
+      - id: infra-002
+        title: Migrate to Kubernetes (staging)
+        description: Deploy containerized services to K8s staging cluster
+        status: wip
+        priority: high
+        created: '2025-01-01'
+        updated: '2025-03-01'
+        dependencies:
+          - infra-001
+        linked_goal:
+          - infrastructure-ts-001
+        notes: Staging migration 70% complete. 8/12 services migrated.
+    long_term_goal:
+      - id: infrastructure-ts-003
+        text: GitOps workflows via ArgoCD
+        evaluation: not_started
+        start_date: '2026-05-04'
+        end_date: '2027-07-30'
   - id: observability
     name: Observability
     description: Logging, metrics, tracing, and alerting
     short_term_goal:
       - id: observability-cs-001
         text: On-call burden is high due to fragile deployments and lack of observability
-        evaluation: needs_attention
-      - id: observability-ts-001
-        text: On-call burden reduced by 60% through better observability and automated remediation
         evaluation: needs_attention
     tasks:
       - id: obs-001
@@ -151,6 +152,10 @@ pillars:
           - observability-cs-001
           - observability-ts-001
         notes: ''
+    long_term_goal:
+      - id: observability-ts-001
+        text: On-call burden reduced by 60% through better observability and automated remediation
+        evaluation: needs_attention
   - id: security
     name: Security
     description: Security posture, compliance, and vulnerability management

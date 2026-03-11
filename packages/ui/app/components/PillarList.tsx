@@ -12,6 +12,13 @@ import {
 } from "react-aria-components";
 import { TaskEditor } from "./TaskEditor";
 
+const STATUS_COLOR: Record<string, string> = {
+  todo: "var(--color-todo)",
+  wip: "var(--color-wip)",
+  done: "var(--color-done)",
+  archive: "var(--color-archive)",
+};
+
 const EVALUATIONS = [
   "not_started",
   "on_track",
@@ -201,14 +208,20 @@ function StatusBulletItemRow({
             </ListBox>
           </Popover>
         </Select>
-        <TextField value={localText} onChange={setLocalText} style={{ flex: 1 }}>
+        <TextField
+          value={localText}
+          onChange={setLocalText}
+          style={{ flex: 1 }}
+        >
           <Input
             className="field-input-inline"
             placeholder="Goal bullet point..."
             onBlur={() => onUpdate(idx, { text: localText })}
           />
         </TextField>
-        <div style={{ display: "flex", flexDirection: "column", flexShrink: 0 }}>
+        <div
+          style={{ display: "flex", flexDirection: "column", flexShrink: 0 }}
+        >
           {editingId ? (
             <>
               <input
@@ -263,27 +276,51 @@ function StatusBulletItemRow({
           ×
         </Button>
       </div>
-      <div style={{ display: "flex", gap: "0.35rem", marginLeft: "2rem", marginTop: "0.15rem", alignItems: "center" }}>
-        <label style={{ fontSize: "0.7em", color: "var(--color-text-faint)" }}>Start</label>
+      <div
+        style={{
+          display: "flex",
+          gap: "0.35rem",
+          marginLeft: "2rem",
+          marginTop: "0.15rem",
+          alignItems: "center",
+        }}
+      >
+        <label style={{ fontSize: "0.7em", color: "var(--color-text-faint)" }}>
+          Start
+        </label>
         <input
           type="date"
           className="field-input-inline"
           style={{ width: "auto", fontSize: "0.75em", padding: "1px 4px" }}
           value={item.start_date || ""}
-          onChange={(e) => onUpdate(idx, { start_date: e.target.value || undefined })}
+          onChange={(e) =>
+            onUpdate(idx, { start_date: e.target.value || undefined })
+          }
         />
-        <label style={{ fontSize: "0.7em", color: "var(--color-text-faint)", marginLeft: "0.25rem" }}>End</label>
+        <label
+          style={{
+            fontSize: "0.7em",
+            color: "var(--color-text-faint)",
+            marginLeft: "0.25rem",
+          }}
+        >
+          End
+        </label>
         <input
           type="date"
           className="field-input-inline"
           style={{ width: "auto", fontSize: "0.75em", padding: "1px 4px" }}
           value={item.end_date || ""}
-          onChange={(e) => onUpdate(idx, { end_date: e.target.value || undefined })}
+          onChange={(e) =>
+            onUpdate(idx, { end_date: e.target.value || undefined })
+          }
         />
         {(item.start_date || item.end_date) && (
           <Button
             className="btn btn-icon"
-            onPress={() => onUpdate(idx, { start_date: undefined, end_date: undefined })}
+            onPress={() =>
+              onUpdate(idx, { start_date: undefined, end_date: undefined })
+            }
             aria-label="Clear dates"
             style={{ fontSize: "0.7em", padding: "0 0.2rem" }}
           >
@@ -375,6 +412,8 @@ export function PillarList({ pillars, onUpdate }: Props) {
   const [localDescriptions, setLocalDescriptions] = useState<
     Record<string, string>
   >(() => Object.fromEntries(pillars.map((p) => [p.id, p.description || ""])));
+  const [reorderMode, setReorderMode] = useState<Record<string, boolean>>({});
+  const dragIdx = useRef<number | null>(null);
 
   const toggle = (id: string) =>
     setCollapsed((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -613,25 +652,123 @@ export function PillarList({ pillars, onUpdate }: Props) {
                   }
                 />
 
-                <span className="field-label">Tasks</span>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: "0.25rem",
+                  }}
+                >
+                  <span className="field-label" style={{ marginBottom: 0 }}>
+                    Tasks
+                  </span>
+                  <Button
+                    className={`btn ${reorderMode[pillar.id] ? "btn-primary" : "btn-secondary"}`}
+                    style={{ fontSize: "0.75em", padding: "0.15em 0.5em" }}
+                    onPress={() =>
+                      setReorderMode((prev) => ({
+                        ...prev,
+                        [pillar.id]: !prev[pillar.id],
+                      }))
+                    }
+                  >
+                    {reorderMode[pillar.id] ? "Done" : "Reorder"}
+                  </Button>
+                </div>
 
-                {pillar.tasks.map((task, tIdx) => (
-                  <TaskEditor
-                    key={task.id}
-                    task={task}
-                    allTasks={all}
-                    statusItems={statusItems}
-                    onUpdate={(updated) => {
-                      const tasks = [...pillar.tasks];
-                      tasks[tIdx] = updated;
-                      updatePillar(idx, { ...pillar, tasks });
-                    }}
-                    onDelete={() => {
-                      const tasks = pillar.tasks.filter((_, i) => i !== tIdx);
-                      updatePillar(idx, { ...pillar, tasks });
-                    }}
-                  />
-                ))}
+                {reorderMode[pillar.id]
+                  ? pillar.tasks.map((task, tIdx) => (
+                      <button
+                        key={task.id}
+                        type="button"
+                        draggable
+                        onDragStart={() => {
+                          dragIdx.current = tIdx;
+                        }}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => {
+                          if (
+                            dragIdx.current === null ||
+                            dragIdx.current === tIdx
+                          )
+                            return;
+                          const tasks = [...pillar.tasks];
+                          const [moved] = tasks.splice(dragIdx.current, 1);
+                          tasks.splice(tIdx, 0, moved);
+                          dragIdx.current = tIdx;
+                          updatePillar(idx, { ...pillar, tasks });
+                        }}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          padding: "0.5rem 0.75rem",
+                          border: "1px solid var(--color-border)",
+                          borderRadius: "var(--radius-md)",
+                          marginBottom: "0.4rem",
+                          background: "var(--color-surface)",
+                          cursor: "grab",
+                          width: "100%",
+                          textAlign: "left",
+                        }}
+                      >
+                        <span
+                          style={{
+                            color: "var(--color-text-faint)",
+                            fontSize: "1.1em",
+                            lineHeight: 1,
+                          }}
+                        >
+                          ⠿
+                        </span>
+                        <span
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: "50%",
+                            flexShrink: 0,
+                            background: STATUS_COLOR[task.status] || "#999",
+                            display: "inline-block",
+                          }}
+                        />
+                        <span
+                          style={{
+                            flex: 1,
+                            fontWeight: 500,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {task.title || (
+                            <em style={{ color: "var(--color-text-faint)" }}>
+                              Untitled task
+                            </em>
+                          )}
+                        </span>
+                        <span className="id-chip">{task.id}</span>
+                      </button>
+                    ))
+                  : pillar.tasks.map((task, tIdx) => (
+                      <TaskEditor
+                        key={task.id}
+                        task={task}
+                        allTasks={all}
+                        statusItems={statusItems}
+                        onUpdate={(updated) => {
+                          const tasks = [...pillar.tasks];
+                          tasks[tIdx] = updated;
+                          updatePillar(idx, { ...pillar, tasks });
+                        }}
+                        onDelete={() => {
+                          const tasks = pillar.tasks.filter(
+                            (_, i) => i !== tIdx,
+                          );
+                          updatePillar(idx, { ...pillar, tasks });
+                        }}
+                      />
+                    ))}
 
                 <Button
                   className="btn btn-add-task"
