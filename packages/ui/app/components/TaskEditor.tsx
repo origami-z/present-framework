@@ -168,41 +168,54 @@ function DepsComboBox({
   );
 }
 
-function LinkedStatusComboBox({
+function LinkedGoalComboBox({
   selected,
   options,
   onChange,
 }: {
-  selected: string[];
+  selected: string | null;
   options: StatusOption[];
-  onChange: (ids: string[]) => void;
+  onChange: (id: string | null) => void;
 }) {
-  const [inputValue, setInputValue] = useState("");
+  // Show selected id in input; reset when external selection changes
+  const [inputValue, setInputValue] = useState(selected ?? "");
+  useEffect(() => {
+    setInputValue(selected ?? "");
+  }, [selected]);
 
   const filteredOptions = options.filter(
     (o) =>
-      !selected.includes(o.id) &&
-      (o.id.toLowerCase().includes(inputValue.toLowerCase()) ||
-        o.text.toLowerCase().includes(inputValue.toLowerCase())),
+      o.id.toLowerCase().includes(inputValue.toLowerCase()) ||
+      o.text.toLowerCase().includes(inputValue.toLowerCase()),
   );
 
   return (
     <div className="deps-combobox">
       <ComboBox
-        inputValue={inputValue}
-        onInputChange={setInputValue}
-        selectedKey={null}
-        onSelectionChange={(key) => {
-          if (key) {
-            onChange([...selected, key as string]);
-            setInputValue("");
-          }
-        }}
+        menuTrigger="focus"
+        // allowsCustomValue is required: without it react-aria closes the popover
+        // the moment inputValue diverges from the selected item's text
         allowsCustomValue
-        aria-label="Link status"
+        // Disable react-aria's built-in text filter — we filter filteredOptions ourselves
+        defaultFilter={() => true}
+        inputValue={inputValue}
+        onInputChange={(v) => {
+          setInputValue(v);
+          if (v === "") onChange(null);
+        }}
+        // While the user is typing a filter string that differs from the
+        // current selection, clear selectedKey so react-aria doesn't close
+        // the popover trying to reconcile input vs. selected item text.
+        selectedKey={inputValue === selected ? selected : null}
+        onSelectionChange={(key) => {
+          const id = key as string | null;
+          onChange(id);
+          setInputValue(id ?? "");
+        }}
+        aria-label="Link goal"
       >
         <div className="deps-input-row">
-          <Input className="field-input" placeholder="Search status items…" />
+          <Input className="field-input" placeholder="Search goals…" />
           <Button className="select-btn">
             <span aria-hidden className="select-arrow">
               ▼
@@ -244,31 +257,12 @@ function LinkedStatusComboBox({
                 className="select-item"
                 style={{ color: "var(--color-text-faint)" }}
               >
-                {inputValue ? "No matches" : "No status items"}
+                {inputValue ? "No matches" : "No goals"}
               </ListBoxItem>
             )}
           </ListBox>
         </Popover>
       </ComboBox>
-      {selected.length > 0 && (
-        <div className="deps-tags">
-          {selected.map((id) => {
-            const item = options.find((o) => o.id === id);
-            return (
-              <span key={id} className="dep-tag" title={item?.text}>
-                {item?.list === "short_term" ? "📋" : "🔭"} {id}
-                <button
-                  className="dep-tag-remove"
-                  onClick={() => onChange(selected.filter((s) => s !== id))}
-                  aria-label={`Remove ${id}`}
-                >
-                  ×
-                </button>
-              </span>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }
@@ -546,10 +540,10 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
 
           <div className="field">
             <span className="field-label">Linked Goal</span>
-            <LinkedStatusComboBox
-              selected={task.linked_goal || []}
+            <LinkedGoalComboBox
+              selected={task.linked_goal?.[0] ?? null}
               options={statusItems}
-              onChange={(ids) => update("linked_goal", ids)}
+              onChange={(id) => update("linked_goal", id ? [id] : [])}
             />
           </div>
 

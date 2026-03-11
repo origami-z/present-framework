@@ -160,7 +160,7 @@ pillars:
     name: Security
     description: Security posture, compliance, and vulnerability management
     short_term_goal:
-      - id: security-cs-001
+      - id: security-cs-002
         text: Security posture has not been formally audited
         evaluation: at_risk
       - id: security-ts-001
@@ -173,12 +173,12 @@ pillars:
         status: done
         priority: high
         created: '2025-01-01'
-        updated: '2026-03-01'
+        updated: '2026-03-11'
         dependencies:
           - sec-002
           - infra-005
         linked_goal:
-          - security-cs-001
+          - security-cs-002
         notes: Audit completed Feb 2025. Report received with 3 critical findings.
       - id: sec-002
         title: Remediate critical audit findings
@@ -186,11 +186,10 @@ pillars:
         status: wip
         priority: high
         created: '2025-02-01'
-        updated: '2025-03-05'
+        updated: '2026-03-11'
         dependencies:
           - sec-001
-        linked_goal:
-          - security-cs-001
+        linked_goal: []
         notes: 2/3 findings resolved. SQL injection in legacy endpoint still open — blocked on refactor.
       - id: sec-003
         title: Implement secrets management (Vault)
@@ -216,6 +215,7 @@ pillars:
         linked_goal:
           - security-ts-001
         notes: ''
+    long_term_goal: []
   - id: developer-experience
     name: Developer Experience
     description: Tooling, workflows, and productivity improvements for engineers
