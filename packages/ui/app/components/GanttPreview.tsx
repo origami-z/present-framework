@@ -362,10 +362,35 @@ export function GanttPreview({ pillars }: Props) {
   const [zoom, setZoom] = useState<ZoomLevel>("monthly");
   const [filterText, setFilterText] = useState("");
   const [collapsedGoals, setCollapsedGoals] = useState<Set<string>>(new Set());
+  const [labelWidth, setLabelWidth] = useState(LABEL_WIDTH);
   const scrollRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLDivElement>(null);
   const todayRef = useRef<HTMLDivElement>(null);
   const syncingScroll = useRef(false);
+  const resizing = useRef(false);
+
+  // Drag-to-resize left panel
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    resizing.current = true;
+    const startX = e.clientX;
+    const startWidth = labelWidth;
+
+    const onMove = (ev: MouseEvent) => {
+      if (!resizing.current) return;
+      const newWidth = Math.max(120, Math.min(600, startWidth + ev.clientX - startX));
+      setLabelWidth(newWidth);
+    };
+
+    const onUp = () => {
+      resizing.current = false;
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    };
+
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  }, [labelWidth]);
 
   const toggleGoal = useCallback((goalId: string) => {
     setCollapsedGoals((prev) => {
@@ -502,7 +527,7 @@ export function GanttPreview({ pillars }: Props) {
       {/* Chart area */}
       <div style={{ display: "flex", flex: 1, overflow: "hidden", minHeight: 0 }}>
         {/* Left labels */}
-        <div ref={labelRef} onScroll={handleLabelScroll} style={labelColumnStyle}>
+        <div ref={labelRef} onScroll={handleLabelScroll} style={{ ...labelColumnStyle, width: labelWidth }}>
           <div style={{ height: HEADER_HEIGHT, borderBottom: "1px solid var(--color-border)", display: "flex", alignItems: "flex-end", padding: "0 0.5rem 0.35rem" }}>
             <span style={{ fontSize: "0.72em", fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
               Item
@@ -557,6 +582,20 @@ export function GanttPreview({ pillars }: Props) {
             );
           })}
         </div>
+
+        {/* Resize handle */}
+        <div
+          onMouseDown={handleResizeStart}
+          style={{
+            width: 5,
+            cursor: "col-resize",
+            background: "var(--color-border)",
+            flexShrink: 0,
+            transition: "background 0.15s",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-primary)")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "var(--color-border)")}
+        />
 
         {/* Right scrollable timeline */}
         <div ref={scrollRef} onScroll={handleTimelineScroll} style={timelineScrollStyle}>
@@ -738,9 +777,7 @@ const toolbarStyle: React.CSSProperties = {
 };
 
 const labelColumnStyle: React.CSSProperties = {
-  width: LABEL_WIDTH,
   flexShrink: 0,
-  borderRight: "2px solid var(--color-border)",
   overflowY: "auto",
   overflowX: "hidden",
   background: "var(--color-surface)",
