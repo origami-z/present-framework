@@ -110,10 +110,10 @@
                   "type": "string",
                   "description": "Free-text notes, blockers, links"
                 },
-                "linked_status": {
+                "linked_goal": {
                   "type": "array",
                   "items": { "type": "string" },
-                  "description": "List of status item IDs from this pillar's short_term_goal or long_term_goal that this task relates to"
+                  "description": "List of goal IDs from this pillar's short_term_goal or long_term_goal that this task relates to"
                 },
                 "start_date": {
                   "type": "string",

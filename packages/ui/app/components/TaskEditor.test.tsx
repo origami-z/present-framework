@@ -11,7 +11,7 @@ interface Task {
   status: string
   priority: string
   dependencies: string[]
-  linked_status: string[]
+  linked_goal: string[]
   notes?: string
   created?: string
   updated?: string
@@ -24,7 +24,7 @@ const baseTask: Task = {
   status: 'todo',
   priority: 'medium',
   dependencies: [],
-  linked_status: [],
+  linked_goal: [],
   notes: '',
   created: '2024-01-01',
   updated: '2024-01-01',
@@ -173,7 +173,7 @@ describe('TaskEditor', () => {
 
   it('renders existing linked status as removable tags', async () => {
     const user = userEvent.setup()
-    const taskWithLinked = { ...baseTask, linked_status: ['infra-stg-001'] }
+    const taskWithLinked = { ...baseTask, linked_goal: ['infra-stg-001'] }
     render(<StatefulEditor task={taskWithLinked} allTasks={noOtherTasks} statusItems={sampleStatusItems} />)
 
     await user.click(screen.getByRole('button', { name: /My Task/i }))
@@ -185,7 +185,7 @@ describe('TaskEditor', () => {
   it('removes a linked status tag when the remove button is clicked', async () => {
     const user = userEvent.setup()
     const onUpdate = vi.fn()
-    const taskWithLinked = { ...baseTask, linked_status: ['infra-stg-001'] }
+    const taskWithLinked = { ...baseTask, linked_goal: ['infra-stg-001'] }
     render(
       <StatefulEditor task={taskWithLinked} allTasks={noOtherTasks} statusItems={sampleStatusItems} onUpdate={onUpdate} />,
     )
@@ -194,11 +194,11 @@ describe('TaskEditor', () => {
     await user.click(screen.getByRole('button', { name: /Remove infra-stg-001/i }))
 
     const lastCall = onUpdate.mock.calls[onUpdate.mock.calls.length - 1][0]
-    expect(lastCall.linked_status).toEqual([])
+    expect(lastCall.linked_goal).toEqual([])
   })
 
   it('shows linked status count badge in collapsed state when task has linked statuses', () => {
-    const taskWithLinked = { ...baseTask, linked_status: ['infra-stg-001', 'infra-ts-001'] }
+    const taskWithLinked = { ...baseTask, linked_goal: ['infra-stg-001', 'infra-ts-001'] }
     render(<StatefulEditor task={taskWithLinked} allTasks={noOtherTasks} statusItems={sampleStatusItems} />)
 
     expect(screen.getByText('🔗 2')).toBeInTheDocument()

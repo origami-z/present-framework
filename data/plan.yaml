@@ -39,7 +39,7 @@ pillars:
         created: '2025-01-01'
         updated: '2025-02-15'
         dependencies: []
-        linked_status:
+        linked_goal:
           - infrastructure-cs-001
           - infrastructure-ts-001
         notes: Completed ahead of schedule. All 12 services containerized.
@@ -52,7 +52,7 @@ pillars:
         updated: '2025-03-01'
         dependencies:
           - infra-001
-        linked_status:
+        linked_goal:
           - infrastructure-ts-001
         notes: Staging migration 70% complete. 8/12 services migrated.
       - id: infra-003
@@ -64,7 +64,7 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - infra-002
-        linked_status:
+        linked_goal:
           - infrastructure-ts-001
         notes: ''
       - id: infra-004
@@ -76,7 +76,7 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - infra-003
-        linked_status:
+        linked_goal:
           - infrastructure-cs-002
           - infrastructure-ts-002
         notes: ''
@@ -89,7 +89,7 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - infra-003
-        linked_status:
+        linked_goal:
           - infrastructure-ts-003
         notes: ''
     long_term_goal: []
@@ -112,7 +112,7 @@ pillars:
         created: '2025-01-01'
         updated: '2025-03-10'
         dependencies: []
-        linked_status:
+        linked_goal:
           - observability-ts-001
         notes: Loki setup done. Still integrating 4 legacy services.
       - id: obs-002
@@ -124,7 +124,7 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - infra-002
-        linked_status:
+        linked_goal:
           - observability-ts-001
         notes: ''
       - id: obs-003
@@ -136,7 +136,7 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - obs-002
-        linked_status: []
+        linked_goal: []
         notes: ''
       - id: obs-004
         title: On-call runbooks and alert tuning
@@ -147,7 +147,7 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - obs-002
-        linked_status:
+        linked_goal:
           - observability-cs-001
           - observability-ts-001
         notes: ''
@@ -172,7 +172,7 @@ pillars:
         dependencies:
           - sec-002
           - infra-005
-        linked_status:
+        linked_goal:
           - security-cs-001
         notes: Audit completed Feb 2025. Report received with 3 critical findings.
       - id: sec-002
@@ -184,7 +184,7 @@ pillars:
         updated: '2025-03-05'
         dependencies:
           - sec-001
-        linked_status:
+        linked_goal:
           - security-cs-001
         notes: 2/3 findings resolved. SQL injection in legacy endpoint still open — blocked on refactor.
       - id: sec-003
@@ -196,7 +196,7 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - infra-002
-        linked_status: []
+        linked_goal: []
         notes: ''
       - id: sec-004
         title: Achieve SOC2 Type II compliance
@@ -208,7 +208,7 @@ pillars:
         dependencies:
           - sec-002
           - sec-003
-        linked_status:
+        linked_goal:
           - security-ts-001
         notes: ''
   - id: developer-experience
@@ -234,7 +234,7 @@ pillars:
         updated: '2025-01-20'
         dependencies:
           - infra-001
-        linked_status:
+        linked_goal:
           - developer-experience-ts-001
         notes: Shipped devcontainer.json and onboarding script. Setup time reduced from 4h to 20min.
       - id: devex-002
@@ -246,7 +246,7 @@ pillars:
         updated: '2025-03-01'
         dependencies:
           - infra-001
-        linked_status:
+        linked_goal:
           - developer-experience-ts-001
         notes: 15/23 repos migrated.
       - id: devex-003
@@ -258,7 +258,7 @@ pillars:
         updated: '2025-01-01'
         dependencies:
           - devex-002
-        linked_status:
+        linked_goal:
           - developer-experience-ts-001
         notes: ''
       - id: devex-004
@@ -269,7 +269,7 @@ pillars:
         created: '2025-01-01'
         updated: '2025-01-01'
         dependencies: []
-        linked_status:
+        linked_goal:
           - developer-experience-cs-001
           - developer-experience-ts-002
         notes: ''

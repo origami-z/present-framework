@@ -42,7 +42,7 @@ interface Task {
   status: string;
   priority: string;
   dependencies: string[];
-  linked_status: string[];
+  linked_goal: string[];
   notes?: string;
   created?: string;
   updated?: string;
@@ -406,7 +406,7 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
               </em>
             )}
           </span>
-          {(task.linked_status?.length ?? 0) > 0 && (
+          {(task.linked_goal?.length ?? 0) > 0 && (
             <span
               style={{
                 fontSize: "0.7em",
@@ -415,9 +415,9 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
                 borderRadius: "var(--radius-md)",
                 padding: "0.1em 0.35em",
               }}
-              title={`Linked to ${task.linked_status.length} status item(s)`}
+              title={`Linked to ${task.linked_goal.length} goal(s)`}
             >
-              🔗 {task.linked_status.length}
+              🔗 {task.linked_goal.length}
             </span>
           )}
         </div>
@@ -553,11 +553,11 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
           </div>
 
           <div className="field">
-            <span className="field-label">Linked Status</span>
+            <span className="field-label">Linked Goal</span>
             <LinkedStatusComboBox
-              selected={task.linked_status || []}
+              selected={task.linked_goal || []}
               options={statusItems}
-              onChange={(ids) => update("linked_status", ids)}
+              onChange={(ids) => update("linked_goal", ids)}
             />
           </div>
 

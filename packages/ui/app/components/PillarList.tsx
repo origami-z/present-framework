@@ -44,7 +44,7 @@ interface Task {
   status: string;
   priority: string;
   dependencies: string[];
-  linked_status: string[];
+  linked_goal: string[];
   description?: string;
   notes?: string;
   created?: string;
@@ -292,7 +292,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
       status: "todo",
       priority: "medium",
       dependencies: [],
-      linked_status: [],
+      linked_goal: [],
       notes: "",
       created: date,
       updated: date,

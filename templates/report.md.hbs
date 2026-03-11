@@ -59,9 +59,9 @@
 {{/each}}
 {{/if}}
 
-| Task | Status | Priority | Dependencies | Linked Status |
-|------|--------|----------|--------------|---------------|
-{{#each tasks}}| **{{title}}** | {{statusEmoji status}} {{status}} | {{priority}} | {{joinDeps dependencies}} | {{joinDeps linked_status}} |
+| Task | Status | Priority | Dependencies | Linked Goal |
+|------|--------|----------|--------------|-------------|
+{{#each tasks}}| **{{title}}** | {{statusEmoji status}} {{status}} | {{priority}} | {{joinDeps dependencies}} | {{joinDeps linked_goal}} |
 {{/each}}
 
 {{/each}}

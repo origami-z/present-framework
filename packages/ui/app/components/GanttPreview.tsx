@@ -17,7 +17,7 @@ interface Task {
   status: string;
   priority: string;
   dependencies: string[];
-  linked_status: string[];
+  linked_goal: string[];
   description?: string;
   notes?: string;
   created?: string;
@@ -228,7 +228,7 @@ function buildRows(
 
     for (const task of pillar.tasks) {
       let mapped = false;
-      for (const ls of task.linked_status || []) {
+      for (const ls of task.linked_goal || []) {
         if (!placedTaskIds.has(task.id) && allGoals.some((g) => g.id === ls)) {
           if (!goalTaskMap.has(ls)) goalTaskMap.set(ls, []);
           goalTaskMap.get(ls)!.push(task);
