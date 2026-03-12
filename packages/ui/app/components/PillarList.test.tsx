@@ -183,4 +183,28 @@ describe("PillarList", () => {
     expect(updatedPillars[0].short_term_goal[0].id).toBe("sec-stg-001");
     expect(updatedPillars[0].short_term_goal[0].evaluation).toBe("not_started");
   });
+
+  it("links goal start/end labels to date inputs", () => {
+    const pillar = {
+      ...makePillar("infra", "Infrastructure"),
+      short_term_goal: [
+        {
+          id: "infra-stg-001",
+          text: "Running on bare metal",
+          evaluation: "at_risk",
+          start_date: "2026-01-01",
+          end_date: "2026-03-31",
+        },
+      ],
+      long_term_goal: [],
+    };
+
+    render(<PillarList pillars={[pillar]} onUpdate={vi.fn()} />);
+
+    const startInput = screen.getByLabelText("Start");
+    const endInput = screen.getByLabelText("End");
+
+    expect(startInput).toBeInTheDocument();
+    expect(endInput).toBeInTheDocument();
+  });
 });

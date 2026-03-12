@@ -354,6 +354,9 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
   };
 
   const otherTasks = allTasks.filter((t) => t.id !== task.id);
+  const dateFieldIdBase = `task-dates-${task.id}`.replace(/[^a-zA-Z0-9_-]/g, "-");
+  const startDateInputId = `${dateFieldIdBase}-start`;
+  const endDateInputId = `${dateFieldIdBase}-end`;
 
   return (
     <div
@@ -513,9 +516,12 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
             }}
           >
             <div className="field">
-              <Label className="field-label">Start Date</Label>
+              <label className="field-label" htmlFor={startDateInputId}>
+                Start Date
+              </label>
               <div style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
                 <input
+                  id={startDateInputId}
                   type="date"
                   className="field-input"
                   value={task.start_date || ""}
@@ -534,9 +540,12 @@ export function TaskEditor({ task, allTasks, statusItems, onUpdate, onDelete }: 
               </div>
             </div>
             <div className="field">
-              <Label className="field-label">End Date</Label>
+              <label className="field-label" htmlFor={endDateInputId}>
+                End Date
+              </label>
               <div style={{ display: "flex", gap: "0.25rem", alignItems: "center" }}>
                 <input
+                  id={endDateInputId}
                   type="date"
                   className="field-input"
                   value={task.end_date || ""}

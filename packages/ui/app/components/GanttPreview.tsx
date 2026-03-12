@@ -520,50 +520,59 @@ export function GanttPreview({ pillars }: Props) {
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       {/* Toolbar */}
       <div style={toolbarStyle}>
-        <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-          <span
-            style={{
-              position: "absolute",
-              left: 8,
-              fontSize: "0.78em",
-              color: "var(--color-text-faint)",
-              pointerEvents: "none",
-            }}
-          >
-            &#x1F50D;
-          </span>
-          <input
-            type="text"
-            className="field-input"
-            placeholder="Filter by name..."
-            value={filterText}
-            onChange={(e) => setFilterText(e.target.value)}
-            style={{ paddingLeft: "1.8rem", fontSize: "0.78em", width: 180, height: 28 }}
-          />
-          {filterText && (
-            <button
-              onClick={() => setFilterText("")}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+          <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+            <span
               style={{
                 position: "absolute",
-                right: 4,
-                background: "none",
-                border: "none",
-                cursor: "pointer",
+                left: 8,
+                fontSize: "0.78em",
                 color: "var(--color-text-faint)",
-                fontSize: "0.85em",
-                padding: "0 4px",
-                fontFamily: "inherit",
+                pointerEvents: "none",
               }}
             >
-              ×
-            </button>
-          )}
+              &#x1F50D;
+            </span>
+            <input
+              aria-label="Filter by name"
+              type="text"
+              className="field-input"
+              placeholder="Filter by name..."
+              value={filterText}
+              onChange={(e) => setFilterText(e.target.value)}
+              style={{ paddingLeft: "1.8rem", fontSize: "0.78em", width: 180, height: 28 }}
+            />
+            {filterText && (
+              <button
+                aria-label="Clear filter"
+                onClick={() => setFilterText("")}
+                style={{
+                  position: "absolute",
+                  right: 4,
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "var(--color-text-faint)",
+                  fontSize: "0.85em",
+                  padding: "0 4px",
+                  fontFamily: "inherit",
+                }}
+              >
+                ×
+              </button>
+            )}
+          </div>
         </div>
         <div style={{ width: 1, height: 18, background: "var(--color-border)" }} />
-        <span style={{ fontSize: "0.8em", color: "var(--color-text-muted)", fontWeight: 600 }}>
+        <span
+          id="gantt-zoom-label"
+          style={{ fontSize: "0.8em", color: "var(--color-text-muted)", fontWeight: 600 }}
+        >
           Zoom:
         </span>
         <div
+          role="group"
+          aria-labelledby="gantt-zoom-label"
           style={{
             display: "flex",
             borderRadius: "var(--radius-md)",

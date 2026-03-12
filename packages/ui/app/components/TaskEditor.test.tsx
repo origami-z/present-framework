@@ -116,6 +116,16 @@ describe("TaskEditor", () => {
     expect(screen.getByLabelText("Notes")).toBeInTheDocument();
   });
 
+  it("links start and end date labels to date inputs", async () => {
+    const user = userEvent.setup();
+    render(<StatefulEditor task={baseTask} allTasks={noOtherTasks} />);
+
+    await user.click(screen.getByRole("button", { name: /My Task/i }));
+
+    expect(screen.getByLabelText("Start Date")).toBeInTheDocument();
+    expect(screen.getByLabelText("End Date")).toBeInTheDocument();
+  });
+
   it("calls onUpdate with updated title when title field changes", async () => {
     const user = userEvent.setup();
     const onUpdate = vi.fn();

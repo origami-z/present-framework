@@ -117,6 +117,9 @@ function StatusBulletItemRow({
   const [idError, setIdError] = useState<string | null>(null);
   const justCommittedRef = useRef(false);
   const idInputRef = useRef<HTMLInputElement>(null);
+  const dateFieldIdBase = `goal-dates-${item.id}-${idx}`.replace(/[^a-zA-Z0-9_-]/g, "-");
+  const startDateInputId = `${dateFieldIdBase}-start`;
+  const endDateInputId = `${dateFieldIdBase}-end`;
 
   useEffect(() => {
     setLocalText(item.text);
@@ -205,7 +208,12 @@ function StatusBulletItemRow({
             </ListBox>
           </Popover>
         </Select>
-        <TextField value={localText} onChange={setLocalText} style={{ flex: 1 }}>
+        <TextField
+          value={localText}
+          onChange={setLocalText}
+          style={{ flex: 1 }}
+          aria-label={`Goal text for ${item.id}`}
+        >
           <Input
             className="field-input-inline"
             placeholder="Goal bullet point..."
@@ -278,8 +286,14 @@ function StatusBulletItemRow({
           alignItems: "center",
         }}
       >
-        <label style={{ fontSize: "0.7em", color: "var(--color-text-faint)" }}>Start</label>
+        <label
+          htmlFor={startDateInputId}
+          style={{ fontSize: "0.7em", color: "var(--color-text-faint)" }}
+        >
+          Start
+        </label>
         <input
+          id={startDateInputId}
           type="date"
           className="field-input-inline"
           style={{ width: "auto", fontSize: "0.75em", padding: "1px 4px" }}
@@ -287,6 +301,7 @@ function StatusBulletItemRow({
           onChange={(e) => onUpdate(idx, { start_date: e.target.value || undefined })}
         />
         <label
+          htmlFor={endDateInputId}
           style={{
             fontSize: "0.7em",
             color: "var(--color-text-faint)",
@@ -296,6 +311,7 @@ function StatusBulletItemRow({
           End
         </label>
         <input
+          id={endDateInputId}
           type="date"
           className="field-input-inline"
           style={{ width: "auto", fontSize: "0.75em", padding: "1px 4px" }}
@@ -571,6 +587,7 @@ export function PillarList({ pillars, onUpdate }: Props) {
                       [pillar.id]: v,
                     }))
                   }
+                  aria-label={`Pillar description for ${pillar.name}`}
                 >
                   <TextArea
                     className="field-input-inline"
@@ -743,7 +760,12 @@ export function PillarList({ pillars, onUpdate }: Props) {
 
       {addingPillar ? (
         <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
-          <TextField value={newPillarName} onChange={setNewPillarName} style={{ flex: 1 }}>
+          <TextField
+            value={newPillarName}
+            onChange={setNewPillarName}
+            style={{ flex: 1 }}
+            aria-label="New pillar name"
+          >
             <Input
               className="field-input"
               placeholder="Pillar name (e.g. Security)"
