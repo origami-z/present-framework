@@ -842,6 +842,7 @@ export function GanttPreview({ pillars }: Props) {
               const w = Math.max((diffDays(barStart, barEnd) + 1) * pxPerDay, 6);
               const opacity = row.status ? (STATUS_OPACITY[row.status] ?? 1) : 1;
               const isDashed = row.status === "todo" || row.status === "archive";
+              const showCompletedTick = row.type === "task" && row.status === "done";
 
               return (
                 <div
@@ -890,6 +891,23 @@ export function GanttPreview({ pillars }: Props) {
                         }}
                       >
                         {row.label}
+                      </span>
+                    )}
+                    {showCompletedTick && (
+                      <span
+                        aria-label="Completed"
+                        title="Completed"
+                        style={{
+                          marginLeft: "auto",
+                          marginRight: 6,
+                          color: "#fff",
+                          fontSize: "0.75em",
+                          lineHeight: 1,
+                          fontWeight: 700,
+                          flexShrink: 0,
+                        }}
+                      >
+                        ✓
                       </span>
                     )}
                   </div>
