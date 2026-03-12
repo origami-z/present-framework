@@ -433,8 +433,10 @@ export function GanttPreview({ pillars }: Props) {
   );
 
   const colWidth = COL_WIDTH[zoom];
-  const totalDays = diffDays(minDate, maxDate) || 1;
   const totalWidth = timeline.length * colWidth;
+  const timelineStart = timeline[0]?.start ?? minDate;
+  const timelineEnd = timeline[timeline.length - 1]?.end ?? maxDate;
+  const totalDays = diffDays(timelineStart, timelineEnd) + 1 || 1;
   const pxPerDay = totalWidth / totalDays;
 
   // Scroll to today on mount
@@ -446,7 +448,7 @@ export function GanttPreview({ pillars }: Props) {
   }, [zoom, pillars.length]);
 
   const today = new Date();
-  const todayOffset = Math.max(0, diffDays(minDate, today) * pxPerDay);
+  const todayOffset = Math.max(0, diffDays(timelineStart, today) * pxPerDay);
 
   if (pillars.length === 0) {
     return (
@@ -762,7 +764,7 @@ export function GanttPreview({ pillars }: Props) {
 
               const barStart = row.startDate || row.endDate!;
               const barEnd = row.endDate || row.startDate!;
-              const x = diffDays(minDate, barStart) * pxPerDay;
+              const x = diffDays(timelineStart, barStart) * pxPerDay;
               const w = Math.max((diffDays(barStart, barEnd) + 1) * pxPerDay, 6);
               const opacity = row.status ? (STATUS_OPACITY[row.status] ?? 1) : 1;
               const isDashed = row.status === "todo" || row.status === "archive";
@@ -802,7 +804,7 @@ export function GanttPreview({ pillars }: Props) {
                       overflow: "hidden",
                     }}
                   >
-                    {w > 60 && (
+                    {w > 30 && (
                       <span
                         style={{
                           fontSize: "0.68em",
