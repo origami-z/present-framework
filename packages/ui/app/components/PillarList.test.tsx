@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PillarList } from "./PillarList";
 
@@ -166,15 +166,16 @@ describe("PillarList", () => {
     expect(screen.getByDisplayValue("Fully on Kubernetes")).toBeInTheDocument();
   });
 
-  it("adds a goal item when + Add is clicked", async () => {
+  it("adds a goal item when Add is clicked in short-term goals", async () => {
     const user = userEvent.setup();
     const onUpdate = vi.fn();
     render(<PillarList pillars={[makePillar("sec", "Security")]} onUpdate={onUpdate} />);
 
-    // There are two "+ Add" buttons (short-term and long-term goals)
-    const addButtons = screen.getAllByRole("button", { name: /\+ Add/i });
-    // First one is for short-term goals
-    await user.click(addButtons[0]);
+    const shortTermGoalsHeading = screen.getByText("📋 Short-term Goals");
+    const shortTermGoalsSection = shortTermGoalsHeading.closest("div");
+    if (!shortTermGoalsSection) throw new Error("Short-term goals section not found");
+
+    await user.click(within(shortTermGoalsSection).getByRole("button", { name: /^Add$/i }));
 
     expect(onUpdate).toHaveBeenCalledTimes(1);
     const [updatedPillars] = onUpdate.mock.calls[0];

@@ -178,7 +178,7 @@ describe("TaskEditor", () => {
     expect(lastCall.dependencies).toEqual([]);
   });
 
-  it("renders the linked status combobox when expanded", async () => {
+  it("renders the linked goal combobox when expanded", async () => {
     const user = userEvent.setup();
     render(
       <StatefulEditor task={baseTask} allTasks={noOtherTasks} statusItems={sampleStatusItems} />,
@@ -186,10 +186,10 @@ describe("TaskEditor", () => {
 
     await user.click(screen.getByRole("button", { name: /My Task/i }));
 
-    expect(screen.getByRole("combobox", { name: /Link status/i })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /Link goal/i })).toBeInTheDocument();
   });
 
-  it("renders existing linked status as removable tags", async () => {
+  it("renders existing linked goal in the combobox input", async () => {
     const user = userEvent.setup();
     const taskWithLinked = { ...baseTask, linked_goal: ["infra-stg-001"] };
     render(
@@ -202,28 +202,27 @@ describe("TaskEditor", () => {
 
     await user.click(screen.getByRole("button", { name: /My Task/i }));
 
-    expect(screen.getByText(/infra-stg-001/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Remove infra-stg-001/i })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /Link goal/i })).toHaveValue("infra-stg-001");
   });
 
-  it("removes a linked status tag when the remove button is clicked", async () => {
+  it("shows selected linked goal option when one is already linked", async () => {
     const user = userEvent.setup();
-    const onUpdate = vi.fn();
     const taskWithLinked = { ...baseTask, linked_goal: ["infra-stg-001"] };
     render(
       <StatefulEditor
         task={taskWithLinked}
         allTasks={noOtherTasks}
         statusItems={sampleStatusItems}
-        onUpdate={onUpdate}
       />,
     );
 
     await user.click(screen.getByRole("button", { name: /My Task/i }));
-    await user.click(screen.getByRole("button", { name: /Remove infra-stg-001/i }));
+    const linkedGoalInput = screen.getByRole("combobox", { name: /Link goal/i });
+    await user.click(linkedGoalInput);
+    await user.keyboard("{ArrowDown}");
 
-    const lastCall = onUpdate.mock.calls[onUpdate.mock.calls.length - 1][0];
-    expect(lastCall.linked_goal).toEqual([]);
+    expect(screen.getByRole("option", { name: /infra-stg-001/i })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: /infra-ltg-001/i })).not.toBeInTheDocument();
   });
 
   it("shows linked status count badge in collapsed state when task has linked statuses", () => {
@@ -237,5 +236,30 @@ describe("TaskEditor", () => {
     );
 
     expect(screen.getByText("🔗 2")).toBeInTheDocument();
+  });
+
+  it("keeps linked goal selection after combobox input blur", async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn();
+    render(
+      <StatefulEditor
+        task={baseTask}
+        allTasks={noOtherTasks}
+        statusItems={sampleStatusItems}
+        onUpdate={onUpdate}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /My Task/i }));
+
+    const linkedGoalInput = screen.getByRole("combobox", { name: /Link goal/i });
+    await user.click(linkedGoalInput);
+    await user.click(screen.getByText("infra-stg-001"));
+
+    await user.tab();
+
+    expect(screen.getByText("🔗 1")).toBeInTheDocument();
+    const lastCall = onUpdate.mock.calls[onUpdate.mock.calls.length - 1][0];
+    expect(lastCall.linked_goal).toEqual(["infra-stg-001"]);
   });
 });

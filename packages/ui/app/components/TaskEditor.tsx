@@ -111,7 +111,12 @@ function DepsComboBox({
           <ListBox className="select-listbox">
             {filteredOptions.length > 0 ? (
               filteredOptions.map(({ id, title }) => (
-                <ListBoxItem key={id} id={id} className="select-item">
+                <ListBoxItem
+                  key={id}
+                  id={id}
+                  textValue={`${id} ${title || ""}`.trim()}
+                  className="select-item"
+                >
                   <span
                     style={{
                       fontFamily: "var(--font-mono)",
@@ -179,6 +184,12 @@ function LinkedGoalComboBox({
 }) {
   // Show selected id in input; reset when external selection changes
   const [inputValue, setInputValue] = useState(selected ?? "");
+  const selectedRef = useRef<string | null>(selected ?? null);
+
+  useEffect(() => {
+    selectedRef.current = selected ?? null;
+  }, [selected]);
+
   useEffect(() => {
     setInputValue(selected ?? "");
   }, [selected]);
@@ -200,8 +211,8 @@ function LinkedGoalComboBox({
         defaultFilter={() => true}
         inputValue={inputValue}
         onInputChange={(v) => {
+          if (v === "" && selectedRef.current) return;
           setInputValue(v);
-          if (v === "") onChange(null);
         }}
         // While the user is typing a filter string that differs from the
         // current selection, clear selectedKey so react-aria doesn't close
@@ -209,13 +220,24 @@ function LinkedGoalComboBox({
         selectedKey={inputValue === selected ? selected : null}
         onSelectionChange={(key) => {
           const id = key as string | null;
+          if (!id) return;
+          selectedRef.current = id;
           onChange(id);
-          setInputValue(id ?? "");
+          setInputValue(id);
         }}
         aria-label="Link goal"
       >
         <div className="deps-input-row">
-          <Input className="field-input" placeholder="Search goals…" />
+          <Input
+            className="field-input"
+            placeholder="Search goals…"
+            onBlur={() => {
+              const currentSelected = selectedRef.current;
+              if (inputValue === "" && currentSelected) {
+                setInputValue(currentSelected);
+              }
+            }}
+          />
           <Button className="select-btn">
             <span aria-hidden className="select-arrow">
               ▼
@@ -226,7 +248,12 @@ function LinkedGoalComboBox({
           <ListBox className="select-listbox">
             {filteredOptions.length > 0 ? (
               filteredOptions.map(({ id, text, list }) => (
-                <ListBoxItem key={id} id={id} className="select-item">
+                <ListBoxItem
+                  key={id}
+                  id={id}
+                  textValue={`${id} ${text || ""}`.trim()}
+                  className="select-item"
+                >
                   <span style={{ fontSize: "0.8em", marginRight: "0.3em" }}>
                     {list === "short_term" ? "📋" : "🔭"}
                   </span>
