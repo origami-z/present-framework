@@ -19,7 +19,7 @@ type Tab = "diagram" | "report" | "deck" | "gantt";
 function PlannerPage() {
   const initialPlan = Route.useLoaderData();
   const [plan, setPlan] = useState<any>(initialPlan);
-  const [activeTab, setActiveTab] = useState<Tab>("diagram");
+  const [activeTab, setActiveTab] = useState<Tab>("gantt");
   const [artifacts, setArtifacts] = useState<{
     diagram?: string;
     report?: string;
@@ -156,7 +156,7 @@ function PlannerPage() {
 
       <PanelGroup orientation="horizontal" style={bodyStyle}>
         {/* Left panel */}
-        <Panel id="left" minSize="20" style={leftPanel}>
+        <Panel id="left" minSize="20" defaultSize="35" style={leftPanel}>
           <div style={sectionCard}>
             <h3 className="section-title">Pillars &amp; Tasks</h3>
             <PillarList
@@ -183,6 +183,9 @@ function PlannerPage() {
           >
             <div style={tabBarRow}>
               <TabList className="tablist" style={{ borderBottom: "none", flex: 1 }}>
+                <Tab id="gantt" className="tab">
+                  Gantt
+                </Tab>
                 <Tab id="diagram" className="tab">
                   Diagram
                 </Tab>
@@ -191,9 +194,6 @@ function PlannerPage() {
                 </Tab>
                 <Tab id="deck" className="tab">
                   Deck
-                </Tab>
-                <Tab id="gantt" className="tab">
-                  Gantt
                 </Tab>
               </TabList>
               <span
