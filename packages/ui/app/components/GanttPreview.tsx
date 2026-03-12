@@ -192,6 +192,31 @@ interface GanttRow {
   indent: number;
 }
 
+interface BarMetrics {
+  x: number;
+  w: number;
+  y: number;
+  barStart: Date;
+  barEnd: Date;
+}
+
+function getRowBarMetrics(
+  row: GanttRow,
+  rowIndex: number,
+  timelineStart: Date,
+  pxPerDay: number,
+): BarMetrics | null {
+  if (!row.startDate && !row.endDate) return null;
+
+  const barStart = row.startDate || row.endDate!;
+  const barEnd = row.endDate || row.startDate!;
+  const x = diffDays(timelineStart, barStart) * pxPerDay;
+  const w = Math.max((diffDays(barStart, barEnd) + 1) * pxPerDay, 6);
+  const y = HEADER_HEIGHT + rowIndex * ROW_HEIGHT + ROW_HEIGHT / 2;
+
+  return { x, w, y, barStart, barEnd };
+}
+
 function buildRows(
   pillars: Pillar[],
   collapsedGoals: Set<string>,
@@ -383,6 +408,27 @@ function filterRowsByFocusWindow(rows: GanttRow[], enabled: boolean): GanttRow[]
   });
 }
 
+function collectReachableTaskIds(
+  startTaskId: string,
+  getNextIds: (taskId: string) => string[],
+): Set<string> {
+  const visited = new Set<string>();
+  const queue: string[] = [startTaskId];
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const nextIds = getNextIds(current);
+
+    for (const nextId of nextIds) {
+      if (nextId === startTaskId || visited.has(nextId)) continue;
+      visited.add(nextId);
+      queue.push(nextId);
+    }
+  }
+
+  return visited;
+}
+
 /* ── Component ────────────────────────────────────────────────────────────── */
 
 export function GanttPreview({ pillars }: Props) {
@@ -390,6 +436,9 @@ export function GanttPreview({ pillars }: Props) {
   const [filterText, setFilterText] = useState("");
   const [focusWindowEnabled, setFocusWindowEnabled] = useState(false);
   const [collapsedGoals, setCollapsedGoals] = useState<Set<string>>(new Set());
+  const [dependencyFocusTaskId, setDependencyFocusTaskId] = useState<string | null>(null);
+  const [upstreamTaskIds, setUpstreamTaskIds] = useState<Set<string>>(new Set());
+  const [downstreamTaskIds, setDownstreamTaskIds] = useState<Set<string>>(new Set());
   const [labelWidth, setLabelWidth] = useState(LABEL_WIDTH);
   const scrollRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLDivElement>(null);
@@ -431,6 +480,56 @@ export function GanttPreview({ pillars }: Props) {
       return next;
     });
   }, []);
+
+  const taskDependencyGraph = useMemo(() => {
+    const tasks = pillars.flatMap((pillar) => pillar.tasks || []);
+    const taskById = new Map<string, Task>();
+    const reverseDependencies = new Map<string, Set<string>>();
+
+    for (const task of tasks) {
+      taskById.set(task.id, task);
+    }
+
+    for (const task of tasks) {
+      for (const dependencyId of task.dependencies || []) {
+        if (!reverseDependencies.has(dependencyId)) {
+          reverseDependencies.set(dependencyId, new Set<string>());
+        }
+        reverseDependencies.get(dependencyId)!.add(task.id);
+      }
+    }
+
+    return { taskById, reverseDependencies };
+  }, [pillars]);
+
+  const clearDependencyFocus = useCallback(() => {
+    setDependencyFocusTaskId(null);
+    setUpstreamTaskIds(new Set());
+    setDownstreamTaskIds(new Set());
+  }, []);
+
+  const focusTaskDependencies = useCallback(
+    (taskId: string) => {
+      if (dependencyFocusTaskId === taskId) {
+        clearDependencyFocus();
+        return;
+      }
+
+      const upstream = collectReachableTaskIds(
+        taskId,
+        (id) => taskDependencyGraph.taskById.get(id)?.dependencies || [],
+      );
+      const downstream = collectReachableTaskIds(
+        taskId,
+        (id) => Array.from(taskDependencyGraph.reverseDependencies.get(id) || []),
+      );
+
+      setDependencyFocusTaskId(taskId);
+      setUpstreamTaskIds(upstream);
+      setDownstreamTaskIds(downstream);
+    },
+    [clearDependencyFocus, dependencyFocusTaskId, taskDependencyGraph],
+  );
 
   const allGoalIds = useMemo(
     () =>
@@ -496,6 +595,78 @@ export function GanttPreview({ pillars }: Props) {
   const timelineEnd = timeline[timeline.length - 1]?.end ?? maxDate;
   const totalDays = diffDays(timelineStart, timelineEnd) + 1 || 1;
   const pxPerDay = totalWidth / totalDays;
+  const hasDependencyFocus = dependencyFocusTaskId !== null;
+
+  const highlightedTaskIds = useMemo(() => {
+    const ids = new Set<string>();
+    if (dependencyFocusTaskId) ids.add(dependencyFocusTaskId);
+    for (const id of upstreamTaskIds) ids.add(id);
+    for (const id of downstreamTaskIds) ids.add(id);
+    return ids;
+  }, [dependencyFocusTaskId, downstreamTaskIds, upstreamTaskIds]);
+
+  const taskRowMetaById = useMemo(() => {
+    const meta = new Map<string, { row: GanttRow; rowIndex: number }>();
+    rows.forEach((row, rowIndex) => {
+      if (row.type === "task") {
+        meta.set(row.id, { row, rowIndex });
+      }
+    });
+    return meta;
+  }, [rows]);
+
+  const dependencyArrows = useMemo(() => {
+    if (!hasDependencyFocus) return [] as { d: string; isPrimary: boolean }[];
+
+    const arrows: { d: string; isPrimary: boolean }[] = [];
+
+    for (const [taskId, taskMeta] of taskRowMetaById) {
+      if (!highlightedTaskIds.has(taskId)) continue;
+
+      const task = taskDependencyGraph.taskById.get(taskId);
+      if (!task) continue;
+
+      for (const dependencyId of task.dependencies || []) {
+        if (!highlightedTaskIds.has(dependencyId)) continue;
+
+        const dependencyMeta = taskRowMetaById.get(dependencyId);
+        if (!dependencyMeta) continue;
+
+        const from = getRowBarMetrics(
+          dependencyMeta.row,
+          dependencyMeta.rowIndex,
+          timelineStart,
+          pxPerDay,
+        );
+        const to = getRowBarMetrics(taskMeta.row, taskMeta.rowIndex, timelineStart, pxPerDay);
+
+        if (!from || !to) continue;
+
+        const startX = from.x + Math.max(from.w - pxPerDay * 0.5, 1);
+        const endX = to.x + Math.min(pxPerDay * 0.5, Math.max(to.w * 0.35, 1));
+        const startY = from.y;
+        const endY = to.y;
+        const direction = endX >= startX ? 1 : -1;
+        const offset = Math.min(56, Math.max(18, Math.abs(endX - startX) / 2.4));
+        const c1x = startX + direction * offset;
+        const c2x = endX - direction * offset;
+        const d = `M ${startX} ${startY} C ${c1x} ${startY}, ${c2x} ${endY}, ${endX} ${endY}`;
+        const isPrimary = dependencyId === dependencyFocusTaskId || taskId === dependencyFocusTaskId;
+
+        arrows.push({ d, isPrimary });
+      }
+    }
+
+    return arrows;
+  }, [
+    dependencyFocusTaskId,
+    hasDependencyFocus,
+    highlightedTaskIds,
+    pxPerDay,
+    taskDependencyGraph.taskById,
+    taskRowMetaById,
+    timelineStart,
+  ]);
 
   // Scroll to today on mount
   useEffect(() => {
@@ -712,6 +883,10 @@ export function GanttPreview({ pillars }: Props) {
           </div>
           {rows.map((row) => {
             const color = PILLAR_COLORS[row.pillarIdx % PILLAR_COLORS.length];
+            const isFocusedTask = row.type === "task" && dependencyFocusTaskId === row.id;
+            const isUpstreamTask = row.type === "task" && upstreamTaskIds.has(row.id);
+            const isDownstreamTask = row.type === "task" && downstreamTaskIds.has(row.id);
+            const isDependencyHighlightedTask = isFocusedTask || isUpstreamTask || isDownstreamTask;
             return (
               <div
                 key={row.id}
@@ -725,8 +900,20 @@ export function GanttPreview({ pillars }: Props) {
                   gap: "0.35rem",
                   cursor: row.type === "goal" ? "pointer" : "default",
                   background: row.type === "goal" ? "var(--color-bg)" : "transparent",
+                  borderLeft: isFocusedTask
+                    ? "3px solid var(--color-primary)"
+                    : isUpstreamTask
+                      ? "3px dashed var(--color-text-faint)"
+                      : isDownstreamTask
+                        ? "3px solid var(--color-text-faint)"
+                        : "3px solid transparent",
+                  opacity:
+                    row.type === "task" && hasDependencyFocus && !isDependencyHighlightedTask
+                      ? 0.5
+                      : 1,
                 }}
                 onClick={() => row.type === "goal" && toggleGoal(row.id)}
+                onDoubleClick={() => row.type === "task" && focusTaskDependencies(row.id)}
               >
                 {row.type === "goal" && (
                   <span
@@ -886,8 +1073,15 @@ export function GanttPreview({ pillars }: Props) {
             {rows.map((row, rIdx) => {
               const color = PILLAR_COLORS[row.pillarIdx % PILLAR_COLORS.length];
               const y = HEADER_HEIGHT + rIdx * ROW_HEIGHT;
+              const barMetrics = getRowBarMetrics(row, rIdx, timelineStart, pxPerDay);
+              const isFocusedTask = row.type === "task" && dependencyFocusTaskId === row.id;
+              const isUpstreamTask = row.type === "task" && upstreamTaskIds.has(row.id);
+              const isDownstreamTask = row.type === "task" && downstreamTaskIds.has(row.id);
+              const isDependencyHighlightedTask = isFocusedTask || isUpstreamTask || isDownstreamTask;
+              const inactiveTaskOpacity =
+                row.type === "task" && hasDependencyFocus && !isDependencyHighlightedTask ? 0.35 : 1;
 
-              if (!row.startDate && !row.endDate) {
+              if (!barMetrics) {
                 return (
                   <div
                     key={row.id}
@@ -904,11 +1098,8 @@ export function GanttPreview({ pillars }: Props) {
                 );
               }
 
-              const barStart = row.startDate || row.endDate!;
-              const barEnd = row.endDate || row.startDate!;
-              const x = diffDays(timelineStart, barStart) * pxPerDay;
-              const w = Math.max((diffDays(barStart, barEnd) + 1) * pxPerDay, 6);
-              const opacity = row.status ? (STATUS_OPACITY[row.status] ?? 1) : 1;
+              const { barStart, barEnd, x, w } = barMetrics;
+              const opacity = (row.status ? (STATUS_OPACITY[row.status] ?? 1) : 1) * inactiveTaskOpacity;
               const isDashed = row.status === "todo" || row.status === "archive";
               const showCompletedTick = row.type === "task" && row.status === "done";
 
@@ -927,6 +1118,7 @@ export function GanttPreview({ pillars }: Props) {
                 >
                   <div
                     title={`${row.label}\n${formatDate(barStart)} → ${formatDate(barEnd)}`}
+                    onDoubleClick={() => row.type === "task" && focusTaskDependencies(row.id)}
                     style={{
                       position: "absolute",
                       left: x,
@@ -945,6 +1137,16 @@ export function GanttPreview({ pillars }: Props) {
                       alignItems: "center",
                       paddingLeft: 6,
                       overflow: "hidden",
+                      outline: isFocusedTask
+                        ? "2px solid var(--color-primary)"
+                        : isUpstreamTask
+                          ? "2px dashed var(--color-text-faint)"
+                          : isDownstreamTask
+                            ? "2px solid var(--color-text-faint)"
+                            : "none",
+                      outlineOffset: -1,
+                      zIndex: isDependencyHighlightedTask ? 2 : 1,
+                      cursor: row.type === "task" ? "pointer" : "default",
                     }}
                   >
                     {w > 30 && (
@@ -982,6 +1184,60 @@ export function GanttPreview({ pillars }: Props) {
                 </div>
               );
             })}
+
+            {/* Dependency arrows */}
+            {dependencyArrows.length > 0 && (
+              <svg
+                width={totalWidth}
+                height={HEADER_HEIGHT + rows.length * ROW_HEIGHT + ROW_HEIGHT * 2}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  pointerEvents: "none",
+                  zIndex: 2,
+                }}
+              >
+                <defs>
+                  <marker
+                    id="gantt-arrowhead-muted"
+                    viewBox="0 0 8 8"
+                    refX="6"
+                    refY="4"
+                    markerWidth="6"
+                    markerHeight="6"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M0,0 L8,4 L0,8 z" fill="var(--color-text-faint)" />
+                  </marker>
+                  <marker
+                    id="gantt-arrowhead-primary"
+                    viewBox="0 0 8 8"
+                    refX="6"
+                    refY="4"
+                    markerWidth="6"
+                    markerHeight="6"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M0,0 L8,4 L0,8 z" fill="var(--color-primary)" />
+                  </marker>
+                </defs>
+
+                {dependencyArrows.map((arrow, idx) => (
+                  <path
+                    key={idx}
+                    d={arrow.d}
+                    fill="none"
+                    stroke={arrow.isPrimary ? "var(--color-primary)" : "var(--color-text-faint)"}
+                    strokeWidth={arrow.isPrimary ? 1.5 : 1.15}
+                    opacity={arrow.isPrimary ? 0.9 : 0.7}
+                    markerEnd={
+                      arrow.isPrimary ? "url(#gantt-arrowhead-primary)" : "url(#gantt-arrowhead-muted)"
+                    }
+                  />
+                ))}
+              </svg>
+            )}
           </div>
         </div>
       </div>
