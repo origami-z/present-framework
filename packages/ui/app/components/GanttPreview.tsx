@@ -396,6 +396,24 @@ export function GanttPreview({ pillars }: Props) {
     });
   }, []);
 
+  const allGoalIds = useMemo(
+    () =>
+      pillars.flatMap((pillar) => [
+        ...(pillar.short_term_goal || []).map((goal) => goal.id),
+        ...(pillar.long_term_goal || []).map((goal) => goal.id),
+      ]),
+    [pillars],
+  );
+
+  const areAllGoalsCollapsed =
+    allGoalIds.length > 0 && allGoalIds.every((goalId) => collapsedGoals.has(goalId));
+
+  const toggleAllGoals = useCallback(() => {
+    setCollapsedGoals(() =>
+      areAllGoalsCollapsed ? new Set<string>() : new Set<string>(allGoalIds),
+    );
+  }, [allGoalIds, areAllGoalsCollapsed]);
+
   // Sync vertical scroll between label column and timeline
   const handleTimelineScroll = useCallback(() => {
     if (syncingScroll.current) return;
@@ -553,9 +571,65 @@ export function GanttPreview({ pillars }: Props) {
               borderBottom: "1px solid var(--color-border)",
               display: "flex",
               alignItems: "flex-end",
-              padding: "0 0.5rem 0.35rem",
+              gap: "0.35rem",
+              padding: "0 0.35rem 0.35rem",
             }}
           >
+            {allGoalIds.length > 0 && (
+              <Button
+                aria-label={areAllGoalsCollapsed ? "Expand all groups" : "Collapse all groups"}
+                onPress={toggleAllGoals}
+                style={{
+                  width: 22,
+                  height: 22,
+                  padding: 0,
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "var(--radius-sm)",
+                  background: "var(--color-surface)",
+                  color: "var(--color-text-muted)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                }}
+              >
+                {areAllGoalsCollapsed ? (
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+                    <path
+                      d="M2.5 3.5h11M2.5 8h11M2.5 12.5h11"
+                      stroke="currentColor"
+                      strokeWidth="1.25"
+                      strokeLinecap="round"
+                      opacity="0.45"
+                    />
+                    <path
+                      d="M5.5 4.5L8.5 8L5.5 11.5"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+                    <path
+                      d="M2.5 3.5h11M2.5 8h11M2.5 12.5h11"
+                      stroke="currentColor"
+                      strokeWidth="1.25"
+                      strokeLinecap="round"
+                      opacity="0.45"
+                    />
+                    <path
+                      d="M4.5 6.5L8 10L11.5 6.5"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </Button>
+            )}
             <span
               style={{
                 fontSize: "0.72em",
