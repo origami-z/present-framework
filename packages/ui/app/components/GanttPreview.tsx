@@ -348,11 +348,47 @@ function filterRows(rows: GanttRow[], query: string): GanttRow[] {
   });
 }
 
+function filterRowsByFocusWindow(rows: GanttRow[], enabled: boolean): GanttRow[] {
+  if (!enabled) return rows;
+
+  const today = new Date();
+  const windowStart = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+  const windowEnd = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+
+  const overlapsWindow = (startDate: Date | null, endDate: Date | null) => {
+    const start = startDate || endDate;
+    const end = endDate || startDate;
+    if (!start || !end) return false;
+    return start <= windowEnd && end >= windowStart;
+  };
+
+  const visibleTaskIds = new Set(
+    rows
+      .filter((row) => row.type === "task" && overlapsWindow(row.startDate, row.endDate))
+      .map((row) => row.id),
+  );
+
+  const visibleGoalIdsByTask = new Set(
+    rows
+      .filter((row) => row.type === "task" && row.goalId && visibleTaskIds.has(row.id))
+      .map((row) => row.goalId as string),
+  );
+
+  return rows.filter((row) => {
+    if (row.type === "task") return visibleTaskIds.has(row.id);
+    if (row.type === "goal") {
+      return visibleGoalIdsByTask.has(row.id) || overlapsWindow(row.startDate, row.endDate);
+    }
+    return false;
+  });
+}
+
 /* ── Component ────────────────────────────────────────────────────────────── */
 
 export function GanttPreview({ pillars }: Props) {
   const [zoom, setZoom] = useState<ZoomLevel>("monthly");
   const [filterText, setFilterText] = useState("");
+  const [focusWindowEnabled, setFocusWindowEnabled] = useState(false);
   const [collapsedGoals, setCollapsedGoals] = useState<Set<string>>(new Set());
   const [labelWidth, setLabelWidth] = useState(LABEL_WIDTH);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -443,7 +479,11 @@ export function GanttPreview({ pillars }: Props) {
     maxDate,
   } = useMemo(() => buildRows(pillars, collapsedGoals), [pillars, collapsedGoals]);
 
-  const rows = useMemo(() => filterRows(allRows, filterText), [allRows, filterText]);
+  const focusRows = useMemo(
+    () => filterRowsByFocusWindow(allRows, focusWindowEnabled),
+    [allRows, focusWindowEnabled],
+  );
+  const rows = useMemo(() => filterRows(focusRows, filterText), [focusRows, filterText]);
 
   const timeline = useMemo(
     () => generateTimeline(minDate, maxDate, zoom),
@@ -551,9 +591,28 @@ export function GanttPreview({ pillars }: Props) {
             </button>
           ))}
         </div>
+        <div style={{ width: 1, height: 18, background: "var(--color-border)" }} />
+        <button
+          onClick={() => setFocusWindowEnabled((prev) => !prev)}
+          aria-pressed={focusWindowEnabled}
+          title="Show only tasks within one month before and after today"
+          style={{
+            padding: "4px 10px",
+            fontSize: "0.78em",
+            fontWeight: 600,
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-md)",
+            cursor: "pointer",
+            background: focusWindowEnabled ? "var(--color-primary)" : "var(--color-surface)",
+            color: focusWindowEnabled ? "#fff" : "var(--color-text-muted)",
+            fontFamily: "inherit",
+          }}
+        >
+          ±1M
+        </button>
         <span style={{ fontSize: "0.72em", color: "var(--color-text-faint)", marginLeft: "auto" }}>
           {rows.length}
-          {filterText ? ` / ${allRows.length}` : ""} items
+          {filterText || focusWindowEnabled ? ` / ${allRows.length}` : ""} items
         </span>
       </div>
 
