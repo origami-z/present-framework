@@ -39,6 +39,18 @@ type ZoomLevel = "weekly" | "monthly" | "quarterly";
 
 interface Props {
   pillars: Pillar[];
+  onDateChange?: (rowId: string, rowType: "goal" | "task", startDate: string, endDate: string) => void;
+}
+
+/* ── Drag state ──────────────────────────────────────────────────────────── */
+
+interface DragState {
+  rowId: string;
+  rowType: "goal" | "task";
+  mode: "move" | "resize-left" | "resize-right";
+  origStartDate: Date;
+  origEndDate: Date;
+  startX: number;
 }
 
 /* ── Pillar colors ────────────────────────────────────────────────────────── */
@@ -350,7 +362,7 @@ function filterRows(rows: GanttRow[], query: string): GanttRow[] {
 
 /* ── Component ────────────────────────────────────────────────────────────── */
 
-export function GanttPreview({ pillars }: Props) {
+export function GanttPreview({ pillars, onDateChange }: Props) {
   const [zoom, setZoom] = useState<ZoomLevel>("monthly");
   const [filterText, setFilterText] = useState("");
   const [collapsedGoals, setCollapsedGoals] = useState<Set<string>>(new Set());
@@ -360,6 +372,8 @@ export function GanttPreview({ pillars }: Props) {
   const todayRef = useRef<HTMLDivElement>(null);
   const syncingScroll = useRef(false);
   const resizing = useRef(false);
+  const [dragState, setDragState] = useState<DragState | null>(null);
+  const [dragDelta, setDragDelta] = useState(0);
 
   // Drag-to-resize left panel
   const handleResizeStart = useCallback(
@@ -418,6 +432,61 @@ export function GanttPreview({ pillars }: Props) {
       syncingScroll.current = false;
     });
   }, []);
+
+  // Bar drag handlers
+  const handleBarDragStart = useCallback(
+    (e: React.MouseEvent, row: GanttRow, mode: DragState["mode"], pxPerDay: number) => {
+      if (!onDateChange || row.type === "pillar") return;
+      if (!row.startDate || !row.endDate) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      const state: DragState = {
+        rowId: row.id,
+        rowType: row.type as "goal" | "task",
+        mode,
+        origStartDate: new Date(row.startDate),
+        origEndDate: new Date(row.endDate),
+        startX: e.clientX,
+      };
+      setDragState(state);
+      setDragDelta(0);
+
+      const onMove = (ev: MouseEvent) => {
+        setDragDelta(ev.clientX - state.startX);
+      };
+
+      const onUp = (ev: MouseEvent) => {
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+
+        const deltaPx = ev.clientX - state.startX;
+        const deltaDays = Math.round(deltaPx / pxPerDay);
+
+        let newStart = state.origStartDate;
+        let newEnd = state.origEndDate;
+
+        if (state.mode === "move") {
+          newStart = addDays(state.origStartDate, deltaDays);
+          newEnd = addDays(state.origEndDate, deltaDays);
+        } else if (state.mode === "resize-left") {
+          newStart = addDays(state.origStartDate, deltaDays);
+          if (newStart > newEnd) newStart = newEnd;
+        } else if (state.mode === "resize-right") {
+          newEnd = addDays(state.origEndDate, deltaDays);
+          if (newEnd < newStart) newEnd = newStart;
+        }
+
+        setDragState(null);
+        setDragDelta(0);
+        onDateChange(state.rowId, state.rowType, formatDate(newStart), formatDate(newEnd));
+      };
+
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    },
+    [onDateChange],
+  );
 
   const {
     rows: allRows,
@@ -762,10 +831,30 @@ export function GanttPreview({ pillars }: Props) {
 
               const barStart = row.startDate || row.endDate!;
               const barEnd = row.endDate || row.startDate!;
-              const x = diffDays(minDate, barStart) * pxPerDay;
-              const w = Math.max((diffDays(barStart, barEnd) + 1) * pxPerDay, 6);
+              const isDragging = dragState?.rowId === row.id;
+              const draggable = onDateChange && row.type !== "pillar" && row.startDate && row.endDate;
+
+              // Compute visual position with drag offset applied
+              let visualX = diffDays(minDate, barStart) * pxPerDay;
+              let visualW = Math.max((diffDays(barStart, barEnd) + 1) * pxPerDay, 6);
+
+              if (isDragging && dragState) {
+                if (dragState.mode === "move") {
+                  visualX += dragDelta;
+                } else if (dragState.mode === "resize-left") {
+                  const clampedDelta = Math.min(dragDelta, visualW - 6);
+                  visualX += clampedDelta;
+                  visualW -= clampedDelta;
+                } else if (dragState.mode === "resize-right") {
+                  visualW = Math.max(visualW + dragDelta, 6);
+                }
+              }
+
               const opacity = row.status ? (STATUS_OPACITY[row.status] ?? 1) : 1;
               const isDashed = row.status === "todo" || row.status === "archive";
+              const barTop = row.type === "goal" ? 4 : 6;
+              const barHeight = row.type === "goal" ? ROW_HEIGHT - 8 : ROW_HEIGHT - 12;
+              const handleWidth = 6;
 
               return (
                 <div
@@ -780,14 +869,15 @@ export function GanttPreview({ pillars }: Props) {
                     background: row.type === "goal" ? "rgba(0,0,0,0.015)" : "transparent",
                   }}
                 >
+                  {/* Bar body */}
                   <div
                     title={`${row.label}\n${formatDate(barStart)} → ${formatDate(barEnd)}`}
                     style={{
                       position: "absolute",
-                      left: x,
-                      top: row.type === "goal" ? 4 : 6,
-                      width: w,
-                      height: row.type === "goal" ? ROW_HEIGHT - 8 : ROW_HEIGHT - 12,
+                      left: visualX,
+                      top: barTop,
+                      width: visualW,
+                      height: barHeight,
                       background: row.type === "goal" ? color.barLight : color.bar,
                       borderRadius: "var(--radius-sm)",
                       opacity,
@@ -798,11 +888,20 @@ export function GanttPreview({ pillars }: Props) {
                           : "none",
                       display: "flex",
                       alignItems: "center",
-                      paddingLeft: 6,
+                      paddingLeft: draggable ? handleWidth + 4 : 6,
+                      paddingRight: draggable ? handleWidth + 2 : 0,
                       overflow: "hidden",
+                      cursor: draggable ? "grab" : "default",
+                      userSelect: "none",
+                      transition: isDragging ? "none" : undefined,
                     }}
+                    onMouseDown={
+                      draggable
+                        ? (e) => handleBarDragStart(e, row, "move", pxPerDay)
+                        : undefined
+                    }
                   >
-                    {w > 60 && (
+                    {visualW > 60 && (
                       <span
                         style={{
                           fontSize: "0.68em",
@@ -811,10 +910,63 @@ export function GanttPreview({ pillars }: Props) {
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
+                          pointerEvents: "none",
                         }}
                       >
                         {row.label}
                       </span>
+                    )}
+
+                    {/* Left resize handle */}
+                    {draggable && (
+                      <div
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          handleBarDragStart(e, row, "resize-left", pxPerDay);
+                        }}
+                        style={{
+                          position: "absolute",
+                          left: 0,
+                          top: 0,
+                          width: handleWidth,
+                          height: "100%",
+                          cursor: "ew-resize",
+                          borderRadius: "var(--radius-sm) 0 0 var(--radius-sm)",
+                          background: "transparent",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background = "rgba(255,255,255,0.3)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background = "transparent")
+                        }
+                      />
+                    )}
+
+                    {/* Right resize handle */}
+                    {draggable && (
+                      <div
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          handleBarDragStart(e, row, "resize-right", pxPerDay);
+                        }}
+                        style={{
+                          position: "absolute",
+                          right: 0,
+                          top: 0,
+                          width: handleWidth,
+                          height: "100%",
+                          cursor: "ew-resize",
+                          borderRadius: "0 var(--radius-sm) var(--radius-sm) 0",
+                          background: "transparent",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background = "rgba(255,255,255,0.3)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background = "transparent")
+                        }
+                      />
                     )}
                   </div>
                 </div>

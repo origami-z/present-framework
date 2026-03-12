@@ -91,6 +91,43 @@ function PlannerPage() {
     }
   }, [showToast]);
 
+  const handleGanttDateChange = useCallback(
+    (rowId: string, rowType: "goal" | "task", startDate: string, endDate: string) => {
+      setPlan((prev: any) => {
+        const updated = {
+          ...prev,
+          pillars: prev.pillars.map((pillar: any) => {
+            if (rowType === "task") {
+              const taskIdx = pillar.tasks.findIndex((t: any) => t.id === rowId);
+              if (taskIdx !== -1) {
+                const tasks = [...pillar.tasks];
+                tasks[taskIdx] = { ...tasks[taskIdx], start_date: startDate, end_date: endDate };
+                return { ...pillar, tasks };
+              }
+            } else if (rowType === "goal") {
+              const stIdx = pillar.short_term_goal?.findIndex((g: any) => g.id === rowId) ?? -1;
+              if (stIdx !== -1) {
+                const goals = [...pillar.short_term_goal];
+                goals[stIdx] = { ...goals[stIdx], start_date: startDate, end_date: endDate };
+                return { ...pillar, short_term_goal: goals };
+              }
+              const ltIdx = pillar.long_term_goal?.findIndex((g: any) => g.id === rowId) ?? -1;
+              if (ltIdx !== -1) {
+                const goals = [...pillar.long_term_goal];
+                goals[ltIdx] = { ...goals[ltIdx], start_date: startDate, end_date: endDate };
+                return { ...pillar, long_term_goal: goals };
+              }
+            }
+            return pillar;
+          }),
+        };
+        debouncedSave(updated);
+        return updated;
+      });
+    },
+    [debouncedSave],
+  );
+
   const handleIterate = useCallback(async () => {
     setIterating(true);
     try {
@@ -218,7 +255,7 @@ function PlannerPage() {
               <DeckPreview content={artifacts.deck || ""} />
             </TabPanel>
             <TabPanel id="gantt" className="tabpanel" style={{ overflow: "hidden" }}>
-              <GanttPreview pillars={plan?.pillars || []} />
+              <GanttPreview pillars={plan?.pillars || []} onDateChange={handleGanttDateChange} />
             </TabPanel>
           </Tabs>
         </Panel>
