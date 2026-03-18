@@ -3,7 +3,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { Button, Tabs, TabList, Tab, TabPanel } from "react-aria-components";
 import { Group as PanelGroup, Panel, Separator as PanelResizeHandle } from "react-resizable-panels";
 import { getPlan, savePlan, generateArtifacts, runIterate } from "../serverFns/plan";
-import { PillarList } from "../components/PillarList";
+import { PillarList, type PillarListScrollTarget } from "../components/PillarList";
 import { DiagramPreview } from "../components/DiagramPreview";
 import { ReportPreview } from "../components/ReportPreview";
 import { DeckPreview } from "../components/DeckPreview";
@@ -30,6 +30,8 @@ function PlannerPage() {
   const [iterating, setIterating] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [pillarListScrollTarget, setPillarListScrollTarget] =
+    useState<PillarListScrollTarget | null>(null);
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -162,6 +164,7 @@ function PlannerPage() {
             <PillarList
               pillars={plan?.pillars || []}
               onUpdate={(pillars) => handlePlanChange({ pillars })}
+              scrollTarget={pillarListScrollTarget}
             />
           </div>
         </Panel>
@@ -218,7 +221,15 @@ function PlannerPage() {
               <DeckPreview content={artifacts.deck || ""} />
             </TabPanel>
             <TabPanel id="gantt" className="tabpanel" style={{ overflow: "hidden" }}>
-              <GanttPreview pillars={plan?.pillars || []} />
+              <GanttPreview
+                pillars={plan?.pillars || []}
+                onItemSelect={(target) => {
+                  setPillarListScrollTarget({
+                    ...target,
+                    requestKey: Date.now(),
+                  });
+                }}
+              />
             </TabPanel>
           </Tabs>
         </Panel>

@@ -39,6 +39,12 @@ type ZoomLevel = "weekly" | "monthly" | "quarterly";
 
 interface Props {
   pillars: Pillar[];
+  onItemSelect?: (target: {
+    type: "pillar" | "goal" | "task";
+    pillarId: string;
+    goalId?: string;
+    taskId?: string;
+  }) => void;
 }
 
 /* ── Pillar colors ────────────────────────────────────────────────────────── */
@@ -185,6 +191,7 @@ interface GanttRow {
   id: string;
   label: string;
   pillarIdx: number;
+  pillarId: string;
   startDate: Date | null;
   endDate: Date | null;
   status?: string;
@@ -271,6 +278,7 @@ function buildRows(
         id: goal.id,
         label: `${goal.goalType === "short" ? "ST" : "LT"}: ${goal.text || goal.id}`,
         pillarIdx: pIdx,
+        pillarId: pillar.id,
         startDate: gs,
         endDate: ge,
         indent: 0,
@@ -289,6 +297,7 @@ function buildRows(
             id: task.id,
             label: task.title || task.id,
             pillarIdx: pIdx,
+            pillarId: pillar.id,
             startDate: ts,
             endDate: te,
             status: task.status,
@@ -311,6 +320,7 @@ function buildRows(
         id: task.id,
         label: task.title || task.id,
         pillarIdx: pIdx,
+        pillarId: pillar.id,
         startDate: ts,
         endDate: te,
         status: task.status,
@@ -431,7 +441,7 @@ function collectReachableTaskIds(
 
 /* ── Component ────────────────────────────────────────────────────────────── */
 
-export function GanttPreview({ pillars }: Props) {
+export function GanttPreview({ pillars, onItemSelect }: Props) {
   const [zoom, setZoom] = useState<ZoomLevel>("monthly");
   const [filterText, setFilterText] = useState("");
   const [focusWindowEnabled, setFocusWindowEnabled] = useState(false);
@@ -508,6 +518,34 @@ export function GanttPreview({ pillars }: Props) {
     setDownstreamTaskIds(new Set());
   }, []);
 
+  const handleRowSelect = useCallback(
+    (row: GanttRow) => {
+      if (!onItemSelect) return;
+
+      if (row.type === "task") {
+        onItemSelect({
+          type: "task",
+          pillarId: row.pillarId,
+          taskId: row.id,
+          goalId: row.goalId,
+        });
+        return;
+      }
+
+      if (row.type === "goal") {
+        onItemSelect({
+          type: "goal",
+          pillarId: row.pillarId,
+          goalId: row.id,
+        });
+        return;
+      }
+
+      onItemSelect({ type: "pillar", pillarId: row.pillarId });
+    },
+    [onItemSelect],
+  );
+
   const focusTaskDependencies = useCallback(
     (taskId: string) => {
       if (dependencyFocusTaskId === taskId) {
@@ -519,9 +557,8 @@ export function GanttPreview({ pillars }: Props) {
         taskId,
         (id) => taskDependencyGraph.taskById.get(id)?.dependencies || [],
       );
-      const downstream = collectReachableTaskIds(
-        taskId,
-        (id) => Array.from(taskDependencyGraph.reverseDependencies.get(id) || []),
+      const downstream = collectReachableTaskIds(taskId, (id) =>
+        Array.from(taskDependencyGraph.reverseDependencies.get(id) || []),
       );
 
       setDependencyFocusTaskId(taskId);
@@ -651,7 +688,8 @@ export function GanttPreview({ pillars }: Props) {
         const c1x = startX + direction * offset;
         const c2x = endX - direction * offset;
         const d = `M ${startX} ${startY} C ${c1x} ${startY}, ${c2x} ${endY}, ${endX} ${endY}`;
-        const isPrimary = dependencyId === dependencyFocusTaskId || taskId === dependencyFocusTaskId;
+        const isPrimary =
+          dependencyId === dependencyFocusTaskId || taskId === dependencyFocusTaskId;
 
         arrows.push({ d, isPrimary });
       }
@@ -1077,9 +1115,12 @@ export function GanttPreview({ pillars }: Props) {
               const isFocusedTask = row.type === "task" && dependencyFocusTaskId === row.id;
               const isUpstreamTask = row.type === "task" && upstreamTaskIds.has(row.id);
               const isDownstreamTask = row.type === "task" && downstreamTaskIds.has(row.id);
-              const isDependencyHighlightedTask = isFocusedTask || isUpstreamTask || isDownstreamTask;
+              const isDependencyHighlightedTask =
+                isFocusedTask || isUpstreamTask || isDownstreamTask;
               const inactiveTaskOpacity =
-                row.type === "task" && hasDependencyFocus && !isDependencyHighlightedTask ? 0.35 : 1;
+                row.type === "task" && hasDependencyFocus && !isDependencyHighlightedTask
+                  ? 0.35
+                  : 1;
 
               if (!barMetrics) {
                 return (
@@ -1099,7 +1140,8 @@ export function GanttPreview({ pillars }: Props) {
               }
 
               const { barStart, barEnd, x, w } = barMetrics;
-              const opacity = (row.status ? (STATUS_OPACITY[row.status] ?? 1) : 1) * inactiveTaskOpacity;
+              const opacity =
+                (row.status ? (STATUS_OPACITY[row.status] ?? 1) : 1) * inactiveTaskOpacity;
               const isDashed = row.status === "todo" || row.status === "archive";
               const showCompletedTick = row.type === "task" && row.status === "done";
 
@@ -1118,7 +1160,16 @@ export function GanttPreview({ pillars }: Props) {
                 >
                   <div
                     title={`${row.label}\n${formatDate(barStart)} → ${formatDate(barEnd)}`}
+                    onClick={() => handleRowSelect(row)}
                     onDoubleClick={() => row.type === "task" && focusTaskDependencies(row.id)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        handleRowSelect(row);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                     style={{
                       position: "absolute",
                       left: x,
@@ -1146,7 +1197,7 @@ export function GanttPreview({ pillars }: Props) {
                             : "none",
                       outlineOffset: -1,
                       zIndex: isDependencyHighlightedTask ? 2 : 1,
-                      cursor: row.type === "task" ? "pointer" : "default",
+                      cursor: "pointer",
                     }}
                   >
                     {w > 30 && (
@@ -1232,7 +1283,9 @@ export function GanttPreview({ pillars }: Props) {
                     strokeWidth={arrow.isPrimary ? 1.5 : 1.15}
                     opacity={arrow.isPrimary ? 0.9 : 0.7}
                     markerEnd={
-                      arrow.isPrimary ? "url(#gantt-arrowhead-primary)" : "url(#gantt-arrowhead-muted)"
+                      arrow.isPrimary
+                        ? "url(#gantt-arrowhead-primary)"
+                        : "url(#gantt-arrowhead-muted)"
                     }
                   />
                 ))}

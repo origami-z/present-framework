@@ -73,6 +73,21 @@ interface Pillar {
 interface Props {
   pillars: Pillar[];
   onUpdate: (pillars: Pillar[]) => void;
+  scrollTarget?: PillarListScrollTarget | null;
+}
+
+export interface PillarListScrollTarget {
+  type: "pillar" | "goal" | "task";
+  pillarId: string;
+  goalId?: string;
+  taskId?: string;
+  requestKey: number;
+}
+
+function getScrollTargetKey(target: PillarListScrollTarget): string {
+  if (target.type === "task") return `task:${target.taskId}`;
+  if (target.type === "goal") return `goal:${target.goalId}`;
+  return `pillar:${target.pillarId}`;
 }
 
 function generateId(prefix: string, existing: string[]) {
@@ -97,6 +112,8 @@ function StatusBulletItemRow({
   idx,
   moveLabel,
   allIds,
+  highlighted,
+  containerRef,
   onUpdate,
   onRemove,
   onMove,
@@ -106,6 +123,8 @@ function StatusBulletItemRow({
   idx: number;
   moveLabel: string;
   allIds: string[];
+  highlighted?: boolean;
+  containerRef?: (node: HTMLDivElement | null) => void;
   onUpdate: (idx: number, partial: Partial<StatusItem>) => void;
   onRemove: (idx: number) => void;
   onMove: (idx: number) => void;
@@ -188,7 +207,19 @@ function StatusBulletItemRow({
   };
 
   return (
-    <div style={{ marginBottom: "0.35rem" }}>
+    <div
+      ref={containerRef}
+      data-scroll-target={`goal:${item.id}`}
+      data-highlighted={highlighted ? "true" : undefined}
+      style={{
+        marginBottom: "0.35rem",
+        borderRadius: "var(--radius-md)",
+        background: highlighted ? "rgba(59, 130, 246, 0.12)" : "transparent",
+        boxShadow: highlighted ? "0 0 0 2px rgba(59, 130, 246, 0.24)" : "none",
+        transition: "background 180ms ease, box-shadow 180ms ease",
+        padding: highlighted ? "0.3rem 0.35rem" : 0,
+      }}
+    >
       <div style={statusItemRow}>
         <Select
           selectedKey={item.evaluation || "not_started"}
@@ -340,6 +371,8 @@ function StatusBulletList({
   pillarId,
   idPrefix,
   allIds,
+  highlightedGoalId,
+  registerGoalRef,
   onUpdate,
   onMove,
   onRenameId,
@@ -350,6 +383,8 @@ function StatusBulletList({
   pillarId: string;
   idPrefix: string;
   allIds: string[];
+  highlightedGoalId?: string | null;
+  registerGoalRef?: (goalId: string, node: HTMLDivElement | null) => void;
   onUpdate: (items: StatusItem[]) => void;
   onMove: (item: StatusItem, updatedSourceItems: StatusItem[]) => void;
   onRenameId: (oldId: string, newId: string) => void;
@@ -403,6 +438,8 @@ function StatusBulletList({
           idx={idx}
           moveLabel={moveLabel}
           allIds={allIds}
+          highlighted={highlightedGoalId === item.id}
+          containerRef={registerGoalRef ? (node) => registerGoalRef(item.id, node) : undefined}
           onUpdate={updateItem}
           onRemove={removeItem}
           onMove={moveItem}
@@ -413,7 +450,7 @@ function StatusBulletList({
   );
 }
 
-export function PillarList({ pillars, onUpdate }: Props) {
+export function PillarList({ pillars, onUpdate, scrollTarget }: Props) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [newPillarName, setNewPillarName] = useState("");
   const [addingPillar, setAddingPillar] = useState(false);
@@ -421,7 +458,55 @@ export function PillarList({ pillars, onUpdate }: Props) {
     Object.fromEntries(pillars.map((p) => [p.id, p.description || ""])),
   );
   const [reorderMode, setReorderMode] = useState<Record<string, boolean>>({});
+  const [highlightedItemKey, setHighlightedItemKey] = useState<string | null>(null);
   const dragIdx = useRef<number | null>(null);
+  const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pillarRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const taskRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const goalRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimer.current) clearTimeout(highlightTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!scrollTarget) return;
+
+    const highlightKey = getScrollTargetKey(scrollTarget);
+
+    setCollapsed((prev) =>
+      prev[scrollTarget.pillarId] ? { ...prev, [scrollTarget.pillarId]: false } : prev,
+    );
+    setHighlightedItemKey(highlightKey);
+
+    if (highlightTimer.current) clearTimeout(highlightTimer.current);
+    highlightTimer.current = setTimeout(() => {
+      setHighlightedItemKey((current) => (current === highlightKey ? null : current));
+    }, 2000);
+
+    let frame1 = 0;
+    let frame2 = 0;
+    frame1 = requestAnimationFrame(() => {
+      frame2 = requestAnimationFrame(() => {
+        const targetNode =
+          (scrollTarget.type === "task" && scrollTarget.taskId
+            ? taskRefs.current[scrollTarget.taskId]
+            : scrollTarget.type === "goal" && scrollTarget.goalId
+              ? goalRefs.current[scrollTarget.goalId]
+              : pillarRefs.current[scrollTarget.pillarId]) ||
+          pillarRefs.current[scrollTarget.pillarId];
+
+        targetNode?.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(frame1);
+      cancelAnimationFrame(frame2);
+    };
+  }, [scrollTarget]);
 
   const toggle = (id: string) => setCollapsed((prev) => ({ ...prev, [id]: !prev[id] }));
 
@@ -524,7 +609,30 @@ export function PillarList({ pillars, onUpdate }: Props) {
         ];
 
         return (
-          <div key={pillar.id} style={pillarCard}>
+          <div
+            key={pillar.id}
+            ref={(node) => {
+              pillarRefs.current[pillar.id] = node;
+            }}
+            data-scroll-target={`pillar:${pillar.id}`}
+            data-highlighted={highlightedItemKey === `pillar:${pillar.id}` ? "true" : undefined}
+            style={{
+              ...pillarCard,
+              background:
+                highlightedItemKey === `pillar:${pillar.id}`
+                  ? "rgba(59, 130, 246, 0.08)"
+                  : pillarCard.background,
+              borderColor:
+                highlightedItemKey === `pillar:${pillar.id}`
+                  ? "rgba(59, 130, 246, 0.55)"
+                  : "var(--color-border)",
+              boxShadow:
+                highlightedItemKey === `pillar:${pillar.id}`
+                  ? "0 0 0 2px rgba(59, 130, 246, 0.16)"
+                  : "none",
+              transition: "background 180ms ease, border-color 180ms ease, box-shadow 180ms ease",
+            }}
+          >
             <div style={pillarHeaderRow}>
               <Button
                 onPress={() => toggle(pillar.id)}
@@ -610,6 +718,14 @@ export function PillarList({ pillars, onUpdate }: Props) {
                   pillarId={pillar.id}
                   idPrefix="stg"
                   allIds={statusIds}
+                  highlightedGoalId={
+                    highlightedItemKey?.startsWith("goal:")
+                      ? highlightedItemKey.slice("goal:".length)
+                      : null
+                  }
+                  registerGoalRef={(goalId, node) => {
+                    goalRefs.current[goalId] = node;
+                  }}
                   onUpdate={(items) => updatePillar(idx, { ...pillar, short_term_goal: items })}
                   onMove={(item, updatedSourceItems) =>
                     updatePillar(idx, {
@@ -628,6 +744,14 @@ export function PillarList({ pillars, onUpdate }: Props) {
                   pillarId={pillar.id}
                   idPrefix="ltg"
                   allIds={statusIds}
+                  highlightedGoalId={
+                    highlightedItemKey?.startsWith("goal:")
+                      ? highlightedItemKey.slice("goal:".length)
+                      : null
+                  }
+                  registerGoalRef={(goalId, node) => {
+                    goalRefs.current[goalId] = node;
+                  }}
                   onUpdate={(items) => updatePillar(idx, { ...pillar, long_term_goal: items })}
                   onMove={(item, updatedSourceItems) =>
                     updatePillar(idx, {
@@ -666,87 +790,131 @@ export function PillarList({ pillars, onUpdate }: Props) {
 
                 {reorderMode[pillar.id]
                   ? pillar.tasks.map((task, tIdx) => (
-                      <button
+                      <div
                         key={task.id}
-                        type="button"
-                        draggable
-                        onDragStart={() => {
-                          dragIdx.current = tIdx;
+                        ref={(node) => {
+                          taskRefs.current[task.id] = node;
                         }}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={() => {
-                          if (dragIdx.current === null || dragIdx.current === tIdx) return;
-                          const tasks = [...pillar.tasks];
-                          const [moved] = tasks.splice(dragIdx.current, 1);
-                          tasks.splice(tIdx, 0, moved);
-                          dragIdx.current = tIdx;
-                          updatePillar(idx, { ...pillar, tasks });
-                        }}
+                        data-scroll-target={`task:${task.id}`}
+                        data-highlighted={
+                          highlightedItemKey === `task:${task.id}` ? "true" : undefined
+                        }
                         style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                          padding: "0.5rem 0.75rem",
-                          border: "1px solid var(--color-border)",
                           borderRadius: "var(--radius-md)",
                           marginBottom: "0.4rem",
-                          background: "var(--color-surface)",
-                          cursor: "grab",
-                          width: "100%",
-                          textAlign: "left",
+                          background:
+                            highlightedItemKey === `task:${task.id}`
+                              ? "rgba(59, 130, 246, 0.14)"
+                              : "transparent",
+                          boxShadow:
+                            highlightedItemKey === `task:${task.id}`
+                              ? "0 0 0 2px rgba(30, 64, 175, 0.55)"
+                              : "none",
+                          transition: "background 180ms ease, box-shadow 180ms ease",
                         }}
                       >
-                        <span
+                        <button
+                          type="button"
+                          draggable
+                          onDragStart={() => {
+                            dragIdx.current = tIdx;
+                          }}
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={() => {
+                            if (dragIdx.current === null || dragIdx.current === tIdx) return;
+                            const tasks = [...pillar.tasks];
+                            const [moved] = tasks.splice(dragIdx.current, 1);
+                            tasks.splice(tIdx, 0, moved);
+                            dragIdx.current = tIdx;
+                            updatePillar(idx, { ...pillar, tasks });
+                          }}
                           style={{
-                            color: "var(--color-text-faint)",
-                            fontSize: "1.1em",
-                            lineHeight: 1,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                            padding: "0.5rem 0.75rem",
+                            border: "1px solid var(--color-border)",
+                            borderRadius: "var(--radius-md)",
+                            background: "var(--color-surface)",
+                            cursor: "grab",
+                            width: "100%",
+                            textAlign: "left",
                           }}
                         >
-                          ⠿
-                        </span>
-                        <span
-                          style={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: "50%",
-                            flexShrink: 0,
-                            background: STATUS_COLOR[task.status] || "#999",
-                            display: "inline-block",
-                          }}
-                        />
-                        <span
-                          style={{
-                            flex: 1,
-                            fontWeight: 500,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {task.title || (
-                            <em style={{ color: "var(--color-text-faint)" }}>Untitled task</em>
-                          )}
-                        </span>
-                        <span className="id-chip">{task.id}</span>
-                      </button>
+                          <span
+                            style={{
+                              color: "var(--color-text-faint)",
+                              fontSize: "1.1em",
+                              lineHeight: 1,
+                            }}
+                          >
+                            ⠿
+                          </span>
+                          <span
+                            style={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              flexShrink: 0,
+                              background: STATUS_COLOR[task.status] || "#999",
+                              display: "inline-block",
+                            }}
+                          />
+                          <span
+                            style={{
+                              flex: 1,
+                              fontWeight: 500,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {task.title || (
+                              <em style={{ color: "var(--color-text-faint)" }}>Untitled task</em>
+                            )}
+                          </span>
+                          <span className="id-chip">{task.id}</span>
+                        </button>
+                      </div>
                     ))
                   : pillar.tasks.map((task, tIdx) => (
-                      <TaskEditor
+                      <div
                         key={task.id}
-                        task={task}
-                        allTasks={all}
-                        statusItems={statusItems}
-                        onUpdate={(updated) => {
-                          const tasks = [...pillar.tasks];
-                          tasks[tIdx] = updated;
-                          updatePillar(idx, { ...pillar, tasks });
+                        ref={(node) => {
+                          taskRefs.current[task.id] = node;
                         }}
-                        onDelete={() => {
-                          const tasks = pillar.tasks.filter((_, i) => i !== tIdx);
-                          updatePillar(idx, { ...pillar, tasks });
+                        data-scroll-target={`task:${task.id}`}
+                        data-highlighted={
+                          highlightedItemKey === `task:${task.id}` ? "true" : undefined
+                        }
+                        style={{
+                          borderRadius: "var(--radius-lg)",
+                          background:
+                            highlightedItemKey === `task:${task.id}`
+                              ? "rgba(59, 130, 246, 0.14)"
+                              : "transparent",
+                          boxShadow:
+                            highlightedItemKey === `task:${task.id}`
+                              ? "0 0 0 2px rgba(30, 64, 175, 0.55)"
+                              : "none",
+                          transition: "background 180ms ease, box-shadow 180ms ease",
                         }}
-                      />
+                      >
+                        <TaskEditor
+                          task={task}
+                          allTasks={all}
+                          statusItems={statusItems}
+                          onUpdate={(updated) => {
+                            const tasks = [...pillar.tasks];
+                            tasks[tIdx] = updated;
+                            updatePillar(idx, { ...pillar, tasks });
+                          }}
+                          onDelete={() => {
+                            const tasks = pillar.tasks.filter((_, i) => i !== tIdx);
+                            updatePillar(idx, { ...pillar, tasks });
+                          }}
+                        />
+                      </div>
                     ))}
 
                 <Button className="btn btn-add-task" onPress={() => addTask(idx)}>

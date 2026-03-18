@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PillarList } from "./PillarList";
 
@@ -206,5 +206,46 @@ describe("PillarList", () => {
 
     expect(startInput).toBeInTheDocument();
     expect(endInput).toBeInTheDocument();
+  });
+
+  it("scrolls to and temporarily highlights a task from an external target", () => {
+    vi.useFakeTimers();
+
+    const scrollIntoView = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      value: scrollIntoView,
+    });
+
+    const pillar = makePillar("infra", "Infrastructure", [makeTask("t-001"), makeTask("t-002")]);
+
+    const { container } = render(
+      <PillarList
+        pillars={[pillar]}
+        onUpdate={vi.fn()}
+        scrollTarget={{
+          type: "task",
+          pillarId: "infra",
+          taskId: "t-002",
+          requestKey: 1,
+        }}
+      />,
+    );
+
+    const taskContainer = container.querySelector('[data-scroll-target="task:t-002"]');
+    expect(taskContainer).toHaveAttribute("data-highlighted", "true");
+
+    act(() => {
+      vi.advanceTimersByTime(50);
+    });
+
+    expect(scrollIntoView).toHaveBeenCalled();
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(taskContainer).not.toHaveAttribute("data-highlighted");
+    vi.useRealTimers();
   });
 });
