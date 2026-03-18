@@ -383,6 +383,51 @@ function filterRows(rows: GanttRow[], query: string): GanttRow[] {
   });
 }
 
+function normalizeStatus(status?: string): string {
+  const normalized = status?.trim().toLowerCase();
+  return normalized || "unspecified";
+}
+
+function statusLabel(status: string): string {
+  if (status === "wip") return "WIP";
+  if (status === "todo") return "To do";
+  if (status === "done") return "Done";
+  if (status === "unspecified") return "Unspecified";
+  return status.replace(/[_-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function filterRowsByStatus(rows: GanttRow[], hiddenStatuses: Set<string>): GanttRow[] {
+  if (hiddenStatuses.size === 0) return rows;
+
+  const taskVisibleById = new Map<string, boolean>();
+  const visibleTasksByGoalId = new Map<string, number>();
+  const totalTasksByGoalId = new Map<string, number>();
+
+  for (const row of rows) {
+    if (row.type !== "task") continue;
+
+    const isVisible = !hiddenStatuses.has(normalizeStatus(row.status));
+    taskVisibleById.set(row.id, isVisible);
+
+    if (row.goalId) {
+      totalTasksByGoalId.set(row.goalId, (totalTasksByGoalId.get(row.goalId) ?? 0) + 1);
+      if (isVisible) {
+        visibleTasksByGoalId.set(row.goalId, (visibleTasksByGoalId.get(row.goalId) ?? 0) + 1);
+      }
+    }
+  }
+
+  return rows.filter((row) => {
+    if (row.type === "task") return taskVisibleById.get(row.id) ?? true;
+    if (row.type === "goal") {
+      const totalChildren = totalTasksByGoalId.get(row.id) ?? 0;
+      if (totalChildren === 0) return true;
+      return (visibleTasksByGoalId.get(row.id) ?? 0) > 0;
+    }
+    return true;
+  });
+}
+
 function filterRowsByFocusWindow(rows: GanttRow[], enabled: boolean): GanttRow[] {
   if (!enabled) return rows;
 
@@ -444,6 +489,7 @@ function collectReachableTaskIds(
 export function GanttPreview({ pillars, onItemSelect }: Props) {
   const [zoom, setZoom] = useState<ZoomLevel>("monthly");
   const [filterText, setFilterText] = useState("");
+  const [hiddenStatuses, setHiddenStatuses] = useState<Set<string>>(new Set());
   const [focusWindowEnabled, setFocusWindowEnabled] = useState(false);
   const [collapsedGoals, setCollapsedGoals] = useState<Set<string>>(new Set());
   const [dependencyFocusTaskId, setDependencyFocusTaskId] = useState<string | null>(null);
@@ -615,11 +661,44 @@ export function GanttPreview({ pillars, onItemSelect }: Props) {
     maxDate,
   } = useMemo(() => buildRows(pillars, collapsedGoals), [pillars, collapsedGoals]);
 
+  const availableStatuses = useMemo(() => {
+    const statuses = new Set<string>();
+
+    for (const pillar of pillars) {
+      for (const task of pillar.tasks || []) {
+        statuses.add(normalizeStatus(task.status));
+      }
+    }
+
+    return Array.from(statuses).sort((a, b) => statusLabel(a).localeCompare(statusLabel(b)));
+  }, [pillars]);
+
+  useEffect(() => {
+    setHiddenStatuses((prev) => {
+      let changed = false;
+      const next = new Set<string>();
+
+      for (const status of prev) {
+        if (availableStatuses.includes(status)) {
+          next.add(status);
+        } else {
+          changed = true;
+        }
+      }
+
+      return changed ? next : prev;
+    });
+  }, [availableStatuses]);
+
   const focusRows = useMemo(
     () => filterRowsByFocusWindow(allRows, focusWindowEnabled),
     [allRows, focusWindowEnabled],
   );
-  const rows = useMemo(() => filterRows(focusRows, filterText), [focusRows, filterText]);
+  const statusRows = useMemo(
+    () => filterRowsByStatus(focusRows, hiddenStatuses),
+    [focusRows, hiddenStatuses],
+  );
+  const rows = useMemo(() => filterRows(statusRows, filterText), [filterText, statusRows]);
 
   const timeline = useMemo(
     () => generateTimeline(minDate, maxDate, zoom),
@@ -716,6 +795,20 @@ export function GanttPreview({ pillars, onItemSelect }: Props) {
 
   const today = new Date();
   const todayOffset = Math.max(0, diffDays(timelineStart, today) * pxPerDay);
+  const hiddenStatusCount = hiddenStatuses.size;
+
+  const toggleStatusVisibility = useCallback((status: string) => {
+    setHiddenStatuses((prev) => {
+      const next = new Set(prev);
+      if (next.has(status)) next.delete(status);
+      else next.add(status);
+      return next;
+    });
+  }, []);
+
+  const showAllStatuses = useCallback(() => {
+    setHiddenStatuses(new Set());
+  }, []);
 
   if (pillars.length === 0) {
     return (
@@ -810,6 +903,75 @@ export function GanttPreview({ pillars, onItemSelect }: Props) {
           ))}
         </div>
         <div style={{ width: 1, height: 18, background: "var(--color-border)" }} />
+        {availableStatuses.length > 0 && (
+          <>
+            <span
+              id="gantt-status-label"
+              style={{ fontSize: "0.8em", color: "var(--color-text-muted)", fontWeight: 600 }}
+            >
+              Status:
+            </span>
+            <div
+              role="group"
+              aria-labelledby="gantt-status-label"
+              style={{
+                display: "flex",
+                borderRadius: "var(--radius-md)",
+                overflow: "hidden",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              {availableStatuses.map((status, index) => {
+                const hidden = hiddenStatuses.has(status);
+                return (
+                  <button
+                    key={status}
+                    type="button"
+                    aria-pressed={!hidden}
+                    onClick={() => toggleStatusVisibility(status)}
+                    style={{
+                      padding: "4px 12px",
+                      fontSize: "0.78em",
+                      fontWeight: 600,
+                      border: "none",
+                      borderRight:
+                        index !== availableStatuses.length - 1
+                          ? "1px solid var(--color-border)"
+                          : "none",
+                      cursor: "pointer",
+                      background: hidden ? "var(--color-surface)" : "var(--color-primary)",
+                      color: hidden ? "var(--color-text-muted)" : "#fff",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    {statusLabel(status)}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={showAllStatuses}
+              disabled={hiddenStatuses.size === 0}
+              style={{
+                padding: "4px 10px",
+                fontSize: "0.78em",
+                fontWeight: 600,
+                border: "1px solid var(--color-border)",
+                borderRadius: "var(--radius-md)",
+                cursor: hiddenStatuses.size === 0 ? "default" : "pointer",
+                background: "var(--color-surface)",
+                color:
+                  hiddenStatuses.size === 0 ? "var(--color-text-faint)" : "var(--color-text-muted)",
+                fontFamily: "inherit",
+                opacity: hiddenStatuses.size === 0 ? 0.7 : 1,
+              }}
+            >
+              Show all
+            </button>
+            <div style={{ width: 1, height: 18, background: "var(--color-border)" }} />
+          </>
+        )}
         <button
           onClick={() => setFocusWindowEnabled((prev) => !prev)}
           aria-pressed={focusWindowEnabled}
