@@ -20,7 +20,7 @@ describe("DeckPreview", () => {
   it("iframe has sandbox attribute for security", () => {
     render(<DeckPreview content="<html>x</html>" />);
     const iframe = screen.getByTitle("Presentation deck");
-    expect(iframe).toHaveAttribute("sandbox", "allow-scripts allow-same-origin");
+    expect(iframe).toHaveAttribute("sandbox", "allow-scripts allow-same-origin allow-popup");
   });
 
   it("renders a download link for the deck", () => {
