@@ -13,11 +13,20 @@ import { generateMermaid } from "../generators/mermaid.js";
 import { generateReport } from "../generators/report.js";
 import { generateDeck } from "../generators/deck.js";
 
+function getDeckOptions(opts = {}) {
+  return {
+    recentMonths: opts.recentMonths,
+    nextMonths: opts.nextMonths,
+  };
+}
+
 export function iterateCommand(program) {
   program
     .command("iterate")
     .description("Snapshot current plan and generate all artifacts")
     .option("--no-commit", "Skip the automatic git commit")
+    .option("--recent-months <number>", "Months to include in the recent-completions summary", "1")
+    .option("--next-months <number>", "Months to include in the upcoming-work summary", "3")
     .action(async (opts) => {
       const plan = loadPlan();
 
@@ -37,7 +46,7 @@ export function iterateCommand(program) {
 
       const diagram = generateMermaid(plan);
       const report = generateReport(plan);
-      const deck = generateDeck(plan);
+      const deck = generateDeck(plan, getDeckOptions(opts));
 
       // Write to iteration dir
       writeIterationOutput(iterDir, "diagram.md", diagram);

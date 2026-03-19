@@ -7,6 +7,11 @@ import yaml from "js-yaml";
 const PLAN_ROOT = process.env.PLAN_ROOT || process.cwd();
 const PLAN_FOLDER = process.env.PLAN_FOLDER || "data";
 
+type DeckOptionsInput = {
+  recentMonths?: number;
+  nextMonths?: number;
+};
+
 // Generators are part of the package itself, not the user's project.
 // Use import.meta.url so this resolves correctly when npm linked.
 const _dirname = dirname(fileURLToPath(import.meta.url));
@@ -46,7 +51,9 @@ export const savePlan = createServerFn({ method: "POST" })
   });
 
 export const generateArtifacts = createServerFn({ method: "POST" })
-  .inputValidator((data: { type: "diagram" | "report" | "deck" | "all" }) => data)
+  .inputValidator(
+    (data: { type: "diagram" | "report" | "deck" | "all"; deckOptions?: DeckOptionsInput }) => data,
+  )
   .handler(async ({ data }) => {
     // Import CLI generators (relative path from ui to cli)
     const planPath = getPlanPath();
@@ -79,7 +86,7 @@ export const generateArtifacts = createServerFn({ method: "POST" })
       results.report = content;
     }
     if (data.type === "deck" || data.type === "all") {
-      const content = generateDeck(plan);
+      const content = generateDeck(plan, data.deckOptions || {});
       writeFileSync(join(outputDir, "deck.html"), content, "utf8");
       results.deck = content;
     }
@@ -87,15 +94,22 @@ export const generateArtifacts = createServerFn({ method: "POST" })
     return results;
   });
 
-export const runIterate = createServerFn({ method: "POST" }).handler(async () => {
-  const { execSync } = await import("child_process");
-  try {
-    execSync(`node packages/cli/src/index.js iterate --no-commit`, {
-      cwd: PLAN_ROOT,
-      stdio: "pipe",
-    });
-    return { ok: true };
-  } catch (err: any) {
-    throw new Error(err.stderr?.toString() || err.message);
-  }
-});
+export const runIterate = createServerFn({ method: "POST" })
+  .inputValidator((data: { deckOptions?: DeckOptionsInput } | undefined) => data)
+  .handler(async ({ data }) => {
+    const { execSync } = await import("child_process");
+    try {
+      const recentMonths = data?.deckOptions?.recentMonths ?? 1;
+      const nextMonths = data?.deckOptions?.nextMonths ?? 3;
+      execSync(
+        `node packages/cli/src/index.js iterate --no-commit --recent-months ${recentMonths} --next-months ${nextMonths}`,
+        {
+          cwd: PLAN_ROOT,
+          stdio: "pipe",
+        },
+      );
+      return { ok: true };
+    } catch (err: any) {
+      throw new Error(err.stderr?.toString() || err.message);
+    }
+  });

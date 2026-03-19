@@ -13,18 +13,34 @@
         --r-heading-font: "Segoe UI", system-ui, sans-serif;
         --r-main-font: "Segoe UI", system-ui, sans-serif;
       }
+      body {
+        background: #f5f7fb;
+      }
+      .reveal {
+        font-size: 32px;
+      }
+      .reveal .slides section {
+        box-sizing: border-box;
+      }
       .reveal h1 {
-        font-size: 1.8em;
+        font-size: 1.65em;
+        margin-bottom: 0.25em;
       }
       .reveal h2 {
-        font-size: 1.3em;
+        font-size: 1.18em;
         color: #1a56db;
         border-bottom: 2px solid #e5e7eb;
-        padding-bottom: 0.3em;
+        padding-bottom: 0.24em;
+        margin-bottom: 0.45em;
       }
       .reveal h3 {
-        font-size: 1em;
+        font-size: 0.9em;
         color: #374151;
+      }
+      .reveal p,
+      .reveal li {
+        font-size: 0.68em;
+        line-height: 1.34;
       }
       .reveal table {
         font-size: 0.7em;
@@ -44,32 +60,49 @@
       }
       .meta {
         color: #6b7280;
-        font-size: 0.7em;
-        margin-top: 0.5em;
+        font-size: 0.62em;
+        margin-top: 0.4em;
+      }
+      .deck-footer {
+        position: fixed;
+        left: 48px;
+        bottom: 36px;
+        z-index: 30;
+        font-size: 0.42em;
+        letter-spacing: 0.04em;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid #e2e8f0;
+        border-radius: 999px;
+        padding: 0.28em 0.8em;
+        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
       }
       .pill {
         display: inline-block;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 0.65em;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 0.62em;
         font-weight: 700;
-        margin: 2px;
+        margin: 2px 6px 2px 0;
+        background: #dbeafe;
+        color: #1d4ed8;
       }
       .stat-grid {
         display: flex;
-        gap: 1em;
+        gap: 0.65em;
         justify-content: center;
         flex-wrap: wrap;
-        margin: 0.5em 0;
+        margin: 0.35em 0;
       }
       .stat-box {
         background: #f3f4f6;
         border-radius: 8px;
-        padding: 0.5em 1.2em;
+        padding: 0.42em 0.95em;
         text-align: center;
+        min-width: 0;
       }
       .stat-box .num {
-        font-size: 1.8em;
+        font-size: 1.45em;
         font-weight: 700;
         color: #6b7280;
       }
@@ -88,6 +121,84 @@
       .stat-box .lbl {
         font-size: 0.65em;
         color: #6b7280;
+      }
+      .hero {
+        text-align: left;
+        background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+        color: #fff;
+        padding: 1.05em 1.15em;
+        border-radius: 18px;
+      }
+      .hero h1,
+      .hero p,
+      .hero .meta {
+        color: #fff;
+      }
+      .hero .meta {
+        opacity: 0.8;
+      }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.95fr);
+        gap: 0.8rem;
+        align-items: start;
+      }
+      .slide-grid {
+        display: grid;
+        gap: 0.8rem;
+        grid-template-columns: 1.2fr 0.8fr;
+        align-items: start;
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.65rem;
+        margin-top: 0.55rem;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 0.72em 0.82em;
+        text-align: left;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+        min-width: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        min-height: 0;
+      }
+      .card--accent {
+        border-top: 4px solid #2563eb;
+      }
+      .card--risk {
+        border-top: 4px solid #dc2626;
+      }
+      .card h3,
+      .card h4 {
+        margin-top: 0;
+        margin-bottom: 0.35em;
+      }
+      .card ul,
+      .box ul,
+      .compact-list {
+        margin: 0;
+        padding-left: 1.1em;
+      }
+      .compact-list li {
+        margin-bottom: 0.3em;
+      }
+      .compact-list li:last-child {
+        margin-bottom: 0;
+      }
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.53em;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 0.32em;
       }
       .pillar-tag {
         display: inline-block;
@@ -139,6 +250,137 @@
         max-height: 55vh;
         overflow-y: auto;
       }
+      .kpi-strip {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem;
+        margin-top: 0.2rem;
+      }
+      .kpi {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 14px;
+        padding: 0.6em 0.5em;
+        text-align: center;
+        min-width: 0;
+      }
+      .kpi .num {
+        font-size: 1.15em;
+        font-weight: 800;
+      }
+      .kpi .lbl {
+        font-size: 0.54em;
+        line-height: 1.2;
+        opacity: 0.85;
+      }
+      .summary-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .card-scroll {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        padding-right: 0.2rem;
+      }
+      .card--scrollable {
+        max-height: 640px;
+      }
+      .summary-list li {
+        padding: 0.55em 0;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .summary-list li:last-child {
+        border-bottom: none;
+      }
+      .task-title {
+        font-weight: 700;
+        color: #111827;
+      }
+      .task-meta {
+        color: #6b7280;
+        font-size: 0.50em;
+        margin-top: 0.18em;
+      }
+      .task-detail {
+        color: #6b7280;
+        font-size: calc(0.65em);
+        line-height: 1.3;
+        margin-top: 0.3rem;
+      }
+      .task-detail a,
+      .card p a,
+      .muted a {
+        color: #1d4ed8;
+        text-decoration: underline;
+        word-break: break-all;
+      }
+      .goal-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.9rem;
+      }
+      .progress-row {
+        display: flex;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+        margin: 0.4rem 0;
+      }
+      .progress-chip {
+        background: #eff6ff;
+        border-radius: 999px;
+        color: #1d4ed8;
+        font-size: 0.5em;
+        font-weight: 700;
+        padding: 0.2em 0.55em;
+      }
+      .muted {
+        color: #6b7280;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.7rem;
+        align-items: start;
+      }
+      .appendix-slide {
+        text-align: left;
+      }
+      .section-break {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+      }
+      .storyline-grid .card {
+        min-height: 0;
+      }
+      .storyline-grid p {
+        font-size: 0.62em;
+        line-height: 1.28;
+        margin-bottom: 0;
+      }
+      .title-slide .pill {
+        margin-bottom: 0.35rem;
+      }
+      .title-slide .hero p {
+        margin: 0.3em 0;
+      }
+      .title-slide .hero .meta {
+        margin-top: 0.3em;
+      }
+      .goal-grid .card,
+      .two-col .card,
+      .slide-grid > .card,
+      .card-grid .card,
+      .kpi,
+      .stat-box {
+        word-break: break-word;
+      }
     </style>
   </head>
   <body>
@@ -146,135 +388,228 @@
       <div class="slides">
 
         <!-- Slide 1: Title -->
-        <section>
-          <h1>{{meta.title}}</h1>
-          <p class="meta">{{meta.owner}}
-            &nbsp;·&nbsp;
-            {{generatedAt}}
-            &nbsp;·&nbsp; v{{meta.version}}</p>
-          <div class="stat-grid" style="margin-top:1.5em">
-            <div class="stat-box"><div class="num num--done">{{overall.done}}</div><div
-                class="lbl"
-              >Done</div></div>
-            <div class="stat-box"><div class="num num--wip">{{overall.wip}}</div><div class="lbl">In
-                Progress</div></div>
-            <div class="stat-box"><div class="num num--todo">{{overall.todo}}</div><div
-                class="lbl"
-              >Todo</div></div>
-            <div class="stat-box"><div class="num num--pct">{{overall.pct}}%</div><div
-                class="lbl"
-              >Complete</div></div>
+        <section class="title-slide">
+          <div class="hero">
+            <div class="hero-grid">
+              <div>
+                <div class="eyebrow" style="color:#bfdbfe">Project update</div>
+                <h1>{{meta.title}}</h1>
+                <p class="meta">{{generatedAt}}</p>
+                <div style="margin-top:0.75rem">
+                  <span class="pill">{{summary.options.recentLabel}}</span>
+                  <span class="pill">{{summary.options.nextLabel}}</span>
+                </div>
+              </div>
+              <div class="kpi-strip">
+                <div class="kpi"><div class="num">{{summary.recentDone.length}}</div><div class="lbl">Recent
+                    completions</div></div>
+                <div class="kpi"><div class="num">{{summary.nextUp.length}}</div><div class="lbl">Next-window
+                    initiatives</div></div>
+                <div class="kpi"><div class="num">{{summary.ongoingGoals.length}}</div><div class="lbl">Ongoing
+                    goals</div></div>
+                <div class="kpi"><div class="num">{{overall.pct}}%</div><div class="lbl">Overall complete</div></div>
+              </div>
+            </div>
           </div>
         </section>
 
-        <!-- Slide 2: Agenda -->
         <section>
-          <h2>Agenda</h2>
-          <div style="margin-top: 1em">
-            {{#each pillars}}
-              <div class="pillar-tag">{{name}}</div>
+          <h2>Executive Snapshot</h2>
+          <div class="card card--accent">
+            <div class="stat-grid" style="justify-content:flex-start">
+              <div class="stat-box"><div class="num num--done">{{overall.done}}</div><div class="lbl">Done</div></div>
+              <div class="stat-box"><div class="num num--wip">{{overall.wip}}</div><div class="lbl">WIP</div></div>
+              <div class="stat-box"><div class="num num--todo">{{overall.todo}}</div><div class="lbl">Todo</div></div>
+            </div>
+            <div style="margin-top:0.75rem">
+              <div class="eyebrow">Coverage</div>
+              <p class="muted">This deck summarizes work completed in {{summary.options.recentLabel}} and commitments across {{summary.options.nextLabel}}.</p>
+              <div style="margin-top:0.65rem">
+                {{#each pillars}}
+                  <span class="pillar-tag">{{name}}</span>
+                {{/each}}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>What Was Done Recently</h2>
+          <div class="card card--accent">
+            <div class="eyebrow">Top completed in {{summary.options.recentLabel}}</div>
+            <div class="card-scroll">
+              <ul class="summary-list">
+                {{#each summary.recentDoneTop}}
+                  <li>
+                    <div class="task-title">{{title}}</div>
+                    <div class="task-meta">{{pillarName}} · Completed {{formatDate end_date}}</div>
+                    {{#if description}}<div class="task-detail">{{{linkifyText description}}}</div>{{/if}}
+                  </li>
+                {{else}}
+                  <li>
+                    <div class="task-title">No recent completions recorded</div>
+                    <div class="task-meta">Add `end_date` to completed tasks to surface them here.</div>
+                  </li>
+                {{/each}}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>What Comes Next</h2>
+          <div class="two-col">
+            <div class="card card--accent card--scrollable">
+              <div class="eyebrow">Already in progress</div>
+              <div class="card-scroll">
+                <ul class="summary-list">
+                  {{#each summary.nextUpWip}}
+                    <li>
+                      <div class="task-title">{{title}}</div>
+                      <div class="task-meta">{{pillarName}} · {{{statusBadge status}}} · {{{priorityBadge priority}}}</div>
+                      {{#if description}}<div class="task-detail">{{{linkifyText description}}}</div>{{/if}}
+                    </li>
+                  {{else}}
+                    <li>
+                      <div class="task-title">No work currently marked in progress</div>
+                      <div class="task-meta">Update task status to `wip` to reflect active execution.</div>
+                    </li>
+                  {{/each}}
+                </ul>
+              </div>
+            </div>
+            <div class="card card--accent card--scrollable">
+              <div class="eyebrow">Planned starts in {{summary.options.nextLabel}}</div>
+              <div class="card-scroll">
+                <ul class="summary-list">
+                  {{#each summary.nextUpPlanned}}
+                    <li>
+                      <div class="task-title">{{title}}</div>
+                      <div class="task-meta">{{pillarName}} · Starts {{formatDate start_date}} · {{{priorityBadge priority}}}</div>
+                      {{#if description}}<div class="task-detail">{{{linkifyText description}}}</div>{{/if}}
+                    </li>
+                  {{else}}
+                    <li>
+                      <div class="task-title">No upcoming dated starts recorded</div>
+                      <div class="task-meta">Add `start_date` to planned tasks to populate this view.</div>
+                    </li>
+                  {{/each}}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Progress on Ongoing Goals</h2>
+          <div class="goal-grid">
+            {{#each summary.ongoingGoalsTop}}
+              <div class="card {{#if (evalEmoji evaluation)}}card--accent{{/if}}">
+                <div class="eyebrow">{{pillarName}}</div>
+                <h3>{{evalEmoji evaluation}} {{text}}</h3>
+                <div class="progress-row">
+                  <span class="progress-chip">{{progressLabel}}</span>
+                  <span class="progress-chip">{{progressPct}}% complete</span>
+                  <span class="progress-chip">{{progress.done}} done / {{progress.wip}} wip / {{progress.todo}} todo</span>
+                </div>
+                <ul class="compact-list">
+                  {{#each activeTasks}}
+                    <li>{{title}} — {{{statusBadge status}}}</li>
+                  {{/each}}
+                </ul>
+              </div>
+            {{else}}
+              <div class="card">
+                <h3>No ongoing goals linked to active work</h3>
+                <p class="muted">Link active tasks to goals using `linked_goal` to track goal progress here.</p>
+              </div>
             {{/each}}
           </div>
         </section>
 
-        {{! One vertical section per pillar: summary + tasks sub-slide }}
-        {{#each pillars}}
-          <section>
-            {{! Pillar summary slide }}
-            <section>
-              <h2>{{name}}</h2>
-              {{#if description}}<p
-                  style="font-size:0.75em;color:#6b7280;margin-bottom:0.5em"
-                >{{description}}</p>{{/if}}
-              {{#if hasStatus}}
-                <div class="current-target {{goalsLayout}}" style="margin-bottom:0.5em">
-                  {{#if hasShortGoal}}
-                    <div class="box box--short">
-                      <h4>📋 Short-term Goals</h4>
-                      <ul>
-                        {{#each short_term_goal}}
-                          <li>{{evalEmoji evaluation}} {{text}}</li>
-                        {{/each}}
-                      </ul>
-                    </div>
-                  {{/if}}
-                  {{#if hasLongGoal}}
-                    <div class="box box--long">
-                      <h4>🔭 Long-term Goals</h4>
-                      <ul>
-                        {{#each long_term_goal}}
-                          <li>{{evalEmoji evaluation}} {{text}}</li>
-                        {{/each}}
-                      </ul>
-                    </div>
-                  {{/if}}
-                </div>
-              {{/if}}
-              <div class="stat-grid">
-                <div class="stat-box"><div class="num num--done">{{stats.done}}</div><div
-                    class="lbl"
-                  >Done</div></div>
-                <div class="stat-box"><div class="num num--wip">{{stats.wip}}</div><div
-                    class="lbl"
-                  >WIP</div></div>
-                <div class="stat-box"><div class="num num--todo">{{stats.todo}}</div><div
-                    class="lbl"
-                  >Todo</div></div>
-              </div>
-            </section>
-            {{! Tasks sub-slide (navigate with ↓) }}
-            {{#if keyTasks}}
-              <section>
-                <h2>{{name}} — Tasks</h2>
-                <table>
-                  <thead><tr><th>Task</th><th>Status</th><th>Priority</th></tr></thead>
-                  <tbody>
-                    {{#each keyTasks}}
-                      <tr>
-                        <td>{{title}}</td>
-                        <td>{{{statusBadge status}}}</td>
-                        <td>{{{priorityBadge priority}}}</td>
-                      </tr>
-                    {{/each}}
-                  </tbody>
-                </table>
-              </section>
-            {{/if}}
-          </section>
-        {{/each}}
-
-        <!-- Final Slide: Summary -->
         <section>
-          <h2>Summary &amp; Next Steps</h2>
-          <div class="stat-grid">
-            <div class="stat-box"><div
-                class="num num--done"
-              >{{overall.done}}/{{overall.total}}</div><div class="lbl">Tasks Done</div></div>
-            <div class="stat-box"><div class="num num--pct">{{overall.pct}}%</div><div
-                class="lbl"
-              >Complete</div></div>
-          </div>
-          <div style="text-align:left;margin-top:1em">
-            <h3>Pillars</h3>
-            <table>
-              <thead><tr><th>Pillar</th><th>✅ Done</th><th>🔵 WIP</th><th>📋 Todo</th></tr></thead>
-              <tbody>
-                {{#each pillars}}
-                  <tr><td><strong>{{name}}</strong></td><td>{{stats.done}}</td><td
-                    >{{stats.wip}}</td><td>{{stats.todo}}</td></tr>
-                {{/each}}
-              </tbody>
-            </table>
+          <h2>Key Watchouts</h2>
+          <div class="card-grid">
+            {{#each summary.watchouts}}
+              <div class="card card--risk">
+                <div class="eyebrow">{{pillarName}}</div>
+                <h3>{{title}}</h3>
+                <p>{{{linkifyText note}}}</p>
+              </div>
+            {{else}}
+              <div class="card card--accent">
+                <h3>No urgent watchouts surfaced</h3>
+                <p class="muted">At-risk goals and active task notes will appear here when they need escalation.</p>
+              </div>
+            {{/each}}
           </div>
         </section>
 
+        <section>
+          <div class="section-break">
+            <div class="eyebrow">Appendix</div>
+            <h2>Pillar Supporting Detail</h2>
+            <p class="muted">Compact backup slides for follow-up questions.</p>
+          </div>
+        </section>
+
+        {{#each summary.appendixPillars}}
+          {{#if hasAppendixContent}}
+            <section>
+              <div class="appendix-slide">
+                <h2>{{name}}</h2>
+                {{#if description}}<p class="muted">{{{linkifyText description}}}</p>{{/if}}
+                <div class="stat-grid" style="justify-content:flex-start">
+                  <div class="stat-box"><div class="num num--done">{{stats.done}}</div><div class="lbl">Done</div></div>
+                  <div class="stat-box"><div class="num num--wip">{{stats.wip}}</div><div class="lbl">WIP</div></div>
+                  <div class="stat-box"><div class="num num--todo">{{stats.todo}}</div><div class="lbl">Todo</div></div>
+                </div>
+                <div class="two-col" style="margin-top:1rem">
+                  <div class="card">
+                    <div class="eyebrow">Goal progress</div>
+                    <ul class="compact-list">
+                      {{#each pillarGoals}}
+                        <li>{{evalEmoji evaluation}} {{text}} — {{progress.done}}/{{progress.total}} delivered</li>
+                      {{else}}
+                        <li>No active goal linkage recorded.</li>
+                      {{/each}}
+                    </ul>
+                  </div>
+                  <div class="card">
+                    <div class="eyebrow">Next actions</div>
+                    <ul class="compact-list">
+                      {{#each pillarNextUp}}
+                        <li>{{title}} — {{#if start_date}}{{formatDate start_date}}{{else}}In progress{{/if}}</li>
+                      {{else}}
+                        <li>No upcoming items captured.</li>
+                      {{/each}}
+                    </ul>
+                  </div>
+                </div>
+                <div class="card" style="margin-top:0.9rem">
+                  <div class="eyebrow">Recent wins</div>
+                  <ul class="compact-list">
+                    {{#each pillarRecentDone}}
+                      <li>{{title}} — completed {{formatDate end_date}}</li>
+                    {{else}}
+                      <li>No recent completions in this window.</li>
+                    {{/each}}
+                  </ul>
+                </div>
+              </div>
+            </section>
+          {{/if}}
+        {{/each}}
+
       </div>
+      <div class="deck-footer">Generated by AI</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
     <script>
       Reveal.initialize({ hash: true, slideNumber: 'c/t', transition: 'slide', controls: true,
-      progress: true, center: false, });
+      progress: true, center: false, width: 1600, height: 900, margin: 0.04, minScale: 0.2,
+      maxScale: 1.5, });
     </script>
   </body>
 </html>

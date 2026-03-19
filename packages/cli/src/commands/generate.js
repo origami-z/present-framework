@@ -4,7 +4,20 @@ import { generateMermaid } from "../generators/mermaid.js";
 import { generateReport } from "../generators/report.js";
 import { generateDeck } from "../generators/deck.js";
 
-async function runGenerate(type, plan) {
+function getDeckOptions(opts = {}) {
+  return {
+    recentMonths: opts.recentMonths,
+    nextMonths: opts.nextMonths,
+  };
+}
+
+function addDeckWindowOptions(command) {
+  return command
+    .option("--recent-months <number>", "Months to include in the recent-completions summary", "1")
+    .option("--next-months <number>", "Months to include in the upcoming-work summary", "3");
+}
+
+async function runGenerate(type, plan, options = {}) {
   switch (type) {
     case "diagram": {
       const content = generateMermaid(plan);
@@ -19,7 +32,7 @@ async function runGenerate(type, plan) {
       return content;
     }
     case "deck": {
-      const content = generateDeck(plan);
+      const content = generateDeck(plan, options.deckOptions);
       writeOutput("deck.html", content);
       console.log(chalk.green("  ✅ output/deck.html"));
       return content;
@@ -54,25 +67,23 @@ export function generateCommand(program) {
       console.log();
     });
 
-  gen
-    .command("deck")
-    .description("Generate reveal.js presentation → output/deck.html")
-    .action(() => {
-      const plan = loadPlan();
-      console.log(chalk.bold("\n🎨 Generating deck...\n"));
-      runGenerate("deck", plan);
-      console.log();
-    });
+  addDeckWindowOptions(
+    gen.command("deck").description("Generate reveal.js presentation → output/deck.html"),
+  ).action((opts) => {
+    const plan = loadPlan();
+    console.log(chalk.bold("\n🎨 Generating deck...\n"));
+    runGenerate("deck", plan, { deckOptions: getDeckOptions(opts) });
+    console.log();
+  });
 
-  gen
-    .command("all")
-    .description("Generate all 3 artifacts")
-    .action(async () => {
+  addDeckWindowOptions(gen.command("all").description("Generate all 3 artifacts")).action(
+    async (opts) => {
       const plan = loadPlan();
       console.log(chalk.bold("\n⚡ Generating all artifacts...\n"));
       await runGenerate("diagram", plan);
       await runGenerate("report", plan);
-      await runGenerate("deck", plan);
+      await runGenerate("deck", plan, { deckOptions: getDeckOptions(opts) });
       console.log(chalk.bold.green("\n✨ Done! Open output/ to view the artifacts.\n"));
-    });
+    },
+  );
 }

@@ -16,10 +16,21 @@ export const Route = createFileRoute("/")({
 
 type Tab = "diagram" | "report" | "deck" | "gantt";
 
+type DeckOptions = {
+  recentMonths: number;
+  nextMonths: number;
+};
+
+function clampMonths(value: number) {
+  if (!Number.isFinite(value) || value < 1) return 1;
+  return Math.round(value);
+}
+
 function PlannerPage() {
   const initialPlan = Route.useLoaderData();
   const [plan, setPlan] = useState<any>(initialPlan);
   const [activeTab, setActiveTab] = useState<Tab>("gantt");
+  const [deckOptions, setDeckOptions] = useState<DeckOptions>({ recentMonths: 1, nextMonths: 3 });
   const [artifacts, setArtifacts] = useState<{
     diagram?: string;
     report?: string;
@@ -83,7 +94,7 @@ function PlannerPage() {
   const handleGenerateAll = useCallback(async () => {
     setGenerating(true);
     try {
-      const result = await generateArtifacts({ data: { type: "all" } });
+      const result = await generateArtifacts({ data: { type: "all", deckOptions } });
       setArtifacts(result as any);
       showToast("All artifacts generated!");
     } catch (e: any) {
@@ -91,19 +102,26 @@ function PlannerPage() {
     } finally {
       setGenerating(false);
     }
-  }, [showToast]);
+  }, [deckOptions, showToast]);
 
   const handleIterate = useCallback(async () => {
     setIterating(true);
     try {
-      await runIterate();
+      await runIterate({ data: { deckOptions } });
       showToast("Iteration snapshot created!");
     } catch (e: any) {
       showToast("Iterate failed: " + e.message);
     } finally {
       setIterating(false);
     }
-  }, [showToast]);
+  }, [deckOptions, showToast]);
+
+  const updateDeckOption = useCallback((key: keyof DeckOptions, value: string) => {
+    setDeckOptions((prev) => ({
+      ...prev,
+      [key]: clampMonths(Number(value)),
+    }));
+  }, []);
 
   return (
     <div style={appStyle}>
@@ -140,6 +158,30 @@ function PlannerPage() {
             flexShrink: 0,
           }}
         >
+          <div style={deckControlGroupStyle}>
+            <label style={deckControlStyle}>
+              <span>Recent (months)</span>
+              <input
+                aria-label="Recent months"
+                type="number"
+                min={1}
+                value={deckOptions.recentMonths}
+                onChange={(e) => updateDeckOption("recentMonths", e.target.value)}
+                style={deckInputStyle}
+              />
+            </label>
+            <label style={deckControlStyle}>
+              <span>Next (months)</span>
+              <input
+                aria-label="Next months"
+                type="number"
+                min={1}
+                value={deckOptions.nextMonths}
+                onChange={(e) => updateDeckOption("nextMonths", e.target.value)}
+                style={deckInputStyle}
+              />
+            </label>
+          </div>
           {savedAt && (
             <span style={{ fontSize: "0.75em", color: "var(--color-text-faint)" }}>
               {saving ? "Saving..." : `Saved ${savedAt}`}
@@ -254,6 +296,30 @@ const headerStyle: React.CSSProperties = {
   borderBottom: "1px solid var(--color-border)",
   flexShrink: 0,
   gap: "1rem",
+};
+
+const deckControlGroupStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "0.5rem",
+  flexWrap: "wrap",
+};
+
+const deckControlStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "0.4rem",
+  fontSize: "0.75em",
+  color: "var(--color-text-muted)",
+};
+
+const deckInputStyle: React.CSSProperties = {
+  width: "4rem",
+  border: "1px solid var(--color-border)",
+  borderRadius: "8px",
+  padding: "0.35rem 0.45rem",
+  background: "var(--color-bg)",
+  color: "var(--color-text)",
 };
 
 const bodyStyle: React.CSSProperties = {

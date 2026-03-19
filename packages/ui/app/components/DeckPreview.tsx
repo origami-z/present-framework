@@ -36,7 +36,7 @@ export function DeckPreview({ content }: Props) {
         src={blobUrl}
         style={iframeStyle}
         title="Presentation deck"
-        sandbox="allow-scripts allow-same-origin"
+        sandbox="allow-scripts allow-same-origin allow-popups"
       />
       <a href={blobUrl} download="deck.html" style={downloadStyle}>
         ↓ Download deck.html
