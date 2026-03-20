@@ -46,6 +46,12 @@ const pillars = [
 ];
 
 describe("GanttPreview", () => {
+  it("renders a pillar strip with the pillar name", () => {
+    render(<GanttPreview pillars={pillars} />);
+
+    expect(screen.getByLabelText("Pillar Delivery")).toBeInTheDocument();
+  });
+
   it("shows status filters in the toolbar", () => {
     render(<GanttPreview pillars={pillars} />);
 

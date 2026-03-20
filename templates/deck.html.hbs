@@ -12,6 +12,7 @@
       :root {
         --r-heading-font: "Segoe UI", system-ui, sans-serif;
         --r-main-font: "Segoe UI", system-ui, sans-serif;
+        --r-heading-text-transform: none;
       }
       body {
         background: #f5f7fb;
@@ -522,24 +523,6 @@
               <div class="card">
                 <h3>No ongoing goals linked to active work</h3>
                 <p class="muted">Link active tasks to goals using `linked_goal` to track goal progress here.</p>
-              </div>
-            {{/each}}
-          </div>
-        </section>
-
-        <section>
-          <h2>Key Watchouts</h2>
-          <div class="card-grid">
-            {{#each summary.watchouts}}
-              <div class="card card--risk">
-                <div class="eyebrow">{{pillarName}}</div>
-                <h3>{{title}}</h3>
-                <p>{{{linkifyText note}}}</p>
-              </div>
-            {{else}}
-              <div class="card card--accent">
-                <h3>No urgent watchouts surfaced</h3>
-                <p class="muted">At-risk goals and active task notes will appear here when they need escalation.</p>
               </div>
             {{/each}}
           </div>

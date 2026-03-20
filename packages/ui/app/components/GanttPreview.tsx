@@ -183,6 +183,7 @@ const COL_WIDTH: Record<ZoomLevel, number> = {
 const ROW_HEIGHT = 32;
 const HEADER_HEIGHT = 52;
 const LABEL_WIDTH = 260;
+const PILLAR_STRIP_WIDTH = 16;
 
 /* ── Row data builder ─────────────────────────────────────────────────────── */
 
@@ -205,6 +206,14 @@ interface BarMetrics {
   y: number;
   barStart: Date;
   barEnd: Date;
+}
+
+interface PillarStripSection {
+  pillarId: string;
+  pillarName: string;
+  pillarIdx: number;
+  startRow: number;
+  rowCount: number;
 }
 
 function getRowBarMetrics(
@@ -484,6 +493,33 @@ function collectReachableTaskIds(
   return visited;
 }
 
+function buildPillarStripSections(rows: GanttRow[], pillars: Pillar[]): PillarStripSection[] {
+  const sections: PillarStripSection[] = [];
+
+  for (let index = 0; index < rows.length; index += 1) {
+    const row = rows[index];
+    const pillar = pillars[row.pillarIdx];
+
+    if (!pillar) continue;
+
+    const previous = sections[sections.length - 1];
+    if (previous && previous.pillarId === row.pillarId) {
+      previous.rowCount += 1;
+      continue;
+    }
+
+    sections.push({
+      pillarId: row.pillarId,
+      pillarName: pillar.name || row.pillarId,
+      pillarIdx: row.pillarIdx,
+      startRow: index,
+      rowCount: 1,
+    });
+  }
+
+  return sections;
+}
+
 /* ── Component ────────────────────────────────────────────────────────────── */
 
 export function GanttPreview({ pillars, onItemSelect }: Props) {
@@ -730,6 +766,11 @@ export function GanttPreview({ pillars, onItemSelect }: Props) {
     });
     return meta;
   }, [rows]);
+
+  const pillarStripSections = useMemo(
+    () => buildPillarStripSections(rows, pillars),
+    [rows, pillars],
+  );
 
   const dependencyArrows = useMemo(() => {
     if (!hasDependencyFocus) return [] as { d: string; isPrimary: boolean }[];
@@ -1006,153 +1047,200 @@ export function GanttPreview({ pillars, onItemSelect }: Props) {
         >
           <div
             style={{
-              height: HEADER_HEIGHT,
-              borderBottom: "1px solid var(--color-border)",
-              display: "flex",
-              alignItems: "flex-end",
-              gap: "0.35rem",
-              padding: "0 0.35rem 0.35rem",
+              position: "relative",
+              minHeight: HEADER_HEIGHT + rows.length * ROW_HEIGHT + ROW_HEIGHT * 2,
             }}
           >
-            {allGoalIds.length > 0 && (
-              <Button
-                aria-label={areAllGoalsCollapsed ? "Expand all groups" : "Collapse all groups"}
-                onPress={toggleAllGoals}
-                style={{
-                  width: 22,
-                  height: 22,
-                  padding: 0,
-                  border: "1px solid var(--color-border)",
-                  borderRadius: "var(--radius-sm)",
-                  background: "var(--color-surface)",
-                  color: "var(--color-text-muted)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                }}
-              >
-                {areAllGoalsCollapsed ? (
-                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
-                    <path
-                      d="M2.5 3.5h11M2.5 8h11M2.5 12.5h11"
-                      stroke="currentColor"
-                      strokeWidth="1.25"
-                      strokeLinecap="round"
-                      opacity="0.45"
-                    />
-                    <path
-                      d="M5.5 4.5L8.5 8L5.5 11.5"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
-                    <path
-                      d="M2.5 3.5h11M2.5 8h11M2.5 12.5h11"
-                      stroke="currentColor"
-                      strokeWidth="1.25"
-                      strokeLinecap="round"
-                      opacity="0.45"
-                    />
-                    <path
-                      d="M4.5 6.5L8 10L11.5 6.5"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-              </Button>
-            )}
-            <span
+            <div
               style={{
-                fontSize: "0.72em",
-                fontWeight: 700,
-                color: "var(--color-text-muted)",
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
+                height: HEADER_HEIGHT,
+                borderBottom: "1px solid var(--color-border)",
+                display: "flex",
+                alignItems: "flex-end",
+                gap: "0.35rem",
+                padding: `0 0.35rem 0.35rem ${PILLAR_STRIP_WIDTH + 6}px`,
               }}
             >
-              Item
-            </span>
-          </div>
-          {rows.map((row) => {
-            const color = PILLAR_COLORS[row.pillarIdx % PILLAR_COLORS.length];
-            const isFocusedTask = row.type === "task" && dependencyFocusTaskId === row.id;
-            const isUpstreamTask = row.type === "task" && upstreamTaskIds.has(row.id);
-            const isDownstreamTask = row.type === "task" && downstreamTaskIds.has(row.id);
-            const isDependencyHighlightedTask = isFocusedTask || isUpstreamTask || isDownstreamTask;
-            return (
-              <div
-                key={row.id}
+              {allGoalIds.length > 0 && (
+                <Button
+                  aria-label={areAllGoalsCollapsed ? "Expand all groups" : "Collapse all groups"}
+                  onPress={toggleAllGoals}
+                  style={{
+                    width: 22,
+                    height: 22,
+                    padding: 0,
+                    border: "1px solid var(--color-border)",
+                    borderRadius: "var(--radius-sm)",
+                    background: "var(--color-surface)",
+                    color: "var(--color-text-muted)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  {areAllGoalsCollapsed ? (
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+                      <path
+                        d="M2.5 3.5h11M2.5 8h11M2.5 12.5h11"
+                        stroke="currentColor"
+                        strokeWidth="1.25"
+                        strokeLinecap="round"
+                        opacity="0.45"
+                      />
+                      <path
+                        d="M5.5 4.5L8.5 8L5.5 11.5"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+                      <path
+                        d="M2.5 3.5h11M2.5 8h11M2.5 12.5h11"
+                        stroke="currentColor"
+                        strokeWidth="1.25"
+                        strokeLinecap="round"
+                        opacity="0.45"
+                      />
+                      <path
+                        d="M4.5 6.5L8 10L11.5 6.5"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
+                </Button>
+              )}
+              <span
                 style={{
-                  height: ROW_HEIGHT,
-                  display: "flex",
-                  alignItems: "center",
-                  paddingLeft: `${0.5 + row.indent * 1.2}rem`,
-                  paddingRight: "0.5rem",
-                  borderBottom: "1px solid var(--color-border)",
-                  gap: "0.35rem",
-                  cursor: row.type === "goal" ? "pointer" : "default",
-                  background: row.type === "goal" ? "var(--color-bg)" : "transparent",
-                  borderLeft: isFocusedTask
-                    ? "3px solid var(--color-primary)"
-                    : isUpstreamTask
-                      ? "3px dashed var(--color-text-faint)"
-                      : isDownstreamTask
-                        ? "3px solid var(--color-text-faint)"
-                        : "3px solid transparent",
-                  opacity:
-                    row.type === "task" && hasDependencyFocus && !isDependencyHighlightedTask
-                      ? 0.5
-                      : 1,
+                  fontSize: "0.72em",
+                  fontWeight: 700,
+                  color: "var(--color-text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
                 }}
-                onClick={() => row.type === "goal" && toggleGoal(row.id)}
-                onDoubleClick={() => row.type === "task" && focusTaskDependencies(row.id)}
               >
-                {row.type === "goal" && (
+                Item
+              </span>
+            </div>
+
+            {pillarStripSections.map((section) => {
+              const color = PILLAR_COLORS[section.pillarIdx % PILLAR_COLORS.length];
+
+              return (
+                <div
+                  key={section.pillarId}
+                  aria-label={`Pillar ${section.pillarName}`}
+                  title={section.pillarName}
+                  style={{
+                    position: "absolute",
+                    top: HEADER_HEIGHT + section.startRow * ROW_HEIGHT,
+                    left: 0,
+                    width: PILLAR_STRIP_WIDTH,
+                    height: section.rowCount * ROW_HEIGHT,
+                    background: color.bar,
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRight: "1px solid rgba(255,255,255,0.28)",
+                    borderBottom: "1px solid var(--color-border)",
+                    zIndex: 1,
+                    overflow: "hidden",
+                  }}
+                >
                   <span
                     style={{
-                      fontSize: "0.7em",
-                      color: "var(--color-text-faint)",
-                      flexShrink: 0,
-                      width: "1em",
+                      writingMode: "vertical-rl",
+                      transform: "rotate(180deg)",
+                      fontSize: "0.6em",
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      lineHeight: 1,
+                      whiteSpace: "nowrap",
+                      opacity: 0.95,
                     }}
                   >
-                    {collapsedGoals.has(row.id) ? "▶" : "▼"}
+                    {section.pillarName}
                   </span>
-                )}
-                <span
+                </div>
+              );
+            })}
+
+            {rows.map((row) => {
+              const color = PILLAR_COLORS[row.pillarIdx % PILLAR_COLORS.length];
+              const isFocusedTask = row.type === "task" && dependencyFocusTaskId === row.id;
+              const isUpstreamTask = row.type === "task" && upstreamTaskIds.has(row.id);
+              const isDownstreamTask = row.type === "task" && downstreamTaskIds.has(row.id);
+              const isDependencyHighlightedTask =
+                isFocusedTask || isUpstreamTask || isDownstreamTask;
+              return (
+                <div
+                  key={row.id}
                   style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: color.bar,
-                    flexShrink: 0,
+                    height: ROW_HEIGHT,
+                    display: "flex",
+                    alignItems: "center",
+                    marginLeft: PILLAR_STRIP_WIDTH,
+                    paddingLeft: `${0.5 + row.indent * 1.2}rem`,
+                    paddingRight: "0.5rem",
+                    borderBottom: "1px solid var(--color-border)",
+                    gap: "0.35rem",
+                    cursor: row.type === "goal" ? "pointer" : "default",
+                    background: row.type === "goal" ? "var(--color-bg)" : "transparent",
+                    borderLeft: isFocusedTask
+                      ? "3px solid var(--color-primary)"
+                      : isUpstreamTask
+                        ? "3px dashed var(--color-text-faint)"
+                        : isDownstreamTask
+                          ? "3px solid var(--color-text-faint)"
+                          : "3px solid transparent",
+                    opacity:
+                      row.type === "task" && hasDependencyFocus && !isDependencyHighlightedTask
+                        ? 0.5
+                        : 1,
+                    position: "relative",
+                    zIndex: 2,
                   }}
-                />
-                <span
-                  style={{
-                    fontSize: row.type === "goal" ? "0.78em" : "0.76em",
-                    fontWeight: row.type === "goal" ? 600 : 400,
-                    color: row.type === "goal" ? "var(--color-text)" : "var(--color-text-muted)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                  title={row.label}
+                  onClick={() => row.type === "goal" && toggleGoal(row.id)}
+                  onDoubleClick={() => row.type === "task" && focusTaskDependencies(row.id)}
                 >
-                  {row.label}
-                </span>
-              </div>
-            );
-          })}
-          <div style={{ height: ROW_HEIGHT * 2 }} />
+                  {row.type === "goal" && (
+                    <span
+                      style={{
+                        fontSize: "0.7em",
+                        color: "var(--color-text-faint)",
+                        flexShrink: 0,
+                        width: "1em",
+                      }}
+                    >
+                      {collapsedGoals.has(row.id) ? "▶" : "▼"}
+                    </span>
+                  )}
+                  <span
+                    style={{
+                      fontSize: row.type === "goal" ? "0.78em" : "0.76em",
+                      fontWeight: row.type === "goal" ? 600 : 400,
+                      color: row.type === "goal" ? "var(--color-text)" : "var(--color-text-muted)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                    title={row.label}
+                  >
+                    {row.label}
+                  </span>
+                </div>
+              );
+            })}
+            <div style={{ height: ROW_HEIGHT * 2, marginLeft: PILLAR_STRIP_WIDTH }} />
+          </div>
         </div>
 
         {/* Resize handle */}

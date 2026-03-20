@@ -276,37 +276,6 @@ function buildHighlights(recentDone, nextUp, ongoingGoals) {
   return highlights;
 }
 
-function buildWatchouts(plan, ongoingGoals) {
-  const taskWatchouts = plan.pillars.flatMap((pillar) =>
-    pillar.tasks
-      .filter((task) => ACTIVE_TASK_STATUSES.has(task.status) && task.notes)
-      .map((task) => ({
-        pillarName: pillar.name,
-        title: task.title,
-        note: task.notes,
-        priority: task.priority,
-        status: task.status,
-      })),
-  );
-
-  const riskGoals = ongoingGoals
-    .filter((goal) => RISK_EVALUATIONS.has(goal.evaluation))
-    .map((goal) => ({
-      pillarName: goal.pillarName,
-      title: goal.text,
-      note: `${goal.progress.wip} in progress · ${goal.progress.todo} queued`,
-      evaluation: goal.evaluation,
-    }));
-
-  return [...riskGoals, ...taskWatchouts]
-    .sort((a, b) => {
-      const aPriority = PRIORITY_WEIGHT[a.priority] ?? 1;
-      const bPriority = PRIORITY_WEIGHT[b.priority] ?? 1;
-      return aPriority - bPriority;
-    })
-    .slice(0, 6);
-}
-
 function buildAppendixPillars(plan, recentDone, nextUp, ongoingGoals) {
   return plan.pillars.map((pillar) => {
     const stats = pillarStats(pillar);
@@ -337,7 +306,6 @@ function buildExecutiveSummary(plan, options) {
   const recentDone = collectRecentDone(plan, recentStart, normalized.referenceDate);
   const nextUp = collectNextUp(plan, normalized.referenceDate, nextEnd);
   const ongoingGoals = collectOngoingGoals(plan);
-  const watchouts = buildWatchouts(plan, ongoingGoals);
 
   return {
     options: {
@@ -356,7 +324,6 @@ function buildExecutiveSummary(plan, options) {
     nextUpPlanned: nextUp.filter((task) => task.status === "todo"),
     ongoingGoals,
     ongoingGoalsTop: ongoingGoals.slice(0, 6),
-    watchouts,
     appendixPillars: buildAppendixPillars(plan, recentDone, nextUp, ongoingGoals),
   };
 }
